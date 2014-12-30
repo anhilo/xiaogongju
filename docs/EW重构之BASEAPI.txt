@@ -1,0 +1,65 @@
+EW重构之  BaseAPI.h
+
+#define ENV_INIT_OK                1
+#define ENV_INIT_FALSE             0
+#define SOCKET_CONNECT_ERROR      -1
+#define SOCKET_SERVER_INIT_ERROR  -1
+#define SOCKET_SEND_ERROR         -1
+#define SOCKET_RECV_ERROR         -1
+#define SOCKET_ERROR              -1
+#define SOCKET_OVER_TIME           0
+#define SOCKET_MAY_CLOSE_NOW       1
+#define SOCKET_CAN_READ_STATE      2
+#define SOCKET_CAN_WRITE_STATE     2
+#define I_TO_CHAR_ERROR           -1
+#define I_TO_CHAR_OK               1
+#define CHAR_TO_I_ERROR           -1
+
+
+
+		socket :
+			API_env_init()  
+				// 初始化socket环境
+				#define ENV_INIT_OK    1
+				#define ENV_INIT_FALSE 0
+				
+			API_socket_connect(char *url,int port)
+				#define SOCKET_CONNECT_ERROR  -1
+				
+			API_socket_init_server(int port,int maxlisten)
+				#define SOCKET_SERVER_INIT_ERROR  -1
+				
+			API_socket_send(int sock,char *buf,int buflen) 
+				// 发送数据
+				#define SOCKET_SEND_ERROR   -1
+				
+			API_socket_recv(int sock,char *buf,int buflen)
+				#define SOCKET_RECV_ERROR   -1
+			API_socket_close()
+			API_socket_read_state(int sock,int sec,int usec)
+				#define SOCKET_ERROR         -1
+				#define SOCKET_OVER_TIME      0
+				#define SOCKET_MAY_CLOSE_NOW  1
+				#define SOCKET_CAN_READ_STATE 2
+			API_socket_write_state(int sock,int sec,int usec)
+				#define SOCKET_CAN_WRITE_STATE 2
+			struct hostent * API_socket_gethostbyname(char * ser_addr){
+				return gethostbyname(ser_addr);
+			}
+
+			API_getsock_opt(int sock);
+				// 好像是一片多余代码，后来被干掉了。
+			
+		thread :
+			int API_thread_create(thread_id,NULL,p_function,p_data)
+			int API_thread_detach(){
+				pthread_detach(pthread_self());
+			}
+		math :
+			int API_m_itochar(int a,char *b,int len)
+				#define I_TO_CHAR_ERROR  -1
+				#define I_TO_CHAR_OK     1
+				// 如果 返回OK  表明 char * b 是最终结果。
+			int API_m_chartoi(char *b,int len)
+				#define CHAR_TO_I_ERROR  -1
+				// 如果不是错误那么结果就是正确的

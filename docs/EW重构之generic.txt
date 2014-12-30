@@ -1,0 +1,42 @@
+generic.h
+#define MAX_POOL       1000
+#define True              1
+#define False             0
+#define NULL_SOCK         0
+#define SOCK_1_OK         1
+#define SOCK_2_OK         2
+#define POOL_WORKING_NOW  3
+#define POOL_STOP_NOW     4
+
+// 正文
+#ifndef _GENERIC_H_
+#define _GENERIC_H_
+
+#define PTW32_STATIC_LIB
+
+#include<stdio.h>
+#include<string.h>    //strlen
+#include<stdlib.h>    //strlen
+#include<getopt.h>    //strlen
+#include<pthread.h> //for threading , link with lpthread
+#include "msocket.h"
+#include "tunnel.h"
+#include "lcx_pro.h"
+#include "sock5-com.h"
+#include "ssocksd_pro.h"
+#include "rcsocks_pro.h"
+#include "rssocks_pro.h"
+
+#ifdef WIN32
+        #include<winsock2.h>
+        #include<ws2tcpip.h>
+        #include<unistd.h>
+#else
+        #include <netdb.h>
+        #include<sys/socket.h>
+        #include<arpa/inet.h>
+        #include<signal.h>
+        int close(int);
+#endif // head files check
+
+#endif // _GENERIC_H_
