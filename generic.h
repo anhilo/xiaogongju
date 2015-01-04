@@ -22,7 +22,12 @@
 	#include<sys/socket.h>
 	#include<arpa/inet.h>
 	#include<signal.h>
-	int close(int);
 #endif // head files check
+
+#define MAX_POOL       1000
+#define True              1
+#define False             0
+#define TUNMAX_BUF    10000
+
 
 #endif // _GENERIC_H_

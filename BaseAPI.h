@@ -1,4 +1,4 @@
-#ifndef _BASEAPI_H_
+#ifndef BASEAPI_H_
 #define _BASEAPI_H_
 
 #define ENV_INIT_OK                1
