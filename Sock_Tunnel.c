@@ -6,17 +6,17 @@
 #define POOL_WORKING_NOW  3
 #define POOL_STOP_NOW     4
 
-sockbind_s socks_Pool[Max_Pool];
+sockbind_s socks_Pool[MAX_POOL];
 int live_num = 0;
 int can_write_pool = True;
 
 int tunn_init_Pool(){
    int i;
-    for(i = 0;i<Max_Pool;i++){
+    for(i = 0;i<MAX_POOL;i++){
         socks_Pool[i].sock_1 = -1;
         socks_Pool[i].sock_2 = -1;
         socks_Pool[i].flag   = False;
-        socks_Pool[i].state  = Null_sock;
+        socks_Pool[i].state  = NULL_SOCK;
         socks_Pool[i].usec_time = -1;
     } 
     can_write_pool = True;
@@ -28,7 +28,7 @@ int tunn_clean(int num){
     socks_Pool[i].sock_1 = -1;
     socks_Pool[i].sock_2 = -1;
     socks_Pool[i].flag = False;
-    socks_Pool[i].state = Null_sock;
+    socks_Pool[i].state = NULL_SOCK;
     socks_Pool[i].usec_time = -1;
     live_num --;
     //can_write_pool = True;
@@ -45,7 +45,7 @@ int tunn_close(int num){
     }
    //puts("close tunnel");
     socks_Pool[ num ].usec_time = -1;
-    socks_Pool[ num ].state = Null_sock;
+    socks_Pool[ num ].state = NULL_SOCK;
     socks_Pool[ num ].flag = False;
     live_num --;
     //printf("--> %3d <-- (close)used tunnel %d , unused tunnel %d\n",num,live_num,Max_Pool - live_num);
@@ -73,9 +73,9 @@ void * tunn_run_now(void *p_num){
             break;
         }
         if(n1 == SOCKET_CAN_READ_STATE
-        && (read_size = API_socket_recv(sock1,buffer,TUNMAX_BUF,0)) > 0){
+        && (read_size = API_socket_recv(sock1,buffer,TUNMAX_BUF)) > 0){
             times = 0;
-            write_size = API_socket_send( sock2 ,buffer,read_size ,0);
+            write_size = API_socket_send( sock2 ,buffer,read_size);
             if( write_size < 0 || write_size != read_size){
             // socks_Pool[num].sock_2 = -1;
                 break;
@@ -88,9 +88,9 @@ void * tunn_run_now(void *p_num){
             break;
         } // 对方关闭了 sock会话 }
         if(n2 == SOCKET_CAN_READ_STATE
-        && (read_size = API_socket_recv(sock2,buffer,TUNMAX_BUF,0)) > 0){
+        && (read_size = API_socket_recv(sock2,buffer,TUNMAX_BUF)) > 0){
             times = 0;
-            write_size = API_socket_send( sock1 ,buffer,read_size ,0);
+            write_size = API_socket_send( sock1 ,buffer,read_size );
             if( write_size < 0 || write_size != read_size){
             //socks_Pool[num].sock_1 = -1;
                 break;
@@ -109,21 +109,21 @@ void * tunn_run_now(void *p_num){
         times = times +1;
     }
     pthread_detach(pthread_self());
-    close_tunnel( num );
+    tunn_close( num );
     //printf("close tunnel_now !!!\n");
     return 0; 
 }
 
 int tunn_get_pool_id_and_lock_it(){
     int i=0;
-    while(live_num >= Max_Pool-1 || !can_write_pool){
+    while(live_num >= MAX_POOL-1 || !can_write_pool){
     // wait Pool ready
         usleep(1);
     }
     // lock pool write
     can_write_pool = False;
     // find a Null Pool
-    for (i = 0;i<Max_Pool;i++){
+    for (i = 0;i<MAX_POOL;i++){
         if(socks_Pool[i].flag == False){
             live_num ++;
             socks_Pool[i].flag == True;
@@ -157,10 +157,10 @@ int tunn_set_second_pool_and_run_it(int num,int sock){
     socks_Pool[ num ] .sock_2 = sock;
     socks_Pool[ num ] .state = SOCK_2_OK;
     if( pthread_create( &thread_1,NULL ,
-      tunnel_now,
+      tunn_run_now,
       (void *)poolnum)<0){
         perror("could not create one way tunnel\n");
-        close_tunnel(num);
+        tunn_close(num);
         return TUNNEL_SET_SECOND_POOL_AND_RUN_IT_FALSE;
     }
     // pthread_join(thread_1,NULL);
@@ -168,10 +168,10 @@ int tunn_set_second_pool_and_run_it(int num,int sock){
 }
 
 int tunn_sock_to_sock(int from_sock,int to_sock,int usec){
-    int num = tunn_set_first_pool_and_lock_it(from_socket,usec_time);
+    int num = tunn_set_first_pool_and_lock_it(from_sock,usec);
     if (num != TUNNEL_GET_FIRST_POOL_ID_FALSE){
         if(TUNNEL_SET_SECOND_POOL_AND_RUN_IT_FALSE !=
-             set_second_socket_and_run_it(num,to_socket){
+             tunn_set_second_pool_and_run_it(num,to_sock)){
             return TUNNEL_SOCK_TO_SOCK_OK;
         }
     }

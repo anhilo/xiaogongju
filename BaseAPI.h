@@ -1,6 +1,9 @@
 #ifndef BASEAPI_H_
 #define _BASEAPI_H_
 
+#include "generic.h"
+
+
 #define ENV_INIT_OK                1
 #define ENV_INIT_FALSE             0
 #define SOCKET_CONNECT_ERROR      -1

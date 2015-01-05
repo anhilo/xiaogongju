@@ -74,7 +74,9 @@ EW 重构计划
 		int create_rssocks_server(char *URL,int port,int usec)	
 			//  从 rssocks 接受指令。
 	ssocksd_pro.h  ssocksd_pro.c
-		int create_ssocksd_server(int port,int usec)
+		int create_ssocksd_server(int port,int usec);
+			#define CREATE_SSOCKSD_SERVER_ERROR -1
+			#define CREATE_SSOCKSD_SERVER_OK     0
 
 	外围功能文件：
 		generic.h    // 包含所有程序必要的头文件，并通过宏区分 *nux 和 win 平台的区别。

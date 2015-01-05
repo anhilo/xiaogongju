@@ -11,6 +11,10 @@
 
 // my headers start from here
 #include "BaseAPI.h"
+#include "CMD_Protocol.h"
+#include "SocksBase.h"
+#include "Sock_Tunnel.h"
+#include "ssocksd_pro.h"
 // end my headers
 
 #ifdef WIN32

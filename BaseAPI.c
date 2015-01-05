@@ -140,7 +140,7 @@ int API_socket_recv(int sock,char *buf,int buflen){
 }
 
 int API_socket_close(int sock){
-    f (sock>0){
+    if (sock>0){
 #ifdef WIN32
         closesocket(sock);
 #else

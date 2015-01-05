@@ -1,7 +1,7 @@
 #include "SocksBase.h"
+int rs_usec_time = 1000;
 
-
-int socks_build_target_socket(int cmd_sock){
+int socks_build_target_socket(int sock){
     char buffer[2000],buf[200];
     int read_size , write_size ;
     int mode , addrtype ;
@@ -88,7 +88,7 @@ void *socks_check_and_tunnel(void *sock){
     int new_sock,sendsize,readsize;
     int target_sock;
     char cmd_buff[100];
-    struct rcsocktul *tunn = (struct rcsocktul *)rcsock;
+    struct rcsocktul *tunn = (struct rcsocktul *)sock;
     if(tunn == NULL){
         pthread_detach(pthread_self());
         return NULL;

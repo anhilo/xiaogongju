@@ -2,6 +2,8 @@
 #define _CMD_PROTO_H_
 
 
+#include "generic.h"
+
 #define PROTO_INIT_CMD_SER_ERROR        0
 #define PROTO_INIT_CMD_SER_OK           1
 #define PROTO_INIT_CMD_RCSOCKET_ERROR  -1
@@ -15,12 +17,13 @@
 #define UNKOWN_MSG                  0
 #define PRO_MAKE_NET                1
 
- #define READ_ERROR_PLEASE_SAY_AGAIN 0   // 服务器没理解，重说一遍
- #define I_AM_NEW_RC_CMD_SOCK_CLIENT 1   // 新主机反向连接请求
- #define CONFIRM_YOU_ARE_SOCK_CLIENT 2   // 新主机连接确认
- #define I_AM_NEW_RC_SOCK_FOR_TUNNEL 3   // 新隧道反向连接请求
+ #define READ_ERROR_PLEASE_SAY_AGAIN 0   // server -> client  服务器没理解，重说一遍
+ #define I_AM_NEW_RC_CMD_SOCK_CLIENT 1   // client -> server  新主机反向连接请求
+ #define CONFIRM_YOU_ARE_SOCK_CLIENT 2   // server -> client  新主机连接确认
+ #define START_A_NEW_SOCK_TUNNEL_NOW 3   // server -> client  请新建一个隧道
+ #define I_AM_NEW_RC_SOCK_FOR_TUNNEL 4   // client -> server  新隧道反向连接请求
         // 新隧道要带 POOLNUM 
-#define CONFIRM_YOU_ARE_SOCK_TUNNEL 4   // 新隧道连接确认
+ #define CONFIRM_YOU_ARE_SOCK_TUNNEL 5   // server -> client  新隧道连接确认
 
 #define PRO_BROAD_MSG               2
 
