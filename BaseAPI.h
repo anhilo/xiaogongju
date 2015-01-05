@@ -1,4 +1,4 @@
-#ifndef BASEAPI_H_
+#ifndef _BASEAPI_H_
 #define _BASEAPI_H_
 
 #include "generic.h"

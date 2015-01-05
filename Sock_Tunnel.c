@@ -126,7 +126,7 @@ int tunn_get_pool_id_and_lock_it(){
     for (i = 0;i<MAX_POOL;i++){
         if(socks_Pool[i].flag == False){
             live_num ++;
-            socks_Pool[i].flag == True;
+            socks_Pool[i].flag = True;
             return i;
         }
     }
