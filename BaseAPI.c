@@ -1,4 +1,5 @@
 #include "BaseAPI.h"
+int usec_for_EW = 10000;
 
 int API_env_init(){
 #ifdef WIN32
@@ -104,7 +105,7 @@ int API_socket_read_state(int sock,int sec,int usec){
         return SOCKET_MAY_CLOSE_NOW;
     }
     else if ( n == 0 ) return SOCKET_OVER_TIME; // 超时
-    return SOCKET_ERROR; // 出错了
+    return SOCKET_INIT_ERROR; // 出错了
 }
 
 int API_socket_write_state(int sock,int sec,int usec){
@@ -127,7 +128,7 @@ int API_socket_write_state(int sock,int sec,int usec){
         return SOCKET_MAY_CLOSE_NOW;
     }
     else if ( n == 0 ) return SOCKET_OVER_TIME; // 超时
-    return SOCKET_ERROR; // 出错了
+    return SOCKET_INIT_ERROR; // 出错了
 }
 
 
@@ -182,4 +183,19 @@ int API_m_chartoi(char *b,int len){
     }
     return result;
 }
+
+int API_m_sleep(int usec){
+    sleep(usec);
+    return 1;
+}
+
+int API_set_usec_time(int usec){
+    usec_for_EW = usec;
+    return 1;
+}
+    
+int API_get_usec_time(){
+    return usec_for_EW;
+}
+
 

@@ -1,5 +1,4 @@
 #include "SocksBase.h"
-int rs_usec_time = 1000;
 
 int socks_build_target_socket(int sock){
     char buffer[2000],buf[200];
@@ -101,7 +100,7 @@ void *socks_check_and_tunnel(void *sock){
     }
     target_sock = socks_build_target_socket(new_sock);
     if( target_sock != SOCKS_BUILD_TARGET_SOCKET_ERROR){
-        tunn_sock_to_sock(target_sock,new_sock,rs_usec_time);
+        tunn_sock_to_sock(target_sock,new_sock,API_get_usec_time());
     }
     else{
         API_socket_close(new_sock);

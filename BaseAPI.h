@@ -10,7 +10,7 @@
 #define SOCKET_SERVER_INIT_ERROR  -1
 #define SOCKET_SEND_ERROR         -1
 #define SOCKET_RECV_ERROR         -1
-#define SOCKET_ERROR              -1
+#define SOCKET_INIT_ERROR         -1
 #define SOCKET_OVER_TIME           0
 #define SOCKET_MAY_CLOSE_NOW       1
 #define SOCKET_CAN_READ_STATE      2
@@ -48,6 +48,9 @@ int API_m_itochar(int a,char *b,int len);
 int API_m_chartoi(char *b,int len);
     // #define CHAR_TO_I_ERROR  -1
     // 如果不是错误那么结果就是正确的
-
+// api for usec times and sleep
+int API_m_sleep(int usec);
+int API_set_usec_time(int usec);
+int API_get_usec_time();
 
 #endif

@@ -5,12 +5,13 @@ int create_rssocks_server(char *URL,int port,int usec){
     char cmd_buff[MAX_CMD_PRO_LEN];
     struct rcsocktul *tunn;
     //rs_usec_time = usec;
+    API_set_usec_time(usec);
     cmd_sock = proto_init_cmd_rcsocket(URL,port);
     if(cmd_sock == PROTO_INIT_CMD_RCSOCKET_ERROR){
         return -1;
     }
     printf("rssocks %s:%d <--[%4d usec]--> socks server\n",
-    URL,port, usec );
+    URL,port, API_get_usec_time() );
     while(1){
         readsize = API_socket_recv(cmd_sock,cmd_buff,MAX_CMD_PRO_LEN);
         if(readsize == MAX_CMD_PRO_LEN &&
@@ -36,7 +37,7 @@ int create_rssocks_server(char *URL,int port,int usec){
         }
         else{
             printf("may be sth wrong ~ %d reconnect now! \n", readsize);
-            create_rssocks_server(URL,port,usec);
+            create_rssocks_server(URL,port,API_get_usec_time());
             return 1;
         }
         usleep(1);

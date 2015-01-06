@@ -68,7 +68,7 @@ void * tunn_run_now(void *p_num){
     while(times < socks_Pool[ num ].usec_time && socks_Pool[num].usec_time>=0){
         n1 = API_socket_read_state(sock1,0,1);
         n2 = API_socket_read_state(sock2,0,1);
-        if (n1 == SOCKET_ERROR || n2 == SOCKET_ERROR ){ // Sock_Error
+        if (n1 == SOCKET_INIT_ERROR || n2 == SOCKET_INIT_ERROR ){ // Sock_Error
         //printf("n1 n2 <0 ???\n");
             break;
         }

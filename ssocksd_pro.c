@@ -1,5 +1,4 @@
 #include "ssocksd_pro.h"
-int ss_usec_time = 1000; 
 
 void *check_and_tunnel(void *socket_desc)
 {
@@ -13,7 +12,7 @@ void *check_and_tunnel(void *socket_desc)
     client_sock = socks_build_target_socket(sock);
     //client_sock = get_connect_socket("127.0.0.1",8090);
     if ( client_sock != SOCKS_BUILD_TARGET_SOCKET_ERROR )
-        tunn_sock_to_sock(client_sock,sock, ss_usec_time);
+        tunn_sock_to_sock(client_sock,sock, API_get_usec_time());
     else{
         //printf("client_sock == -1\n");
         API_socket_close(sock);
@@ -29,11 +28,11 @@ void *check_and_tunnel(void *socket_desc)
 int create_ssocksd_server(int port,int usec){
     int socket_desc , client_sock , c;
     struct sockaddr_in server , client;
-    ss_usec_time = usec;
+    API_set_usec_time(usec);
     socket_desc = API_socket_init_server(port,300);
     c = sizeof(struct sockaddr_in);
     printf("ssocksd 0.0.0.0:%d <--[%4d usec]--> socks server\n",
-    port , usec);
+    port , API_get_usec_time());
     //Accept and incoming connection
     // puts("Waiting for incoming connections...");
     pthread_t thread_id;
