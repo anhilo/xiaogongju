@@ -106,6 +106,7 @@ int proto_understand_and_do_it(int sock){
             cmd[0] = PRO_MAKE_NET;
             cmd[1] = CONFIRM_YOU_ARE_SOCK_CLIENT;
             API_socket_send(sock,cmd,MAX_CMD_PRO_LEN);
+            cmd_socket  = sock;
             puts("rssocks cmd_socket OK!");
         }
         else if (cmd[1] == I_AM_NEW_RC_SOCK_FOR_TUNNEL){
@@ -122,7 +123,7 @@ int proto_understand_and_do_it(int sock){
     return PROTO_UNDERSTAND_ERROR;
 }
 
-int proto_send_rccmd_poolnum(int sock,int poolnum){
+int proto_send_rccmd_poolnum(int poolnum){
     char cmd[MAX_CMD_PRO_LEN];
     char buf[4];
     cleancmdbuff(cmd);
@@ -133,7 +134,7 @@ int proto_send_rccmd_poolnum(int sock,int poolnum){
     cmd[3] = buf[1];
     cmd[4] = buf[2];
     cmd[5] = buf[3];
-    if(API_socket_send(sock,cmd,MAX_CMD_PRO_LEN) != MAX_CMD_PRO_LEN){
+    if(API_socket_send(cmd_socket,cmd,MAX_CMD_PRO_LEN) != MAX_CMD_PRO_LEN){
         return PRO_SEND_RCCMD_ERROR;
     }
     return PRO_SEND_RCCMD_OK;

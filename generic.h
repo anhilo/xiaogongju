@@ -15,6 +15,8 @@
 #include "SocksBase.h"
 #include "Sock_Tunnel.h"
 #include "ssocksd_pro.h"
+#include "Lcx_Base.h"
+#include "rssocks_pro.h"
 // end my headers
 
 #ifdef WIN32

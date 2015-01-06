@@ -3,6 +3,7 @@
 
 
 #include "generic.h"
+#define MAX_CMD_PRO_LEN                 6
 
 #define PROTO_INIT_CMD_SER_ERROR        0
 #define PROTO_INIT_CMD_SER_OK           1
@@ -31,7 +32,7 @@ int proto_init_cmd_server_for_rc(int port);
 int proto_init_cmd_rcsocket(char *URL,int port);
 int proto_get_rcsocket(char *URL,int port,int poolnum);
 int proto_understand_and_do_it(int sock);
-int proto_send_rccmd_poolnum(int sock,int poolnum);
+int proto_send_rccmd_poolnum(int poolnum);
 
 
 #endif
