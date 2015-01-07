@@ -61,7 +61,7 @@ int socks_build_target_socket(int sock){
     if (read_size != 2 ){
         return SOCKS_BUILD_TARGET_SOCKET_ERROR ;
     }
-    des_port = buf[0]*256 + buf[1];
+    des_port =(unsigned char ) buf[0]*256 + (unsigned char )buf[1];
     reply[0] = 0x05; reply[1] = 0x00; reply[2] = 0x00; reply[3] = 0x01;
     reply_len = 4;
     // 2.3 connect URL : port

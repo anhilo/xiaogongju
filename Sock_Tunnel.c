@@ -48,7 +48,7 @@ int tunn_close(int num){
     socks_Pool[ num ].state = NULL_SOCK;
     socks_Pool[ num ].flag = False;
     live_num --;
-    //printf("--> %3d <-- (close)used tunnel %d , unused tunnel %d\n",num,live_num,Max_Pool - live_num);
+//    printf("--> %3d <-- (close)used tunnel %d , unused tunnel %d\n",num,live_num,MAX_POOL - live_num);
     return 1; 
 }
 
@@ -64,7 +64,7 @@ void * tunn_run_now(void *p_num){
     sock1 = socks_Pool[ num ].sock_1;
     sock2 = socks_Pool[ num ].sock_2;
     //printf("sock1 = %d , sock2 = %d\n",sock1,sock2);
-    //printf("--> %3d <-- (start)used tunnel %d , unused tunnel %d\n",num,live_num,Max_Pool - live_num);
+//    printf("--> %3d <-- (start)used tunnel %d , unused tunnel %d\n",num,live_num,MAX_POOL - live_num);
     while(times < socks_Pool[ num ].usec_time && socks_Pool[num].usec_time>=0){
         n1 = API_socket_read_state(sock1,0,1);
         n2 = API_socket_read_state(sock2,0,1);
