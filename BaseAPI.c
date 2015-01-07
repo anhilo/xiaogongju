@@ -185,7 +185,7 @@ int API_m_chartoi(char *b,int len){
 }
 
 int API_m_sleep(int usec){
-    sleep(usec);
+    usleep(usec);
     return 1;
 }
 
