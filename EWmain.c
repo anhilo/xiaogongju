@@ -1,6 +1,6 @@
 #include "generic.h"
 
-#define VERSION_STR "beta 2.0"
+#define VERSION_STR "free 1.0"
 #define NULL_STATE 0
 #define SSOCKSD 1
 #define RCSOCKS 2
@@ -21,7 +21,7 @@ int refPort = 1080;
 char connHost[300] = "127.0.0.1";
 int connPort = 8888;
 int listenPort = 8888;
-int usec = 1000;
+int usec = 100000;
 
 const char *optstring = "s:l:aqht:vd:e:f:g:";
 struct option opts[]={
@@ -47,7 +47,7 @@ int main(int argc ,char *argv[]){
     int c,index;
     API_env_init();
     tunn_init_Pool();
-    if(argc == 1 ){ about_fun(); }
+    if(argc == 1 ){ help(); }
     while((c=getopt_long(argc,argv,optstring,opts,&index))!=-1)
     {
         switch(c) {
@@ -147,6 +147,7 @@ int help(){
         printf("\nVERSION : %s \n",VERSION_STR);
         printf(" ./xxx ([-options] [values])*\n");
         printf(" options :\n");
+        printf(" Eg: ./xxx -s ssocksd -h \n");
         printf(" -s state setup the function.You can pick one from the \n");
         printf(" following options:\n");
         printf(" ssocksd , rcsocks , rssocks , \n");
@@ -213,18 +214,36 @@ int about_fun(){
     printf(" Eg: ./xxx -h -s ssocksd\n");
     printf(" \n\n");
     printf(" Contributors\n");
-    printf(" OverTime : The creator\n");
-    printf(" asky : <<Linux Programming by Example>>\n");
-    printf(" is a great book\n");
-    printf(" darksn0w : Proviede some advice\n");
-    printf(" zhuanjia : Modify the Readme file\n");
-    printf(" syc4mor3 : Named for this tool\n");
+    printf(" rootkiter : The creator\n");
+    printf("   asky    : <<Linux Programming by \n");
+    printf("             Example>>is a great book\n");
+    printf(" darksn0w  : Proviede some advice\n");
+    printf(" zhuanjia  : Modify the Readme file\n");
+    printf(" syc4mor3  : Named for this tool\n");
     printf(" ......\n\n");
     return 1;
 }
 
 int quFun(){
-    printf("\n\n The -q parameter in the legend. \n");
+    printf("                          _ooOoo_  \n");
+    printf("                         o8888888o  \n");
+    printf("                         88\" . \"88  \n");
+    printf("                         (| -_- |)  \n");
+    printf("                          O\\ = /O  \n");
+    printf("                      ____/`---'\\____  \n");
+    printf("                    .   ' \\\\| |// `.  \n");
+    printf("                     / \\\\||| : |||// \\  \n");
+    printf("                   / _||||| -:- |||||- \\  \n");
+    printf("                     | | \\\\\\ - /// | |  \n");
+    printf("                   | \\_| ''\\---/'' | |  \n");
+    printf("                    \\ .-\\__ `-` ___/-. /  \n");
+    printf("                 ___`. .' /--.--\\ `. . __  \n");
+    printf("              .\"\" '< `.___\\_<|>_/___.' >'\"\".  \n");
+    printf("             | | : `- \\`.;`\\ _ /`;.`/ - ` : | |  \n");
+    printf("               \\ \\ `-. \\_ __\\ /__ _/ .-` / /  \n");
+    printf("       ======`-.____`-.___\\_____/___.-`____.-'======  \n");
+    printf("                          `=---='   \n");
+    printf("..........................................................\n");
     return 1;
 }
 

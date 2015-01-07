@@ -101,6 +101,7 @@ int lcx_tran(int from_port,char *to_host,int to_port,int usec){
         }
     }
     printf("close tran ????\n");
+    return 1;
 }
 
 void *check_and_slave_tunnel(void *PoolNum){

@@ -1,5 +1,5 @@
 #include "BaseAPI.h"
-int usec_for_EW = 10000;
+int usec_for_EW = 100000;
 
 int API_env_init(){
 #ifdef WIN32
