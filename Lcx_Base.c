@@ -1,5 +1,8 @@
 #include"Lcx_Base.h"
 
+char from_URL[300],to_URL[300];
+int from_port,to_port;
+
 void *create_socks_port_server(void *p_port){
     // get connect from explorer
     int port = *(int*)p_port;
@@ -100,22 +103,52 @@ int lcx_tran(int from_port,char *to_host,int to_port,int usec){
     printf("close tran ????\n");
 }
 
-int lcx_slave(char *from_URL,int from_port,char *to_URL,int to_port,int usec){
+void *check_and_slave_tunnel(void *PoolNum){
+    //puts("check slave now !!");
+    int target_sock,new_sock;
+    if(PoolNum == NULL){
+        pthread_detach(pthread_self());
+        return NULL;
+    }
+    int poolnum = *(int*)PoolNum;
+    //printf("poolnum = %d \n",poolnum);
+    new_sock = proto_get_rcsocket(from_URL,from_port,poolnum);
+    target_sock = API_socket_connect(to_URL,to_port);
+    if(new_sock != SOCKET_INIT_ERROR &&
+      target_sock != SOCKET_INIT_ERROR){
+        tunn_sock_to_sock(new_sock,target_sock,API_get_usec_time());
+    }
+    else{
+        API_socket_close( new_sock );
+        API_socket_close( target_sock ) ;
+    }
+    pthread_detach(pthread_self());
+    return NULL;
+}
+
+int lcx_slave(char *mfrom_URL,int mfrom_port,
+        char *mto_URL,int mto_port,int usec){
     int readsize,sendsize;
     char cmd_buff[MAX_CMD_PRO_LEN];
+    int poolnum;int cmd_sock;
     API_set_usec_time(usec);
-    int poolnum;
-    int cmd_sock = init_rcsocket(from_URL,from_port);
+    strncpy(from_URL,mfrom_URL,300);
+    strncpy(to_URL,mto_URL,300);
+    from_port = mfrom_port;
+    to_port   = mto_port;
     printf("lcx_slave %s:%d <--[%4d usec]--> %s:%d\n",
-    from_URL,from_port, usec, to_URL,to_port);
+        from_URL,from_port, usec, to_URL,to_port);
+    cmd_sock = proto_init_cmd_rcsocket(from_URL,from_port);
     if(cmd_sock == SOCKET_INIT_ERROR ){return -1;}
     while(1){
         readsize = API_socket_recv(cmd_sock,cmd_buff,MAX_CMD_PRO_LEN);
         //printf("readsize = %d \n",readsize);
-        if( readsize == MAX_CMD_PRO_LEN ){
+        if( readsize == MAX_CMD_PRO_LEN &&
+          cmd_buff[0]== PRO_MAKE_NET && 
+          cmd_buff[1]== START_A_NEW_SOCK_TUNNEL_NOW ){
             // read a pool number
             pthread_t thread_id;
-            poolnum = chartoi( cmd_buff[2],4 );
+            poolnum = API_m_chartoi( &(cmd_buff[2]),4 );
             if(pthread_create(&thread_id,NULL,
               check_and_slave_tunnel,
               (void *)&poolnum)<0) {
@@ -125,7 +158,7 @@ int lcx_slave(char *from_URL,int from_port,char *to_URL,int to_port,int usec){
             usleep(1);
         }
         else{
-            slave(mfrom_host,mfrom_port,mto_host,mto_port,usec);
+            lcx_slave(mfrom_URL,mfrom_port,mto_URL,mto_port,usec);
             return 1;
         }
         usleep(1);
