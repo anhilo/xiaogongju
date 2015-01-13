@@ -3,13 +3,14 @@
 char from_URL[300],to_URL[300];
 int from_port,to_port;
 
-void *create_socks_port_server(void *p_port){
+MIC_THREAD_FUN_DEF(create_socks_port_server,p_port) {
+//void *create_socks_port_server(void *p_port){
     // get connect from explorer
     int port = *(int*)p_port;
     int socks_server,client_sock;
     struct sockaddr_in client;
     int len_sockaddr,poolnum;
-    pthread_t thread_id;
+    MIC_THREAD_HANDLE_ID thread_id;
     socks_server = API_socket_init_server(port,300);
     len_sockaddr = sizeof(struct sockaddr_in);
     while( (client_sock = accept(socks_server,
@@ -24,47 +25,56 @@ void *create_socks_port_server(void *p_port){
             API_get_usec_time()
         );
         proto_send_rccmd_poolnum(poolnum);
-        usleep(1);
+        MIC_USLEEP(1);
     }
     if(client_sock<0){
         puts("accept failed");
         return 0;
     }
-    pthread_detach(pthread_self());
+    MIC_THREAD_END();
+//    pthread_detach(pthread_self());
     puts("exit socks_port_server");
     return 0;
 }
 
 
-
-void * create_listen_port(void *p_port){
+MIC_THREAD_FUN_DEF(create_listen_port,p_port) {
+//void * create_listen_port(void *p_port){
     // tell the rssocks a new connect
     int port = *(int *)p_port;
     proto_init_cmd_server_for_rc(port);
+    MIC_THREAD_END();
     return NULL;
 }
 
 int lcx_listen(int from_port,int cmd_port,int usec){
     // rcsocks -l socks_port -p listen_port
-    pthread_t thread_1 ,thread_2;
+    MIC_THREAD_HANDLE_ID thread_1 ,thread_2;
     API_set_usec_time(usec);
     printf("rcsocks 0.0.0.0:%d <--[%4d usec]--> 0.0.0.0:%d\n",
     from_port, API_get_usec_time() , cmd_port );
-    if(pthread_create(&thread_1,NULL,
-    create_socks_port_server,&from_port)<0)
+    if(MIC_THREAD_CREATE( thread_1,
+        create_socks_port_server, &from_port) < 0)
+//    if(pthread_create(&thread_1,NULL,
+//    create_socks_port_server,&from_port)<0)
     {
         puts("could not create one way tunnel\n");
         return -1;
     }
     //puts("create first server OK!");
-    if(pthread_create(&thread_2,NULL,
-    create_listen_port,&cmd_port)<0)
+    if(MIC_THREAD_CREATE( thread_1,
+        create_listen_port, &cmd_port) < 0)
+//    if(pthread_create(&thread_2,NULL,
+//    create_listen_port,&cmd_port)<0)
     {
         puts("could not create one way tunnel\n");
         return -1;
     }
-    pthread_join(thread_1,NULL);
-    pthread_join(thread_2,NULL);
+//    pthread_join(thread_1,NULL);
+//    pthread_join(thread_2,NULL);
+    while(1){
+        MIC_SLEEP(1000);
+    }
     puts("exit rcsocks now ????");
     return 1; 
 }
@@ -104,11 +114,13 @@ int lcx_tran(int from_port,char *to_host,int to_port,int usec){
     return 1;
 }
 
-void *check_and_slave_tunnel(void *PoolNum){
+MIC_THREAD_FUN_DEF(check_and_slave_tunnel,PoolNum) {
+//void *check_and_slave_tunnel(void *PoolNum){
     //puts("check slave now !!");
     int target_sock,new_sock;
     if(PoolNum == NULL){
-        pthread_detach(pthread_self());
+        MIC_THREAD_END();
+//        pthread_detach(pthread_self());
         return NULL;
     }
     int poolnum = *(int*)PoolNum;
@@ -123,7 +135,8 @@ void *check_and_slave_tunnel(void *PoolNum){
         API_socket_close( new_sock );
         API_socket_close( target_sock ) ;
     }
-    pthread_detach(pthread_self());
+    MIC_THREAD_END();
+//    pthread_detach(pthread_self());
     return NULL;
 }
 
@@ -148,20 +161,23 @@ int lcx_slave(char *mfrom_URL,int mfrom_port,
           cmd_buff[0]== PRO_MAKE_NET && 
           cmd_buff[1]== START_A_NEW_SOCK_TUNNEL_NOW ){
             // read a pool number
-            pthread_t thread_id;
+            MIC_THREAD_HANDLE_ID thread_id;
             poolnum = API_m_chartoi( &(cmd_buff[2]),4 );
-            if(pthread_create(&thread_id,NULL,
-              check_and_slave_tunnel,
-              (void *)&poolnum)<0) {
+            if(MIC_THREAD_CREATE(thread_id,
+                check_and_slave_tunnel,
+                &poolnum) < 0 ) {
+//            if(pthread_create(&thread_id,NULL,
+//              check_and_slave_tunnel,
+//              (void *)&poolnum)<0) {
                 puts("could not create one way tunnel\n");
                 return 0;
             }
-            usleep(1);
+            MIC_USLEEP(1);
         }
         else{
             lcx_slave(mfrom_URL,mfrom_port,mto_URL,mto_port,usec);
             return 1;
         }
-        usleep(1);
+        MIC_USLEEP(1);
     } 
 }

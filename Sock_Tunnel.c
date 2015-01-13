@@ -48,19 +48,21 @@ int tunn_close(int num){
     socks_Pool[ num ].state = NULL_SOCK;
     socks_Pool[ num ].flag = False;
     live_num --;
-//    printf("--> %3d <-- (close)used tunnel %d , unused tunnel %d\n",num,live_num,MAX_POOL - live_num);
+    printf("--> %3d <-- (close)used tunnel %d , unused tunnel %d\n",num,live_num,MAX_POOL - live_num);
     return 1; 
 }
 
-void * tunn_run_now(void *p_num){
+MIC_THREAD_FUN_DEF(tunn_run_now,p_num) {
+//void * tunn_run_now(void *p_num){
     int num;
     int read_size , write_size;
     char buffer[TUNMAX_BUF];
     int times = 0;
     // data must be here, so do a normal recv
     int n1=1,n2=1;
-    num = *(int*)p_num;
     int sock1,sock2;
+    num = *(int*)p_num;
+//printf(" ---> the num is %d \n",num);
     sock1 = socks_Pool[ num ].sock_1;
     sock2 = socks_Pool[ num ].sock_2;
     //printf("sock1 = %d , sock2 = %d\n",sock1,sock2);
@@ -105,10 +107,11 @@ void * tunn_run_now(void *p_num){
         memset(buffer , 0 , TUNMAX_BUF);
         read_size = write_size = 0;
         n1 = n2 = -1;
-        usleep(1);
+        MIC_USLEEP(1);
         times = times +1;
     }
-    pthread_detach(pthread_self());
+    MIC_THREAD_END();
+    //pthread_detach(pthread_self());
     tunn_close( num );
     //printf("close tunnel_now !!!\n");
     return 0; 
@@ -118,7 +121,7 @@ int tunn_get_pool_id_and_lock_it(){
     int i=0;
     while(live_num >= MAX_POOL-1 || !can_write_pool){
     // wait Pool ready
-        usleep(1);
+        MIC_USLEEP(1);
     }
     // lock pool write
     can_write_pool = False;
@@ -153,12 +156,15 @@ int tunn_set_first_pool_and_lock_it(int sock,int usec){
 int tunn_set_second_pool_and_run_it(int num,int sock){
     int *poolnum= (int *)malloc(sizeof(int));
     *poolnum = num;
-    pthread_t thread_1;
+    MIC_THREAD_HANDLE_ID thread_1;
     socks_Pool[ num ] .sock_2 = sock;
     socks_Pool[ num ] .state = SOCK_2_OK;
-    if( pthread_create( &thread_1,NULL ,
-      tunn_run_now,
-      (void *)poolnum)<0){
+    if( MIC_THREAD_CREATE(thread_1,
+        tunn_run_now,
+        poolnum) < 0 ){
+//    if( pthread_create( &thread_1,NULL ,
+//      tunn_run_now,
+//      (void *)poolnum)<0){
         perror("could not create one way tunnel\n");
         tunn_close(num);
         return TUNNEL_SET_SECOND_POOL_AND_RUN_IT_FALSE;

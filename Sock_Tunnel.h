@@ -34,7 +34,8 @@ typedef struct sspool{
 int tunn_init_Pool();
 int tunn_clean(int num);
 int tunn_close(int num);
-void * tunn_run_now(void *p_num);
+//MIC_THREAD_FUN_DEF(tunn_run_now,p_num) ;
+//void * tunn_run_now(void *p_num);
 int tunn_get_pool_id_and_lock_it();
 int tunn_set_first_pool_and_lock_it(int sock,int usec);
 int tunn_set_second_pool_and_run_it(int pool_num,int sock);

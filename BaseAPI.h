@@ -36,9 +36,9 @@ struct hostent *API_socket_gethostbyname(char * ser_addr);
 //  API_getsock_opt(int sock);
 
 // api for thread
-int API_thread_create(pthread_t *thread, const pthread_attr_t *attr,
-                          void *(*start_routine) (void *), void *arg);
-int API_thread_detach();
+//int API_thread_create(pthread_t *thread, const pthread_attr_t *attr,
+//                          void *(*start_routine) (void *), void *arg);
+//int API_thread_detach();
 
 // api for math
 int API_m_itochar(int a,char *b,int len);

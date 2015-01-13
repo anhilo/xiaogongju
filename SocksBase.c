@@ -79,17 +79,19 @@ int socks_build_target_socket(int sock){
         reply_len ++;
     }
     API_socket_send(sock,reply, reply_len);
-    //.. puts("sock5pro return cli_sock\n");
+    //puts("sock5pro return cli_sock\n");
     return cli_sock; 
 }
 
-void *socks_check_and_tunnel(void *sock){
+MIC_THREAD_FUN_DEF(socks_check_and_tunnel,sock){
+//void *socks_check_and_tunnel(void *sock){
     int new_sock,sendsize,readsize;
     int target_sock;
     char cmd_buff[100];
     struct rcsocktul *tunn = (struct rcsocktul *)sock;
     if(tunn == NULL){
-        pthread_detach(pthread_self());
+        MIC_THREAD_END();
+//        pthread_detach(pthread_self());
         return NULL;
     }
     //printf("create RC_rcosket\n");
@@ -105,6 +107,23 @@ void *socks_check_and_tunnel(void *sock){
     else{
         API_socket_close(new_sock);
     }
-    pthread_detach(pthread_self());
+    MIC_THREAD_END();
+//    pthread_detach(pthread_self());
     return NULL;
 }
+
+
+
+int socks_build_rcsocks_tunnel(void *sock){
+    MIC_THREAD_HANDLE_ID thread_id;
+    if ( MIC_THREAD_CREATE ( thread_id , 
+        socks_check_and_tunnel,
+        sock) < 0 ) {
+//            if(pthread_create(&thread_id,NULL,
+//            socks_check_and_tunnel,(void *)tunn)<0) {
+        puts("could not create one way tunnel\n");
+        return 0;
+    }
+    return 1;
+}
+

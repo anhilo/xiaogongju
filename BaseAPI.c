@@ -153,14 +153,14 @@ int API_socket_close(int sock){
 
 
 
-int API_thread_create(pthread_t *thread, const pthread_attr_t *attr,
-                          void *(*start_routine) (void *), void *arg){
-    return pthread_create(thread,attr,start_routine,arg);
-}
-
-int API_thread_detach(){
-    return pthread_detach(pthread_self());
-}
+//int API_thread_create(pthread_t *thread, const pthread_attr_t *attr,
+//                          void *(*start_routine) (void *), void *arg){
+//    return pthread_create(thread,attr,start_routine,arg);
+//}
+//
+//int API_thread_detach(){
+//    return pthread_detach(pthread_self());
+//}
 
 
 int API_m_itochar(int a,char *b,int len){

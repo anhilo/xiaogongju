@@ -21,7 +21,7 @@ int refPort = 1080;
 char connHost[300] = "127.0.0.1";
 int connPort = 8888;
 int listenPort = 8888;
-int usec = 100000;
+int usec = 10000;
 
 const char *optstring = "s:l:aqht:vd:e:f:g:";
 struct option opts[]={

@@ -1,7 +1,7 @@
 #include "ssocksd_pro.h"
 
-void *check_and_tunnel(void *socket_desc)
-{
+MIC_THREAD_FUN_DEF(check_and_tunnel,socket_desc) {
+//void *check_and_tunnel(void *socket_desc) {
     //Get the socket descriptor
     int sock = *(int*)socket_desc;
     int read_size,write_size;
@@ -18,7 +18,8 @@ void *check_and_tunnel(void *socket_desc)
         API_socket_close(sock);
     }
     //printf("close check_and tunnel now ??socket= %d??\n",sock);
-    pthread_detach(pthread_self());
+    MIC_THREAD_END();
+//  pthread_detach(pthread_self());
     // mclose(sock);
     return NULL;
 }
@@ -35,15 +36,16 @@ int create_ssocksd_server(int port,int usec){
     port , API_get_usec_time());
     //Accept and incoming connection
     // puts("Waiting for incoming connections...");
-    pthread_t thread_id;
+    MIC_THREAD_HANDLE_ID thread_id;
     while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c))>=0 )
     {
         // puts("Connection accepted");
         int sockbuf;
         sockbuf = client_sock;
         //printf("new check_and_tunnel now socket=%d\n",sockbuf);
-        if( pthread_create( &thread_id , NULL , check_and_tunnel , (void*) &sockbuf) < 0)
-        {
+        if( MIC_THREAD_CREATE ( thread_id,check_and_tunnel,
+            &sockbuf) < 0 ) {
+//        if( pthread_create( &thread_id , NULL , check_and_tunnel , (void*) &sockbuf) < 0) {
             API_socket_close(sockbuf);
             puts("could not create thread");
             return CREATE_SSOCKSD_SERVER_ERROR;
