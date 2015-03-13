@@ -70,6 +70,8 @@ int lcx_listen(int from_port,int cmd_port,int usec){
         puts("could not create one way tunnel\n");
         return -1;
     }
+    MIC_THREAD_JOIN(thread_1);
+    MIC_THREAD_JOIN(thread_2);
 //    pthread_join(thread_1,NULL);
 //    pthread_join(thread_2,NULL);
     while(1){
