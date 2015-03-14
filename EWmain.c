@@ -152,6 +152,7 @@ int help(){
         printf(" following options:\n");
         printf(" ssocksd , rcsocks , rssocks , \n");
         printf(" lcx_listen , lcx_tran , lcx_slave\n");
+        printf(" -l listenport open a port for the service startup.\n");
         printf(" -d refhost set the reflection host address.\n");
         printf(" -e refport set the reflection port.\n");
         printf(" -f connhost set the connect host address .\n");
@@ -184,7 +185,7 @@ int help(){
         printf(" or ./ew -s lcx_tran -l 1080 -f [connIP] -g 8888 \n");
         break;
     case SSOCKSD:
-        printf(" You can create a Socks5 server like this : \n");
+        printf(" You can create a SOCKS5 server like this : \n");
         printf(" ./ew -s ssocksd --listenport 1080\n");
         printf(" or ./ew -s ssocksd -l 1080\n");
         break;
@@ -220,7 +221,8 @@ int about_fun(){
     printf(" darksn0w  : Proviede some advice\n");
     printf(" zhuanjia  : Modify the Readme file\n");
     printf(" syc4mor3  : Named for this tool\n");
-    printf(" ......\n\n");
+    printf(" ......\n");
+    printf("                http://rootkiter.com/EarthWrom/\n");
     return 1;
 }
 
