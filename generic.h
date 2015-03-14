@@ -38,10 +38,11 @@
     #define MIC_THREAD_HANDLE_ID HANDLE
     #define MIC_THREAD_CREATE(handle,fun_name,parm) \
         CreateThread(NULL,0,fun_name,(void*)parm,0,NULL)
-    #define MIC_THREAD_JOIN(handle,NULL) \
+    #define MIC_THREAD_JOIN(handle) \
         Sleep(1)
     #define MIC_THREAD_END() Sleep(1)
     #define MIC_SLEEP(x)  Sleep(x*1000)
+    #define MIC_USLEEP(x) Sleep(x);
 #else
     #define MIC_THREAD_FUN_DEF(fun_name,parm) \
         void *fun_name(void *parm)
@@ -52,8 +53,8 @@
         pthread_join(handle ,NULL)
     #define MIC_THREAD_END() pthread_detach(pthread_self())
     #define MIC_SLEEP(x)  sleep(x)
+    #define MIC_USLEEP(x) usleep(x*1000);
 #endif
-#define MIC_USLEEP(x) usleep(1);
 
 #define MAX_POOL       1000
 #define True              1
