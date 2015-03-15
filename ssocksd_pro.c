@@ -9,6 +9,7 @@ MIC_THREAD_FUN_DEF(check_and_tunnel,socket_desc) {
     int client_sock;
     //Receive a message from client
     //read_size = recv(sock , client_message , 2000 , 0);
+    MIC_USLEEP(1);
     client_sock = socks_build_target_socket(sock);
     //client_sock = get_connect_socket("127.0.0.1",8090);
     if ( client_sock != SOCKS_BUILD_TARGET_SOCKET_ERROR )
@@ -51,6 +52,8 @@ int create_ssocksd_server(int port,int usec){
             return CREATE_SSOCKSD_SERVER_ERROR;
         }
         client_sock = -1;
+        MIC_USLEEP(1);
+        MIC_THREAD_JOIN( thread_id );
         //Now join the thread , so that we dont terminate before the thread
         // pthread_join( thread_id , NULL);
         // puts("Handler assigned");

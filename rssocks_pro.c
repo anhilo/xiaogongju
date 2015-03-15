@@ -46,5 +46,5 @@ int create_rssocks_server(char *URL,int port,int usec){
         }
         MIC_USLEEP(1);
     }
-    printf("exit wihile ??????\n"); 
+    printf("exit while ??????\n"); 
 }

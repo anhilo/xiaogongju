@@ -26,7 +26,7 @@ int proto_init_cmd_server_for_rc(int port){
                 ))>= 0 ){
     // puts("new clent from second server here");
         proto_understand_and_do_it( client_sock );
-        usleep(1);
+        MIC_USLEEP(1);
     }
     return PROTO_INIT_CMD_SER_OK;
 }
