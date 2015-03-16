@@ -182,7 +182,7 @@ int API_m_chartoi(char *b,int len){
     int result = 0;
     if (len!=4)return CHAR_TO_I_ERROR;
     for (i = len - 1 ;i >= 0 ; i--){
-        result = result * 128 + b[i];
+        result = result * 128 +(unsigned int ) b[i];
     }
     return result;
 }
