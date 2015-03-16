@@ -115,6 +115,8 @@ int proto_understand_and_do_it(int sock){
             cmd[0] = PRO_MAKE_NET;
             cmd[1] = CONFIRM_YOU_ARE_SOCK_TUNNEL;
             API_socket_send(sock,cmd,MAX_CMD_PRO_LEN);
+            if( num == CHAE_TO_I_ERROR )
+                return PROTO_UNDERSTAND_ERROR;
             tunn_set_second_pool_and_run_it(num,sock);
         }
         else return PROTO_UNDERSTAND_ERROR;

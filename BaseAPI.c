@@ -172,6 +172,7 @@ int API_m_itochar(int a,char *b,int len){
     int buf = a;
     for (i = 0;i< len ;i++){
         b[i] = buf % 128;
+        if(b[i] < 0) return I_TO_CHAR_ERROR;
         buf = buf / 128;
     }
     return I_TO_CHAR_OK;
@@ -182,7 +183,8 @@ int API_m_chartoi(char *b,int len){
     int result = 0;
     if (len!=4)return CHAR_TO_I_ERROR;
     for (i = len - 1 ;i >= 0 ; i--){
-        result = result * 128 +(unsigned int ) b[i];
+        if (b[i] < 0) return CHAR_TO_I_ERROR;
+        result = result * 128 + b[i];
     }
     return result;
 }
