@@ -38,6 +38,9 @@ int API_socket_connect(char *ser_addr,int port){
     server_addr.sin_family = AF_INET;
     // dns url -> ip
     des_addr = API_socket_gethostbyname(ser_addr);
+    if ( des_addr == NULL ){
+        return SOCKET_CONNECT_ERROR;
+    }
     server_addr.sin_addr = *(struct in_addr*)des_addr->h_addr;
     if( server_addr.sin_addr.s_addr == 0 )
     {

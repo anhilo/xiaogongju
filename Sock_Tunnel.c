@@ -23,32 +23,35 @@ int tunn_init_Pool(){
     return TUNNEL_INIT_OK;
 }
 
-int tunn_clean(int num){
-    int i = num;
-    socks_Pool[i].sock_1 = -1;
-    socks_Pool[i].sock_2 = -1;
-    socks_Pool[i].flag = False;
-    socks_Pool[i].state = NULL_SOCK;
-    socks_Pool[i].usec_time = -1;
-    live_num --;
-    //can_write_pool = True;
-    return TUNNEL_CLEAN_OK;
-}
+//int tunn_clean(int num){
+//    int i = num;
+//    socks_Pool[i].sock_1 = -1;
+//    socks_Pool[i].sock_2 = -1;
+//    socks_Pool[i].flag = False;
+//    socks_Pool[i].state = NULL_SOCK;
+//    socks_Pool[i].usec_time = -1;
+//    live_num --;
+//    //can_write_pool = True;
+//    return TUNNEL_CLEAN_OK;
+//}
 int tunn_close(int num){
+    int flag = 0;
     if( socks_Pool[ num ].sock_1 > 0){
         API_socket_close(socks_Pool[ num ].sock_1);
         socks_Pool[ num ].sock_1 = -1;
+        flag = 1;
     }
     if( socks_Pool[ num ].sock_2 > 0){
         API_socket_close(socks_Pool[ num ].sock_2);
         socks_Pool[ num ].sock_2 = -1;
+        flag = 1;
     }
    //puts("close tunnel");
     socks_Pool[ num ].usec_time = -1;
     socks_Pool[ num ].state = NULL_SOCK;
     socks_Pool[ num ].flag = False;
-    live_num --;
-    printf("--> %3d <-- (close)used tunnel %d , unused tunnel %d\n",num,live_num,MAX_POOL - live_num);
+    if (flag) live_num --;
+    printf("--> %3d <-- (close)used/unused  %d/%d\n",num,live_num,MAX_POOL - live_num);
     return 1; 
 }
 
@@ -130,6 +133,7 @@ int tunn_get_pool_id_and_lock_it(){
         if(socks_Pool[i].flag == False){
             live_num ++;
             socks_Pool[i].flag = True;
+    printf("<-- %3d --> (open)used/unused  %d/%d\n",i,live_num,MAX_POOL - live_num);
             return i;
         }
     }
