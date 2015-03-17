@@ -31,7 +31,8 @@ int API_socket_close(int sock);
 int API_socket_read_state(int sock,int sec,int usec);
 int API_socket_write_state(int sock,int sec,int usec);
 
-struct hostent *API_socket_gethostbyname(char * ser_addr);
+//struct hostent *API_socket_gethostbyname(char * ser_addr);
+struct in_addr *API_socket_getaddrinfo(char *url);
 
 //  API_getsock_opt(int sock);
 
