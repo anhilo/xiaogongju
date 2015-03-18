@@ -13,6 +13,10 @@ MIC_THREAD_FUN_DEF(create_socks_port_server,p_port) {
     MIC_THREAD_HANDLE_ID thread_id;
     socks_server = API_socket_init_server(port,300);
     len_sockaddr = sizeof(struct sockaddr_in);
+    if(socks_server == SOCKET_INIT_ERROR){
+        printf("Error : --> %d start server.\n", port);
+        return NULL;
+    }
     while( (client_sock = accept(socks_server,
       (struct sockaddr *)&client,
       (socklen_t*)&len_sockaddr)
@@ -29,7 +33,7 @@ MIC_THREAD_FUN_DEF(create_socks_port_server,p_port) {
     }
     if(client_sock<0){
         puts("accept failed");
-        return 0;
+        return NULL;
     }
     MIC_THREAD_END();
 //    pthread_detach(pthread_self());
@@ -55,25 +59,19 @@ int lcx_listen(int from_port,int cmd_port,int usec){
     from_port, API_get_usec_time() , cmd_port );
     if(MIC_THREAD_CREATE( thread_1,
         create_socks_port_server, &from_port) < 0)
-//    if(pthread_create(&thread_1,NULL,
-//    create_socks_port_server,&from_port)<0)
     {
-        puts("could not create one way tunnel\n");
+        printf("Error: --> %d start server\n",from_port);
         return -1;
     }
     //puts("create first server OK!");
     if(MIC_THREAD_CREATE( thread_1,
         create_listen_port, &cmd_port) < 0)
-//    if(pthread_create(&thread_2,NULL,
-//    create_listen_port,&cmd_port)<0)
     {
-        puts("could not create one way tunnel\n");
+        printf("Error: --> %d start server\n",cmd_port);
         return -1;
     }
     MIC_THREAD_JOIN(thread_1);
     MIC_THREAD_JOIN(thread_2);
-//    pthread_join(thread_1,NULL);
-//    pthread_join(thread_2,NULL);
     while(1){
         MIC_SLEEP(1000);
     }

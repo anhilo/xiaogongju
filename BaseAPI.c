@@ -72,7 +72,7 @@ int API_socket_init_server(int port,int maxlisten){
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
     if (socket_desc == -1)
     {
-        printf("Could not create socket");
+        printf("Error : Could not create socket [ port = %d ].\n",port);
         return SOCKET_SERVER_INIT_ERROR;
     }
     //Prepare the sockaddr_in structure
@@ -83,7 +83,7 @@ int API_socket_init_server(int port,int maxlisten){
     if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
     {
         //print the error message
-        perror("bind failed. Error");
+        printf("Error : bind port %d .\n",port);
         return SOCKET_SERVER_INIT_ERROR;
     }
     // puts("bind done");
