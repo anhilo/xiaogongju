@@ -1,6 +1,6 @@
 #include "generic.h"
 
-#define VERSION_STR "free 1.0"
+#define VERSION_STR "free1.0"
 #define NULL_STATE 0
 #define SSOCKSD 1
 #define RCSOCKS 2
