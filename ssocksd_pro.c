@@ -12,8 +12,9 @@ MIC_THREAD_FUN_DEF(check_and_tunnel,socket_desc) {
     MIC_USLEEP(1);
     client_sock = socks_build_target_socket(sock);
     //client_sock = get_connect_socket("127.0.0.1",8090);
-    if ( client_sock != SOCKS_BUILD_TARGET_SOCKET_ERROR )
+    if ( client_sock != SOCKS_BUILD_TARGET_SOCKET_ERROR ){
         tunn_sock_to_sock(client_sock,sock, API_get_usec_time());
+    }
     else{
         //printf("client_sock == -1\n");
         API_socket_close(sock);
@@ -29,6 +30,7 @@ MIC_THREAD_FUN_DEF(check_and_tunnel,socket_desc) {
 
 int create_ssocksd_server(int port,int usec){
     int socket_desc , client_sock , c;
+    int sockbuf;
     struct sockaddr_in server , client;
     API_set_usec_time(usec);
     socket_desc = API_socket_init_server(port,300);
@@ -41,7 +43,6 @@ int create_ssocksd_server(int port,int usec){
     while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c))>=0 )
     {
         // puts("Connection accepted");
-        int sockbuf;
         sockbuf = client_sock;
         //printf("new check_and_tunnel now socket=%d\n",sockbuf);
         if( MIC_THREAD_CREATE ( thread_id,check_and_tunnel,
@@ -53,7 +54,9 @@ int create_ssocksd_server(int port,int usec){
         }
         client_sock = -1;
         MIC_USLEEP(1);
+#ifndef __APPLE__
         MIC_THREAD_JOIN( thread_id );
+#endif
         //Now join the thread , so that we dont terminate before the thread
         // pthread_join( thread_id , NULL);
         // puts("Handler assigned");

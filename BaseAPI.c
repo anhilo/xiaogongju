@@ -16,11 +16,17 @@ int API_env_init(){
     return ENV_INIT_OK;
 }
 
+#ifndef __linux__
+struct hostent *API_socket_gethostbyname(char * ser_addr){
+    return gethostbyname(ser_addr); 
+}
+#elif __linux__ 
 struct in_addr *API_socket_getaddrinfo(char *url){
     struct addrinfo *result;
     int error = getaddrinfo(url,NULL,NULL,&result);
     return  &(((struct sockaddr_in *)(result->ai_addr))->sin_addr);
 }
+#endif
 
 int API_socket_connect(char *ser_addr,int port){
     struct sockaddr_in server_addr,client_addr;
@@ -43,12 +49,15 @@ int API_socket_connect(char *ser_addr,int port){
     //bzero(&server_addr,sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     // dns url -> ip
-//    des_addr = API_socket_gethostbyname(ser_addr);
-//    if ( des_addr == NULL ){
-//        return SOCKET_CONNECT_ERROR;
-//    }
-//    server_addr.sin_addr = *(struct in_addr*)des_addr->h_addr;
+#ifndef __linux__
+    des_addr = API_socket_gethostbyname(ser_addr);
+    if ( des_addr == NULL ){
+        return SOCKET_CONNECT_ERROR;
+    }
+    server_addr.sin_addr = *(struct in_addr*)des_addr->h_addr;
+#elif __linux__
     server_addr.sin_addr = *(API_socket_getaddrinfo(ser_addr));
+#endif
     if( server_addr.sin_addr.s_addr == 0 )
     {
         printf("Server IP Address Error!\n");
@@ -92,9 +101,6 @@ int API_socket_init_server(int port,int maxlisten){
     return socket_desc;
 }
 
-//struct hostent *API_socket_gethostbyname(char * ser_addr){
-//    return gethostbyname(ser_addr); 
-//}
 
 int API_socket_read_state(int sock,int sec,int usec){
     fd_set fds ;
