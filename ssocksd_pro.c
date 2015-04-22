@@ -54,9 +54,9 @@ int create_ssocksd_server(int port,int usec){
         }
         client_sock = -1;
         MIC_USLEEP(1);
-#ifndef __APPLE__
-        MIC_THREAD_JOIN( thread_id );
-#endif
+//#ifndef __APPLE__
+//        MIC_THREAD_JOIN( thread_id );
+//#endif
         //Now join the thread , so that we dont terminate before the thread
         // pthread_join( thread_id , NULL);
         // puts("Handler assigned");
