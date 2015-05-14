@@ -8,7 +8,7 @@ int API_env_init(){
     if (WSAStartup(MAKEWORD(2,2), &wsd) != 0)
     {
         perror ("WSAStartup failed!");
-        return 1;
+        return ENV_INIT_FALSE;
     }
 #else
     signal(SIGPIPE, SIG_IGN);
@@ -29,6 +29,28 @@ struct in_addr *API_socket_getaddrinfo(char *url){
 #endif
 
 int API_socket_connect(char *ser_addr,int port){
+#ifdef WIN32
+	WSADATA wd;
+	SOCKET sock;
+	struct sockaddr_in sin;
+    struct hostent * des_addr;
+	int size = sizeof(sin);
+	memset(&sin, 0, sizeof(sin));
+	WSAStartup(MAKEWORD( 1, 1 ), &wd);
+	sock=WSASocket(PF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
+	sin.sin_family = AF_INET;
+	bind(sock, (struct sockaddr*)&sin, size);
+	sin.sin_port = htons(port);
+
+    des_addr = API_socket_gethostbyname(ser_addr);
+    if ( des_addr == NULL ){
+        return SOCKET_CONNECT_ERROR;
+    }
+    sin.sin_addr = *(struct in_addr*)des_addr->h_addr;
+//	sin.sin_addr.s_addr = inet_addr(ser_addr);
+	connect(sock, (struct sockaddr*)&sin, size);
+	return sock;
+#elif __linux__
     struct sockaddr_in server_addr,client_addr;
     struct hostent * des_addr;
     memset(&client_addr, 0 ,sizeof(client_addr));
@@ -49,15 +71,7 @@ int API_socket_connect(char *ser_addr,int port){
     //bzero(&server_addr,sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     // dns url -> ip
-#ifndef __linux__
-    des_addr = API_socket_gethostbyname(ser_addr);
-    if ( des_addr == NULL ){
-        return SOCKET_CONNECT_ERROR;
-    }
-    server_addr.sin_addr = *(struct in_addr*)des_addr->h_addr;
-#elif __linux__
     server_addr.sin_addr = *(API_socket_getaddrinfo(ser_addr));
-#endif
     if( server_addr.sin_addr.s_addr == 0 )
     {
         printf("Server IP Address Error!\n");
@@ -72,9 +86,28 @@ int API_socket_connect(char *ser_addr,int port){
     }
     //puts("got the client_socket");
     return client_socket;
+#endif
 }
 
 int API_socket_init_server(int port,int maxlisten){
+#ifdef WIN32
+    SOCKET  locals;
+    struct sockaddr_in   s_sin;        
+    memset(&s_sin, 0, sizeof(s_sin));
+    locals = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, NULL, NULL);
+    s_sin.sin_family = AF_INET;
+    s_sin.sin_port = htons(port);
+    s_sin.sin_addr.s_addr = htonl(INADDR_ANY);
+      
+    if(SOCKET_ERROR == bind(locals, (struct sockaddr *)&s_sin, sizeof(s_sin)))
+    {
+//           printf("bind wrong.");
+           return ;
+    }
+        
+    listen(locals, maxlisten);
+    return locals;
+#elif __linux__
     int socket_desc;
     struct sockaddr_in server;
     int c;
@@ -99,6 +132,7 @@ int API_socket_init_server(int port,int maxlisten){
     //Listen
     listen(socket_desc , maxlisten);
     return socket_desc;
+#endif
 }
 
 
