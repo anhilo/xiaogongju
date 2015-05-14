@@ -23,7 +23,11 @@ int Set_Shell_Path_Value(){
     else {
         return SET_SHELL_PATH_ERROR;
     }
+#elif __APPLE__
+    strncpy(SHELL_FILE_PATH,"/bin/bash",MAX_SHELL_PATH);
+    //printf("--->  %s\n",SHELL_FILE_PATH);
 #else
+    printf("__apple__?");
     return SET_SHELL_PATH_ERROR;
 #endif
     return SET_SHELL_PATH_OK;
@@ -47,11 +51,11 @@ int API_env_init(){
     return ENV_INIT_FALSE;
 }
 
-#ifndef __linux__
+#ifdef WIN32
 struct hostent *API_socket_gethostbyname(char * ser_addr){
     return gethostbyname(ser_addr); 
 }
-#elif __linux__ 
+#else //__linux__ 
 struct in_addr *API_socket_getaddrinfo(char *url){
     struct addrinfo *result;
     int error = getaddrinfo(url,NULL,NULL,&result);
@@ -81,7 +85,7 @@ int API_socket_connect(char *ser_addr,int port){
 //	sin.sin_addr.s_addr = inet_addr(ser_addr);
 	connect(sock, (struct sockaddr*)&sin, size);
 	return sock;
-#elif __linux__
+#else// __linux__
     struct sockaddr_in server_addr,client_addr;
     struct hostent * des_addr;
     memset(&client_addr, 0 ,sizeof(client_addr));
@@ -138,7 +142,7 @@ int API_socket_init_server(int port,int maxlisten){
         
     listen(locals, maxlisten);
     return locals;
-#elif __linux__
+#else 
     int socket_desc;
     struct sockaddr_in server;
     int c;
@@ -293,7 +297,21 @@ MIC_THREAD_FUN_DEF (shelltest,socket){
     printf("psocket = %d\n",*((int*)socket)); 
     API_socket_send(sock,SHELL_WELCOME_MSG,strlen(SHELL_WELCOME_MSG));
     printf("sock == %d\n",sock);
-#ifdef __linux__
+#ifdef __WIN32__
+    STARTUPINFO si;
+    PROCESS_INFORMATION  pi;
+    memset(&si, 0, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdInput = si.hStdOutput = si.hStdError = (HANDLE)sock;
+    // API_socket_send(si.hStdOutput,"Hello Client\n",strlen("Hello Client\n"));
+    CreateProcess(
+        NULL, SHELL_FILE_PATH, NULL, NULL,
+        TRUE, 0, 0, NULL, &si, &pi
+    );
+    API_socket_send(sock,SHELL_BYE_MSG,strlen(SHELL_BYE_MSG));
+    API_socket_close(sock);
+#else //  __linux__
     int fpid;
     printf("%s\n" ,SHELL_FILE_PATH);
     fpid = fork();
@@ -309,20 +327,6 @@ MIC_THREAD_FUN_DEF (shelltest,socket){
         system(SHELL_FILE_PATH);
         API_socket_send(sock,SHELL_BYE_MSG,strlen(SHELL_BYE_MSG));
     }
-#elif __WIN32__
-    STARTUPINFO si;
-    PROCESS_INFORMATION  pi;
-    memset(&si, 0, sizeof(si));
-    si.cb = sizeof(si);
-    si.dwFlags = STARTF_USESTDHANDLES;
-    si.hStdInput = si.hStdOutput = si.hStdError = (HANDLE)sock;
-    // API_socket_send(si.hStdOutput,"Hello Client\n",strlen("Hello Client\n"));
-    CreateProcess(
-        NULL, SHELL_FILE_PATH, NULL, NULL,
-        TRUE, 0, 0, NULL, &si, &pi
-    );
-    API_socket_send(sock,SHELL_BYE_MSG,strlen(SHELL_BYE_MSG));
-    API_socket_close(sock);
 #endif
     MIC_THREAD_END();
     return 0;
