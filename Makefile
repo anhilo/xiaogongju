@@ -3,10 +3,10 @@ objects = BaseAPI.o EWmain.o SocksBase.o Sock_Tunnel.o \
 		  libsock/Socks.o
 EWhere : $(objects)
 	cc -o EWhere $(objects) -lpthread 
-	rm *.o
+	rm $(objects)
 forwin : $(objects)
 	cc -o EWhere $(objects) -lwsock32 
-	rm *.o
+	rm $(objects)
 clean:
 	rm EWhere
 	rm EWhere.exe

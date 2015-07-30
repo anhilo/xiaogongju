@@ -1,3 +1,4 @@
+#include "errno.h"
 #include "Socks.h"
 
 #define IPV4_TYPE 0x01
@@ -9,8 +10,8 @@
 #define CONNECT_TARGET_OK        0x00  // 成功
 #define CONNECT_TARGET_ERROR     0x01  // 一般性失败
 #define NOT_SUPPORT_TUNNEL       0x02  // 规则不允许转发
-#define CONNECT_NET_NOT_THRER    0x03 // 网络不可达
-#define CONNECT_TARGET_NOT_THRER 0x04 // 主机不可达到
+#define NET_NOT_REACHABLE        0x03 // 网络不可达
+#define THE_HOST_NOT_REACHABLE   0x04 // 主机不可达到
 #define REFUSE_BY_REMOTE         0x05 // 连接拒绝
 #define TTL_OVERTIME             0x06 // TTL 超时
 #define NOT_SUPPORT_CMD          0x07 // 不支持请求包中的CMD
@@ -127,7 +128,17 @@ printf("Not support  UDP?\n");
         return GET_TARGET_SOCKET_ERROR;
     }
     if(cli_sock == SOCKET_CONNECT_ERROR){
-        Say_Cannot_Build_Target_Now(sock,CONNECT_TARGET_ERROR);
+        switch(errno){
+        case ENETUNREACH: 
+            Say_Cannot_Build_Target_Now(sock,NET_NOT_REACHABLE);
+        case EHOSTUNREACH:
+            Say_Cannot_Build_Target_Now(sock,THE_HOST_NOT_REACHABLE);
+        case ECONNRESET:
+            Say_Cannot_Build_Target_Now(sock,REFUSE_BY_REMOTE);
+        case ETIMEDOUT:
+            Say_Cannot_Build_Target_Now(sock,TTL_OVERTIME);
+        }
+        
         return GET_TARGET_SOCKET_ERROR;
     }
     Say_Build_Target_OK(sock);
