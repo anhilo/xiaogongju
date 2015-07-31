@@ -16,11 +16,11 @@ int API_env_init(){
     return ENV_INIT_OK;
 }
 
-#ifndef __linux__
+#ifdef WIN32
 struct hostent *API_socket_gethostbyname(char * ser_addr){
     return gethostbyname(ser_addr); 
 }
-#elif __linux__ 
+#else  
 struct in_addr *API_socket_getaddrinfo(char *url){
     struct addrinfo *result;
     int error = getaddrinfo(url,NULL,NULL,&result);
@@ -49,13 +49,13 @@ int API_socket_connect(char *ser_addr,int port){
     //bzero(&server_addr,sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     // dns url -> ip
-#ifndef __linux__
+#ifdef WIN32
     des_addr = API_socket_gethostbyname(ser_addr);
     if ( des_addr == NULL ){
         return SOCKET_CONNECT_ERROR;
     }
     server_addr.sin_addr = *(struct in_addr*)des_addr->h_addr;
-#elif __linux__
+#else 
     server_addr.sin_addr = *(API_socket_getaddrinfo(ser_addr));
 #endif
     if( server_addr.sin_addr.s_addr == 0 )

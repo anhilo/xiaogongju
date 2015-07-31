@@ -53,6 +53,42 @@ int Say_Cannot_Build_Target_Now(int sock,int type){
     return 1;
 }
 
+int Say_Cannot_Build_Target_Reason(int sock){
+#ifdef WIN32
+    int WinErrno = WSAGetLastError();
+    switch (WinErrno){
+        case WSAENETUNREACH:
+            Say_Cannot_Build_Target_Now(sock,NET_NOT_REACHABLE);
+            break;
+        case WSAEHOSTUNREACH:
+            Say_Cannot_Build_Target_Now(sock,THE_HOST_NOT_REACHABLE);
+            break;
+        case WSAECONNREFUSED:
+            Say_Cannot_Build_Target_Now(sock,REFUSE_BY_REMOTE);
+            break;
+        case WSAETIMEDOUT:
+            Say_Cannot_Build_Target_Now(sock,TTL_OVERTIME);
+            break;
+    }
+#else
+    switch(errno){
+        case ENETUNREACH: 
+            Say_Cannot_Build_Target_Now(sock,NET_NOT_REACHABLE);
+            break;
+        case EHOSTUNREACH:
+            Say_Cannot_Build_Target_Now(sock,THE_HOST_NOT_REACHABLE);
+            break;
+        case ECONNREFUSED:
+            Say_Cannot_Build_Target_Now(sock,REFUSE_BY_REMOTE);
+            break;
+        case ETIMEDOUT:
+            Say_Cannot_Build_Target_Now(sock,TTL_OVERTIME);
+            break;
+    }
+#endif
+    return 1;
+}
+
 int Say_Build_Target_OK(int sock){
     char ERreq[10] = {0x05,0x00,0x00,0x01,0x41,0x41,0x41,0x41,0x41,0x41};
     int reqlen = 10;
@@ -128,17 +164,7 @@ printf("Not support  UDP?\n");
         return GET_TARGET_SOCKET_ERROR;
     }
     if(cli_sock == SOCKET_CONNECT_ERROR){
-        switch(errno){
-        case ENETUNREACH: 
-            Say_Cannot_Build_Target_Now(sock,NET_NOT_REACHABLE);
-        case EHOSTUNREACH:
-            Say_Cannot_Build_Target_Now(sock,THE_HOST_NOT_REACHABLE);
-        case ECONNRESET:
-            Say_Cannot_Build_Target_Now(sock,REFUSE_BY_REMOTE);
-        case ETIMEDOUT:
-            Say_Cannot_Build_Target_Now(sock,TTL_OVERTIME);
-        }
-        
+        Say_Cannot_Build_Target_Reason(sock);
         return GET_TARGET_SOCKET_ERROR;
     }
     Say_Build_Target_OK(sock);
