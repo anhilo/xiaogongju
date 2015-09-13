@@ -236,6 +236,35 @@ int API_socket_close(int sock){
     return 1;
 }
 
+int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
+    struct sockaddr_in client_addr;
+    int client_sock;
+    int len_sockaddr;
+    int fun_result;
+    puts("start socket server here");
+    len_sockaddr = sizeof(struct sockaddr_in);
+    puts("start accept socket client here");
+    while( (client_sock = accept(
+                socks_server,
+                (struct sockaddr *)&client_addr,
+                (socklen_t*)&len_sockaddr
+                ))>= 0 ){
+        // 对于每一个新连接的会话，都用fun 函数进行处理
+        /// fun 函数应当以线程方式进行处理，以免程序阻塞
+        fun_result = fun( client_sock , client_addr, len_sockaddr);
+        if(fun_result == CALLBACK_FUN_RUN_OK){
+     //       puts("[ OK    ]  CALLBACK_FUN_RUN_OK !");
+        }
+        else if(fun_result == CALLBACK_FUN_RUN_ERROR){
+            puts("[ ERROR ]  CALLBACK_FUN_RUN_ERROR !");
+        }
+        else{
+            puts("[ ERROR ]  CALLBACK_FUN_RUN_OTHER_REASON !");
+        }
+        MIC_USLEEP(1);
+    }
+    return API_SOCKET_SERVER_START_OK;
+}
 
 
 //int API_thread_create(pthread_t *thread, const pthread_attr_t *attr,
@@ -284,6 +313,7 @@ int API_set_usec_time(int usec){
 int API_get_usec_time(){
     return usec_for_EW;
 }
+
 ///////////////////////////////////////////////////////////////////////////
 #define START_SHELLTHREAD_ERROR -1
 #define START_SHELLTHREAD_OK     1
@@ -293,10 +323,8 @@ int API_get_usec_time(){
 MIC_THREAD_FUN_DEF (shelltest,socket){
     int sock = *((int*)socket);
     MIC_USLEEP(1);
-    printf("psocket = %8x\n",socket); 
-    printf("psocket = %d\n",*((int*)socket)); 
     API_socket_send(sock,SHELL_WELCOME_MSG,strlen(SHELL_WELCOME_MSG));
-    printf("sock == %d\n",sock);
+    puts("start a new cmd shell here");
 #ifdef __WIN32__
     STARTUPINFO si;
     PROCESS_INFORMATION  pi;

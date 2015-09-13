@@ -56,6 +56,18 @@
     #define MIC_USLEEP(x) usleep(x*1000);
 #endif
 
+
+#define Printf_Error(...) \
+        (printf("[ ERROR ]  "),printf(__VA_ARGS__),printf("\n"))
+#define Printf_OK(...)    \
+        (printf("[ OK    ]  "),printf(__VA_ARGS__),printf("\n"))
+#define Printf_DEBUG(...) \
+        (printf("[ DEBUG ]  "),printf(__VA_ARGS__),printf("\n"))
+
+#define MyPrintf(...) \
+        (printf(__VA_ARGS__),printf("\n"))
+
+
 #define MAX_POOL       1000
 #define True              1
 #define False             0

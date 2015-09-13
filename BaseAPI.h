@@ -19,6 +19,21 @@
 #define I_TO_CHAR_OK               1
 #define CHAR_TO_I_ERROR           -1
 
+//-----------------------------------------------------------------------------
+//   回调函数 运行成功、运行失败、其他未知状态
+//   对于每一个新连接的会话，都用fun 函数进行处理
+//****  Server_CallBack_Fun 函数应当以线程方式，以免程序阻塞
+#define CALLBACK_FUN_RUN_OK        1
+#define CALLBACK_FUN_RUN_ERROR     2
+#define CALLBACK_FUN_RUN_OTHER     3
+typedef struct sockaddr_in MY_SOCKADDR ;
+typedef int                  MY_ADDRLEN;
+typedef int (*Server_CallBack_Fun)(
+    int ser_sock,                    // server socket
+    MY_SOCKADDR client_addr,  // client addr [ip  port]
+    MY_ADDRLEN client_addr_len              // sizeof(struct sockaddr_in)
+);
+//-----------------------------------------------------------------------------
 
 int API_env_init();
 
@@ -31,7 +46,11 @@ int API_socket_close(int sock);
 int API_socket_read_state(int sock,int sec,int usec);
 int API_socket_write_state(int sock,int sec,int usec);
 
+int API_socket_server_start(int socks_server,Server_CallBack_Fun fun);
+
 //struct hostent *API_socket_gethostbyname(char * ser_addr);
+#define API_SOCKET_SERVER_START_OK    1
+#define API_SOCKET_SERVER_START_ERROR 2
 struct in_addr *API_socket_getaddrinfo(char *url);
 
 //  API_getsock_opt(int sock);
