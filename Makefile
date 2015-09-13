@@ -1,7 +1,7 @@
 object_lib = baselib/BaseAPI.o sockslib/SocksBase.o \
 			 sockslib/Sock_Tunnel.o sockslib/ssocksd_pro.o \
 			 sockslib/rssocks_pro.o CMD_Protocol.o \
-			 lcxlib/Lcx_Base.o 
+			 lcxlib/Lcx_Base.o baselib/GlobalFunctions.o
 
 testlib   =  protocol/Node_Conn_Protocol.o \
           protocol/Protocol.o

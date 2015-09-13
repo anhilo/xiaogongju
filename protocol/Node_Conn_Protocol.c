@@ -23,14 +23,6 @@
     #define CONN_MESSAGE_N_I_GOT_IT         12 // node   -> server  我将开始管理工作，请配合。 
     #define CONN_MESSAGE_S_I_GOT_IT         13 // node   -> server  我将开始正常工作，请配合。 
 
-//=============================================================
-#define HAVE_ADMIN_NOW 1    // 管理员已经存在
-#define HAVE_NO_ADMIN  2    // 我没有管理员
-//----------------------------------------------------
-int CheckAdminFlag(){
-    return HAVE_ADMIN_NOW;  
-}
-//----------------------------------------------------
 
 //*********************************************************************************************************
 //=============================================================
@@ -86,7 +78,6 @@ int NodeConn_check_recv(char* CMDBUF ,int MESSAGE_CMD){
     conn_pro = CMDBUF[PROTOCOL_TYPE_OFFSET  ];
     cmd_msg  = CMDBUF[PROTOCOL_TYPE_OFFSET + CONN_MESSAGE_OFFSET  ];
     
-MyPrintf("%d -> %d ", CONN_MESSAGE_DATA_OFFSET, cmd_msg);
     if(conn_pro != NEW_NODE_CONN || cmd_msg != MESSAGE_CMD){
         return NODECONN_CHECK_RECV_ERROR;
     }
@@ -100,11 +91,12 @@ MyPrintf("%d -> %d ", CONN_MESSAGE_DATA_OFFSET, cmd_msg);
 int NodeConn_Nomal_ACK(int sock){
     // 普通的 被控节点，正常回复即可
     char CMD_BUF[PROTOCOL_MAX_LEN];
-    int haveAdmin = CheckAdminFlag();
+    int haveAdmin = GLOBAL_Admin_State();
     int sendSTATE;
     int nrecv,nsend;
-    if(haveAdmin == HAVE_ADMIN_NOW){
+    if(haveAdmin == GLOBAL_ADMIN_ONLINE){
             // 管理员在服务器这一方，所以正常告知新节点即可
+Printf_OK("ADMIN on server node");
         if( NODECONN_ACK_SEND_OK !=
          NodeConn_ACK_Send(sock,CONN_MESSAGE_S_I_HAVE_ADMIN)){
             return NODECONN_NORNAL_ACK_ERROR;
@@ -117,7 +109,7 @@ int NodeConn_Nomal_ACK(int sock){
             return NODECONN_NORNAL_ACK_OK;
         }
     }
-    else if(haveAdmin == HAVE_NO_ADMIN){
+    else if(haveAdmin == GLOBAL_ADMIN_OFFLINE){
             // 管理员不再服务器这一方，则需要询问是否在客户端那一方
         if( NODECONN_ACK_SEND_OK !=
          NodeConn_ACK_Send(sock,CONN_MESSAGE_S_NO_ADMIN)
@@ -126,27 +118,23 @@ int NodeConn_Nomal_ACK(int sock){
         }
 
         nrecv = NodeConn_Recv(sock,CMD_BUF,PROTOCOL_MAX_LEN);
-        if(nrecv != PROTOCOL_MAX_LEN ){
+
+        if(nrecv == PROTOCOL_MAX_LEN ){
             if(
-                NODECONN_CHECK_RECV_ERROR == 
+                NODECONN_CHECK_RECV_OK == 
                 NodeConn_check_recv(CMD_BUF,CONN_MESSAGE_N_I_HAVE_ADMIN)
             ){  // 管理员在客户端，需要开始认证合法性，并同步自身数据
     //HKOVERTIME------------------------------------------------------------------
     //----------------------------------------------------------------------------
                 Printf_OK("The Client have admin , I'll send my info there");
+                nsend = NodeConn_Send(sock,CONN_MESSAGE_S_I_GOT_IT,CMD_BUF,0);
             }
             else if( NODECONN_CHECK_RECV_OK == 
                 NodeConn_check_recv(CMD_BUF,CONN_MESSAGE_N_NO_ADMIN)
             ){
                 // 客户端也没有管理员，我们现在是孤立节点
                 nsend = NodeConn_Send(sock,CONN_MESSAGE_A_ALONE_CHECK,CMD_BUF,0);
-                nrecv = NodeConn_Recv(sock,CMD_BUF,PROTOCOL_MAX_LEN);
-                if(NODECONN_CHECK_RECV_OK == 
-                    NodeConn_check_recv(CMD_BUF,CONN_MESSAGE_A_ALONE_CHECK)
-                ){
-                    Printf_OK("No Admin  , all a lone");
-                    return  NODECONN_NODE_CONNECT_OK;
-                }
+                Printf_OK("No Admin  , all a lone");
             }
 
             return NODECONN_NORNAL_ACK_OK;
@@ -159,6 +147,7 @@ int NodeConn_Nomal_ACK(int sock){
 
 int NodeConn_Analysis_For_Server(int client_sock,char *CMD_MESSAGE,int CMD_LEN){
     int new_node_conn ,conn_message;
+    int ret_state;
     new_node_conn = CMD_MESSAGE[PROTOCOL_TYPE_OFFSET];  // 获取顶层协议值
     if(CMD_LEN != PROTOCOL_MAX_LEN || new_node_conn != NEW_NODE_CONN){
         Printf_Error("PROTOCOL_TYPE = %d \n",new_node_conn);
@@ -166,14 +155,15 @@ int NodeConn_Analysis_For_Server(int client_sock,char *CMD_MESSAGE,int CMD_LEN){
     }
     conn_message = CMD_MESSAGE[ PROTOCOL_TYPE_OFFSET + CONN_MESSAGE_OFFSET] ;
     switch(conn_message){
-        Printf_OK("here 1");
         case CONN_MESSAGE_N_CONNECT:
             // 节点向服务发起连接请求
-        Printf_OK("here 2");
-            NodeConn_Nomal_ACK(client_sock);
+            ret_state = NodeConn_Nomal_ACK(client_sock);
+            if(ret_state == NODECONN_NORNAL_ACK_OK){
+                return NODECONN_PROTOCOL_ANALYSIS_FOR_SERVER_OK;
+            }
+            return NODECONN_PROTOCOL_ANALYSIS_FOR_SERVER_ERROR;
             break;
         case CONN_MESSAGE_N_IM_ADMIN:
-        Printf_OK("here 3");
             // 我是管理员，你们要听我的
             break;
     }
@@ -189,26 +179,22 @@ int NodeConn_Node_Connect(char *URL,int port){
         return NODECONN_NODE_CONNECT_ERROR;
     }
 
-Printf_DEBUG("here 1");
     nsend =NodeConn_Send(sock,CONN_MESSAGE_N_CONNECT , buf,0);
     if(nsend != NODECONN_SEND_OK){
         return NODECONN_NODE_CONNECT_ERROR;
     }
 
-Printf_DEBUG("here 2");
     nrecv = NodeConn_Recv(sock,buf,PROTOCOL_MAX_LEN);
     if(nrecv != PROTOCOL_MAX_LEN){
         Printf_Error("nrecv error Node Connect");
         return NODECONN_NODE_CONNECT_ERROR;
     }
-Printf_DEBUG("here 3");
-Printf_DEBUG("here 3 -->%d ",buf[1]);
 
     if( NODECONN_CHECK_RECV_OK == 
         NodeConn_check_recv(buf,CONN_MESSAGE_S_I_HAVE_ADMIN)
     ){   // 管理员在服务器那头，我要去验证管理员的合法性并同步数据
     //HKOVERTIME------------------------------------------------------------------
-Printf_DEBUG("here 10000");
+Printf_DEBUG("Admin on Server node");
     //----------------------------------------------------------------------------
         nsend = NodeConn_ACK_Send(sock,CONN_MESSAGE_N_I_GOT_IT);
         if(nsend != NODECONN_SEND_OK){
@@ -217,13 +203,13 @@ Printf_DEBUG("here 10000");
         }
         return NODECONN_NODE_CONNECT_OK;
     }
-Printf_DEBUG("here 4");
     
     if( NODECONN_NODE_CONNECT_OK == 
         NodeConn_check_recv(buf,CONN_MESSAGE_S_NO_ADMIN)
     ){  // 管理员不在那一头，我要检查本地是否有管理员
-        if(HAVE_ADMIN_NOW == CheckAdminFlag()){
+        if(GLOBAL_ADMIN_ONLINE == GLOBAL_Admin_State()){
                 // 本地有管理员，我要告诉服务器我有管理员
+Printf_DEBUG("Admin on Client node");
             nsend = NodeConn_Send(sock,CONN_MESSAGE_N_I_HAVE_ADMIN,buf,0);
             nrecv = NodeConn_Recv(sock,buf,PROTOCOL_MAX_LEN);
             if(NODECONN_CHECK_RECV_OK == 
@@ -235,6 +221,7 @@ Printf_DEBUG("here 4");
         }
         else{
             // 本地也没有管理员，我们现在是孤立节点了
+Printf_DEBUG("No Admin ");
             nsend = NodeConn_Send(sock,CONN_MESSAGE_N_NO_ADMIN,buf,0);
             nrecv = NodeConn_Recv(sock,buf,PROTOCOL_MAX_LEN);
             if(NODECONN_CHECK_RECV_OK == 

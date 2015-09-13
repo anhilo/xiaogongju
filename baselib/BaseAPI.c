@@ -1,12 +1,32 @@
 #include "BaseAPI.h"
 
-#define MAX_SHELL_PATH 255
+#define MAX_SHELL_PATH      255
 #define SET_SHELL_PATH_ERROR -1
 #define UNKNOWN_SHELL_PATH   -2
 #define SET_SHELL_PATH_OK     1
 
 char SHELL_FILE_PATH[MAX_SHELL_PATH];
-int usec_for_EW = 100000;
+
+int Set_Shell_Path_Value();
+
+int API_env_init(){
+    GLOBAL_INIT_ENV();
+#ifdef WIN32
+    // 初始化套接字库 win32 下需要
+    WSADATA wsd;
+    if (WSAStartup(MAKEWORD(2,2), &wsd) != 0)
+    {
+        Printf_Error("WSAStartup failed!");
+        return ENV_INIT_FALSE;
+    }
+#else
+    signal(SIGPIPE, SIG_IGN);
+#endif
+    if (Set_Shell_Path_Value() == SET_SHELL_PATH_OK){
+        return ENV_INIT_OK;
+    }
+    return ENV_INIT_FALSE;
+}
 
 int Set_Shell_Path_Value(){
 #ifdef WIN32
@@ -31,24 +51,6 @@ int Set_Shell_Path_Value(){
     return SET_SHELL_PATH_ERROR;
 #endif
     return SET_SHELL_PATH_OK;
-}
-
-int API_env_init(){
-#ifdef WIN32
-    // 初始化套接字库 win32 下需要
-    WSADATA wsd;
-    if (WSAStartup(MAKEWORD(2,2), &wsd) != 0)
-    {
-        perror ("WSAStartup failed!");
-        return ENV_INIT_FALSE;
-    }
-#else
-    signal(SIGPIPE, SIG_IGN);
-#endif
-    if (Set_Shell_Path_Value() == SET_SHELL_PATH_OK){
-        return ENV_INIT_OK;
-    }
-    return ENV_INIT_FALSE;
 }
 
 #ifdef WIN32
@@ -95,11 +97,11 @@ int API_socket_connect(char *ser_addr,int port){
     client_addr.sin_port = htons(0); // any port
     int client_socket = socket(AF_INET,SOCK_STREAM,0);
     if( client_socket < 0){
-        printf("Create Socket Failed ! \n");
+        Printf_Error("Create Socket Failed ! \n");
         return SOCKET_CONNECT_ERROR;
     }
     if( bind(client_socket,(struct sockaddr*)&client_addr,sizeof(client_addr))){
-        printf("Client Bind Port Failed ! \n");
+        Printf_Error("Client Bind Port Failed ! \n");
         return SOCKET_CONNECT_ERROR;
     }
     memset(&server_addr,0,sizeof(server_addr));
@@ -109,14 +111,14 @@ int API_socket_connect(char *ser_addr,int port){
     server_addr.sin_addr = *(API_socket_getaddrinfo(ser_addr));
     if( server_addr.sin_addr.s_addr == 0 )
     {
-        printf("Server IP Address Error!\n");
+        Printf_Error("Server IP Address Error!\n");
         return SOCKET_CONNECT_ERROR;
     }
     server_addr.sin_port = htons(port);
     //向服务器发起连接,连接成功后client_socket代表了客户机和服务器的一个socket连接
     if(connect(client_socket,(struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
     {
-        printf("Can Not Connect To %s!\n", ser_addr );
+        Printf_Error("Can Not Connect To %s!\n", ser_addr );
         return SOCKET_CONNECT_ERROR;
     }
     //puts("got the client_socket");
@@ -136,7 +138,7 @@ int API_socket_init_server(int port,int maxlisten){
       
     if(SOCKET_ERROR == bind(locals, (struct sockaddr *)&s_sin, sizeof(s_sin)))
     {
-//           printf("bind wrong.");
+           Printf_Error("bind wrong.");
            return ;
     }
         
@@ -149,7 +151,7 @@ int API_socket_init_server(int port,int maxlisten){
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
     if (socket_desc == -1)
     {
-        printf("Error : Could not create socket [ port = %d ].\n",port);
+        Printf_Error("Could not create socket [ port = %d ].\n",port);
         return SOCKET_SERVER_INIT_ERROR;
     }
     //Prepare the sockaddr_in structure
@@ -160,7 +162,7 @@ int API_socket_init_server(int port,int maxlisten){
     if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
     {
         //print the error message
-        printf("Error : bind port %d .\n",port);
+        Printf_Error("bind port %d .\n",port);
         return SOCKET_SERVER_INIT_ERROR;
     }
     // puts("bind done");
@@ -241,9 +243,9 @@ int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
     int client_sock;
     int len_sockaddr;
     int fun_result;
-    puts("start socket server here");
+    MyPrintf("start socket server here");
     len_sockaddr = sizeof(struct sockaddr_in);
-    puts("start accept socket client here");
+    MyPrintf("start accept socket client here");
     while( (client_sock = accept(
                 socks_server,
                 (struct sockaddr *)&client_addr,
@@ -256,10 +258,10 @@ int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
      //       puts("[ OK    ]  CALLBACK_FUN_RUN_OK !");
         }
         else if(fun_result == CALLBACK_FUN_RUN_ERROR){
-            puts("[ ERROR ]  CALLBACK_FUN_RUN_ERROR !");
+            Printf_Error("CALLBACK_FUN_RUN_ERROR !");
         }
         else{
-            puts("[ ERROR ]  CALLBACK_FUN_RUN_OTHER_REASON !");
+            Printf_Error("CALLBACK_FUN_RUN_OTHER_REASON !");
         }
         MIC_USLEEP(1);
     }
@@ -306,12 +308,12 @@ int API_m_sleep(int usec){
 }
 
 int API_set_usec_time(int usec){
-    usec_for_EW = usec;
+    GLOBAL_set_usec_time(usec);
     return 1;
 }
     
 int API_get_usec_time(){
-    return usec_for_EW;
+    return GLOBAL_get_usec_time();
 }
 
 ///////////////////////////////////////////////////////////////////////////

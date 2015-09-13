@@ -23,12 +23,14 @@
 
 // my headers start from here
 #include "baselib/BaseAPI.h"
+#include "baselib/GlobalFunctions.h"
 #include "CMD_Protocol.h"
 #include "sockslib/SocksBase.h"
 #include "sockslib/Sock_Tunnel.h"
 #include "sockslib/ssocksd_pro.h"
 #include "lcxlib/Lcx_Base.h"
 #include "sockslib/rssocks_pro.h"
+#include "protocol/Protocol.h"
 // end my headers
 
 
