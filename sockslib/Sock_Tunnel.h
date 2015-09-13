@@ -1,7 +1,7 @@
 #ifndef _SockTunnel_H_
 #define _SockTunnel_H_
 
-#include "generic.h"
+#include "../generic.h"
 
 #define TUNNEL_INIT_OK                           1
 #define TUNNEL_INIT_FALSE                        0

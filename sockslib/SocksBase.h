@@ -1,7 +1,7 @@
 #ifndef _SOCKSBASE_H_
 #define _SOCKSBASE_H_
 
-#include "generic.h"
+#include "../generic.h"
 
 #define  SOCKS_BUILD_TARGET_SOCKET_ERROR   -1
 

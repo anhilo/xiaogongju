@@ -22,13 +22,13 @@
 #endif // head files check
 
 // my headers start from here
-#include "BaseAPI.h"
+#include "baselib/BaseAPI.h"
 #include "CMD_Protocol.h"
-#include "SocksBase.h"
-#include "Sock_Tunnel.h"
-#include "ssocksd_pro.h"
-#include "Lcx_Base.h"
-#include "rssocks_pro.h"
+#include "sockslib/SocksBase.h"
+#include "sockslib/Sock_Tunnel.h"
+#include "sockslib/ssocksd_pro.h"
+#include "lcxlib/Lcx_Base.h"
+#include "sockslib/rssocks_pro.h"
 // end my headers
 
 

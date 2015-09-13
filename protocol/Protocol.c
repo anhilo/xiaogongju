@@ -20,6 +20,7 @@ int Protocol_Analysis_For_Server(
             }
             break;
     }
+    return 1;
 }
 
 int PRO_start_server(int port,int max_num){
@@ -28,6 +29,7 @@ int PRO_start_server(int port,int max_num){
         ser_sock,
         Protocol_Analysis_For_Server
     );
+    return 1;
 }
 
 int PRO_socket_send(int sock,char *buffer,int buflen){

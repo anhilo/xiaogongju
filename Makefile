@@ -1,5 +1,7 @@
-object_lib = BaseAPI.o SocksBase.o Sock_Tunnel.o \
-          ssocksd_pro.o rssocks_pro.o CMD_Protocol.o Lcx_Base.o 
+object_lib = baselib/BaseAPI.o sockslib/SocksBase.o \
+			 sockslib/Sock_Tunnel.o sockslib/ssocksd_pro.o \
+			 sockslib/rssocks_pro.o CMD_Protocol.o \
+			 lcxlib/Lcx_Base.o 
 
 testlib   =  protocol/Node_Conn_Protocol.o \
           protocol/Protocol.o
@@ -18,11 +20,11 @@ EWhere : $(objects)
 	cc -o testmain  $(Test_obj)   $(object_lib) $(LINUX_LINK)
 	cc -o nserver  $(node_server)   $(object_lib) $(LINUX_LINK) $(testlib)
 	cc -o nclient  $(node_client)   $(object_lib) $(LINUX_LINK) $(testlib)
-	rm *.o
+	rm $(objects)
 forwin : $(objects)
 	cc -o EWhere    $(EWMain_obj) $(object_lib) $(WIN32_LINK)
 	cc -o testmain  $(Test_obj)   $(object_lib) $(WIN32_LINK)
-	rm *.o
+	rm $(objects)
 clean:
 	rm EWhere
 	rm testmain

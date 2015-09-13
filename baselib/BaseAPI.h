@@ -1,7 +1,7 @@
 #ifndef _BASEAPI_H_
 #define _BASEAPI_H_
 
-#include "generic.h"
+#include "../generic.h"
 
 
 #define ENV_INIT_OK                1
