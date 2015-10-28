@@ -1,34 +1,23 @@
-object_lib = baselib/BaseAPI.o sockslib/SocksBase.o \
-			 sockslib/Sock_Tunnel.o sockslib/ssocksd_pro.o \
-			 sockslib/rssocks_pro.o CMD_Protocol.o \
-			 lcxlib/Lcx_Base.o baselib/GlobalFunctions.o
+object_lib = baselib/BaseAPI.o baselib/GlobalFunctions.o \
+			baselib/ListNodeCTRL.o baselib/TreeNodeCTRL.o
 
-testlib   =  protocol/Node_Conn_Protocol.o \
-          protocol/Protocol.o
+AgentLib   =  AgentManager/PCNodeInfo.o \
+			AgentManager/PCNodeManager.o 
+          
 
-EWMain_obj = EWmain.o
-Test_obj   = testmain.o
+node_client = testmain.o
 node_server = nodeserver.o
-node_client = nodeclient.o
 
 LINUX_LINK = -lpthread
 WIN32_LINK = -lwsock32 -lws2_32
 
-objects = $(object_lib) $(EWMain_obj) $(Test_obj) $(node_server) $(node_client) $(testlib)
+clientobj = $(object_lib) $(AgentLib) $(node_client)
+serverobj = $(object_lib) $(AgentLib) $(node_server) 
+objects   = $(object_lib) $(AgentLib) $(node_client) $(node_server)
 EWhere : $(objects)
-	cc -o EWhere    $(EWMain_obj) $(object_lib) $(LINUX_LINK) 
-	cc -o testmain  $(Test_obj)   $(object_lib) $(LINUX_LINK)
-	cc -o nserver  $(node_server)   $(object_lib) $(LINUX_LINK) $(testlib)
-	cc -o nclient  $(node_client)   $(object_lib) $(LINUX_LINK) $(testlib)
-	rm $(objects)
-forwin : $(objects)
-	cc -o EWhere    $(EWMain_obj) $(object_lib) $(WIN32_LINK)
-	cc -o testmain  $(Test_obj)   $(object_lib) $(WIN32_LINK)
+	cc -o nserver  $(LINUX_LINK) $(serverobj)
+	cc -o nclient  $(LINUX_LINK) $(clientobj)
 	rm $(objects)
 clean:
-	rm EWhere
-	rm testmain
 	rm nserver
 	rm nclient
-	rm EWhere.exe
-	rm testmain.exe

@@ -21,16 +21,19 @@
 	#include<signal.h>
 #endif // head files check
 
+#ifndef _VALUE_TYPE_PNODEDATA_
+#define _VALUE_TYPE_PNODEDATA_
+typedef void *pNodeData; 
+typedef int (*pfunNodeCall)( pNodeData );
+typedef int (*pfunNodeFree)( pNodeData );
+typedef pNodeData  (*pfunNodeCopy)( pNodeData );
+#endif
+
 // my headers start from here
 #include "baselib/BaseAPI.h"
 #include "baselib/GlobalFunctions.h"
-#include "CMD_Protocol.h"
-#include "sockslib/SocksBase.h"
-#include "sockslib/Sock_Tunnel.h"
-#include "sockslib/ssocksd_pro.h"
-#include "lcxlib/Lcx_Base.h"
-#include "sockslib/rssocks_pro.h"
-#include "protocol/Protocol.h"
+#include "baselib/ListNodeCTRL.h"
+#include "baselib/TreeNodeCTRL.h"
 // end my headers
 
 
