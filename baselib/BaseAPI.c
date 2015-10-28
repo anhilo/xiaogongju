@@ -5,7 +5,13 @@
 #define UNKNOWN_SHELL_PATH   -2
 #define SET_SHELL_PATH_OK     1
 
+struct ValueForCallBack{
+    Server_CallBack_Fun fun;
+    int socket;
+};
+//**************************************************
 char SHELL_FILE_PATH[MAX_SHELL_PATH];
+//**************************************************
 
 int Set_Shell_Path_Value();
 
@@ -238,11 +244,23 @@ int API_socket_close(int sock){
     return 1;
 }
 
+MIC_THREAD_FUN_DEF(cbf_for_server_start,pvalue){
+    Server_CallBack_Fun m_fun = 
+        ((struct ValueForCallBack *)pvalue) -> fun;
+    int m_sock = 
+        ((struct ValueForCallBack *)pvalue) -> socket;
+    int res = m_fun(m_sock);
+    free(pvalue);
+    return NULL;
+}
+
 int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
     struct sockaddr_in client_addr;
     int client_sock;
     int len_sockaddr;
     int fun_result;
+    int sockbuf;
+    MIC_THREAD_HANDLE_ID thread_id;
     MyPrintf("start socket server here");
     len_sockaddr = sizeof(struct sockaddr_in);
     MyPrintf("start accept socket client here");
@@ -253,31 +271,24 @@ int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
                 ))>= 0 ){
         // 对于每一个新连接的会话，都用fun 函数进行处理
         /// fun 函数应当以线程方式进行处理，以免程序阻塞
-        fun_result = fun( client_sock , client_addr, len_sockaddr);
-        if(fun_result == CALLBACK_FUN_RUN_OK){
-     //       puts("[ OK    ]  CALLBACK_FUN_RUN_OK !");
+        struct ValueForCallBack * pvalue = 
+            (struct ValueForCallBack *)malloc(sizeof(struct ValueForCallBack));
+        if(pvalue == NULL) {
+            Printf_Error("server start error pvalue is NULL");
+            return API_SOCKET_SERVER_START_ERROR;
         }
-        else if(fun_result == CALLBACK_FUN_RUN_ERROR){
-            Printf_Error("CALLBACK_FUN_RUN_ERROR !");
+        pvalue -> fun = fun;
+        pvalue -> socket = client_sock;
+        if( MIC_THREAD_CREATE (thread_id, cbf_for_server_start , pvalue ) <0){
+            API_socket_close(sockbuf);
+            Printf_Error("server start error thread error");
+            return API_SOCKET_SERVER_START_ERROR;
         }
-        else{
-            Printf_Error("CALLBACK_FUN_RUN_OTHER_REASON !");
-        }
+        MIC_THREAD_JOIN(thread_id);
         MIC_USLEEP(1);
     }
     return API_SOCKET_SERVER_START_OK;
 }
-
-
-//int API_thread_create(pthread_t *thread, const pthread_attr_t *attr,
-//                          void *(*start_routine) (void *), void *arg){
-//    return pthread_create(thread,attr,start_routine,arg);
-//}
-//
-//int API_thread_detach(){
-//    return pthread_detach(pthread_self());
-//}
-
 
 int API_m_itochar(int a,char *b,int len){
     int i;
