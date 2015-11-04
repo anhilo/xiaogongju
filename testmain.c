@@ -1,15 +1,12 @@
 #include "generic.h"
-#include"AgentManager/AgentInteractive.c"
+//#include"AgentManager/AgentInteractive.h"
+#include "AgentManager/AgentCTRL.h"
 
 int main(){
-	int sock = AGENTINT_Connect_IAM_NEW_NODE("127.0.0.1",8888);
-	MyPrintf("The sock is %d",sock);
-	sock = AGENTINT_Connect_NEWTUNNEL_ASK("127.0.0.1",8888);
-	MyPrintf("The sock is %d",sock);
-	sock = AGENTINT_Connect_TUNNEL_ANSWER("127.0.0.1",8888);
-	MyPrintf("The sock is %d",sock);
-	sock = AGENTINT_Connect_BroadCastSock("127.0.0.1",8888);
-	MyPrintf("The sock is %d",sock);
+    AGENTCTRL_Init_Admin(
+        "The client Node",
+        1024);
+    AGENTCTRL_Connect("127.0.0.1",8888);
 	return 0;
 }
 //int main(){

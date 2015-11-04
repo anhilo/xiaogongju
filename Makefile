@@ -2,7 +2,9 @@ object_lib = baselib/BaseAPI.o baselib/GlobalFunctions.o \
 			baselib/ListNodeCTRL.o baselib/TreeNodeCTRL.o
 
 AgentLib   =  AgentManager/PCNodeInfo.o \
-			AgentManager/PCNodeManager.o 
+			AgentManager/PCNodeManager.o \
+			AgentManager/AgentCTRL.o \
+			AgentManager/AgentInteractive.o
           
 
 node_client = testmain.o

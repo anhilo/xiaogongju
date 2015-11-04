@@ -70,4 +70,8 @@ int PCMANAGER_GETNeighborNum();
 #define PCMANAGER_GETALLNODENUM_ERROR  -1
 int PCMANAGER_GETAllNodeNum();
 
+#define PCMANAGER_HAVANODE_NO           0
+#define PCMANAGER_HAVANODE_YES          1
+int PCMANAGER_HAVENode(int id);
+
 #endif

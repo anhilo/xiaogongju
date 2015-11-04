@@ -7,7 +7,7 @@ pPCNodeInfo PCNODE_Create(){
         -1,
         PC_OS_UNKNOW,
         "No Name Now",
-        NOTHING_TYPE_NOW,
+        UNKONWN_NODE,
         "no ip",
         -1,
         -1

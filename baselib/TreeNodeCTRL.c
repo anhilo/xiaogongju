@@ -271,3 +271,11 @@ int Tree_CleanUp(pTreeManager head){
     head->root = NULL;
     return TREE_CLEANUP_OK;
 }
+
+int Tree_HaveNode(pTreeManager head,int id){
+    TreeNode *p = GetNode(head,id);
+    if(p == NULL){
+        return 0;
+    }
+    return 1;
+}

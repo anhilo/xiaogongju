@@ -129,3 +129,11 @@ int ListNode_VisitNode(pLISTHEAD head,int id,pfunNodeCall callback){
     callback(p->node);
     return 1;
 }
+
+int ListNode_HaveNode(pLISTHEAD head, int id){
+    pLISTNODE p = GetLISTNODE(head,id);
+    if(p == NULL){
+        return 0;
+    }
+    return 1;
+}

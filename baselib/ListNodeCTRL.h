@@ -50,4 +50,7 @@ pNodeData ListNode_GetNodeData(pLISTHEAD head,int id);
 int ListNode_Traversal(pLISTHEAD head,pfunNodeCall callback);
 
 int ListNode_VisitNode(pLISTHEAD head,int id,pfunNodeCall callback);
+
+
+int ListNode_HaveNode(pLISTHEAD head, int id);
 #endif

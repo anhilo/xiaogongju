@@ -47,6 +47,7 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself){
 }
 
 int PCMANAGER_ADDNeighbor(pPCNodeInfo newnode){
+    
     int res = ListNode_InsertNode(
                 list,
                 newnode->id,
@@ -83,7 +84,7 @@ int PCMANAGER_ADDRemote(int fatherid,pPCNodeInfo newnode){
 int funcallback_ForSetUpper(pNodeData node){
     pPCNodeInfo info = (pPCNodeInfo)node;
     if(info == NULL){  return 0;}
-    if((info->conn).LinkType == NEIGHBOR_WITH_ADMIN){
+    if((info->conn).LinkType == UPSTREAM_NODE){
  //       PCNODE_Free(info);
         return 1;
     }
@@ -107,7 +108,7 @@ int PCMANAGER_SETUpperAdmin(int nodeid){
     if( node == NULL){
         return PCMANAGER_SETUPPER_ERROR;
     }
-    (node->conn) .LinkType = NEIGHBOR_WITH_ADMIN;
+    (node->conn) .LinkType = UPSTREAM_NODE;
     int res = ListNode_ReplaceNodeData(list,nodeid,node);
     if(res == LISTNODE_REPLACENODEDATA_ERROR){
         return PCMANAGER_SETUPPER_ERROR;
@@ -254,4 +255,13 @@ int PCMANAGER_GETNeighborNum(){
 
 int PCMANAGER_GETAllNodeNum(){
     return Tree_GetNodesNum(tree);
+}
+
+int PCMANAGER_HAVENode(int id){
+    if( ListNode_HaveNode(list,id)
+        || Tree_HaveNode(tree,id)){
+        return PCMANAGER_HAVANODE_YES;
+    }
+    return PCMANAGER_HAVANODE_NO;
+        
 }

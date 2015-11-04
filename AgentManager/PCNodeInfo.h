@@ -6,11 +6,15 @@
 #define MAX_PCNAME_LEN     50
 #define MAX_IP_ADDR_LEN    20
 
-#define NEIGHBOR_NODE       1
-#define REMOTION_NODE       2
-#define NEIGHBOR_WITH_ADMIN 3
-#define NEIGHBOR_IS_ADMIN   4
-#define NOTHING_TYPE_NOW    5
+// first conn send msg
+#define IAM_ADMIN_NODE      1
+#define MYSELF_NODE         2
+#define WITH_ADMIN_NODE     3
+// other conn msg
+#define UPSTREAM_NODE       4
+#define NEIGHBOR_NODE       5
+#define REMOTION_NODE       6
+#define UNKONWN_NODE        7
 typedef struct PCConnInfo{
     int LinkType;
     char IPaddr[MAX_IP_ADDR_LEN];

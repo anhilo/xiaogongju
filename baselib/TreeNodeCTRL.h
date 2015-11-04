@@ -64,4 +64,6 @@ int Tree_GetNodesNum(pTreeManager head);
 #define TREE_CLEANUP_ERROR  -1
 #define TREE_CLEANUP_OK      1
 int Tree_CleanUp(pTreeManager head);
+
+int Tree_HaveNode(pTreeManager head,int id);
 #endif

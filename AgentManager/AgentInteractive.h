@@ -31,11 +31,4 @@ int AGENTINT_Connect_NEWTUNNEL_ASK(char *url,int port);
 int AGENTINT_Connect_TUNNEL_ANSWER(char *url,int port);
 int AGENTINT_Connect_BroadCastSock(char *url,int port);
 
-// D. 新会话建立
-#define AGENTINT_BUILD_TUNNEL_ERROR   -1
-int AGENTINT_Build_Tunnel(char *url,int port,int targetid);
-#define AGENTINT_BUILD_TUNNEL_ERROR   -1
-int AGENTINT_Re_Build_Tunnel(int cmd_socket,int targetid);
-
-
 #endif
