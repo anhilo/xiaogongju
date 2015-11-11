@@ -37,6 +37,7 @@ int PCNODE_SETAllData(
         return PCNODE_SETALLDATA_ERROR;
     }
     node -> id = id;
+    node -> id = id;
     node -> OSType = OSType;
     strncpy( node-> PCName , PCName,(unsigned long) MAX_PCNAME_LEN );
     node -> conn.LinkType = LinkType;

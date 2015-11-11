@@ -4,6 +4,7 @@ object_lib = baselib/BaseAPI.o baselib/GlobalFunctions.o \
 AgentLib   =  AgentManager/PCNodeInfo.o \
 			AgentManager/PCNodeManager.o \
 			AgentManager/AgentCTRL.o \
+			AgentManager/AgentSock.o \
 			AgentManager/AgentInteractive.o
           
 

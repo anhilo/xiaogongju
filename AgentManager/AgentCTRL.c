@@ -1,7 +1,5 @@
 #include "AgentCTRL.h"
-#include "PCNodeManager.h"
-#include "PCNodeInfo.h"
-#include "AgentInteractive.h"
+#include "AgentSock.h"
 
 //***************************************
 pPCNodeInfo m_self;
@@ -40,61 +38,6 @@ int AGENTCTRL_Init_Node(char *pcname,int ostype){
     return AgentCTRL_Init(pcname,ostype,MYSELF_NODE);
 }
 
-#define DEFAULT_NODE_ID   255
-int agentCtrl_sendPCNode(int sock,pPCNodeInfo info){
-    char buffer[1000];
-    // send id
-    API_m_itochar  (info->id    ,buffer,4);
-    API_socket_send(sock        ,buffer,4);
-    // send pcname
-    API_socket_send(sock,info->PCName,MAX_PCNAME_LEN);
-    // send ostype
-    API_m_itochar  (info->OSType,buffer,4);
-    API_socket_send(sock        ,buffer,4);
-    // send nodetype
-    API_m_itochar  (info->conn.LinkType,buffer,4);
-    API_socket_send(sock               ,buffer,4);
-    return 1;
-}
-
-#define AGENTCTRL_RECVPCNODE_ERROR  NULL
-pPCNodeInfo agentCtrl_recvPCNode(int sock){
-    pPCNodeInfo info = PCNODE_Create();
-    char buf[MAX_PCNAME_LEN+MAX_IP_ADDR_LEN];
-    char pcname[MAX_PCNAME_LEN+1];
-    int  id,ostype,linktype;
-    if(info == NULL) return AGENTCTRL_RECVPCNODE_ERROR;
-    //recv id
-    API_socket_recv(sock,buf,4);
-    id = API_m_chartoi(buf,4);
-    MyPrintf("newnode id = %d.",id);
-    // recv name
-    API_socket_recv(sock,pcname,MAX_PCNAME_LEN);
-    MyPrintf("newnode name = %s.",pcname);
-    // recv ostype
-    API_socket_recv(sock,buf,4);
-    ostype = API_m_chartoi(buf,4);
-    MyPrintf("newnode OSType = %d.",ostype);
-    // recv nodetype
-    API_socket_recv(sock,buf,4);
-    linktype = API_m_chartoi(buf,4);
-    MyPrintf("newnode linktype = %d.",linktype);
-    
-    int res = PCNODE_SETAllData(
-        info,
-        id,
-        ostype,
-        pcname,
-        linktype,
-        "",
-        -1,
-        0);
-    if(res == PCNODE_SETALLDATA_ERROR){
-        return AGENTCTRL_RECVPCNODE_ERROR;
-    }
-    return info;
-}
-
 int Distribution_newID(int oldid){
     maxid = (maxid>oldid) ? (maxid) : (oldid);
     if( PCMANAGER_HAVENode(oldid)){
@@ -103,53 +46,47 @@ int Distribution_newID(int oldid){
     return maxid;
 }
 
-#define set_Your_id 1
-int resetHisID(int sock,int id){
-    char buffer[20];
-    buffer[0] = set_Your_id;
-    API_m_itochar(id,&buffer[1],4);
-    if(API_socket_send(sock,buffer,5)
-        == SOCKET_SEND_ERROR){
-        return 0;
-    }
-    return 1;
-}
-
-#define ASK_MY_ID_ERROR  1
-#define ASK_MY_ID_OK     2
-int askMyID(int sock){
-    char buffer[20];
+#define SET_MY_ID_ERROR  1
+#define SET_MY_ID_OK     2
+int SetMyID(int sock){
     int mid = 0;
     int mold_id = 0;
-    if(API_socket_recv(sock,buffer,5) 
-        == SOCKET_RECV_ERROR){
-        return ASK_MY_ID_ERROR;
+
+    mid = AgentInfo_RecvID(sock);
+    Printf_DEBUG("my id now is %d.",mid);
+    if(AGENTINFO_RECVID_ERROR == mid){
+        return SET_MY_ID_ERROR;
     }
-    if(buffer[0] == set_Your_id){
-        mid = API_m_chartoi(&buffer[1],4);
-        if(PCMANAGER_HAVENode(mid)
-            == PCMANAGER_HAVANODE_YES){
-            int idbuf = Distribution_newID(mid);
-            PCMANAGER_ReplaceID(mid,idbuf);
+    if(PCMANAGER_HAVENode(mid)
+        == PCMANAGER_HAVANODE_YES){
+        // if same id ,change that id
+        int idbuf = Distribution_newID(mid);
+        if(PCMANAGER_REPLACEID_ERROR == 
+            PCMANAGER_ReplaceID(mid,idbuf)){
+            return SET_MY_ID_ERROR;
         }
-        mold_id = m_self ->id;
-        PCMANAGER_ReplaceID(mold_id,mid);
-        return ASK_MY_ID_OK;
     }
-    return ASK_MY_ID_ERROR;
+    mold_id = m_self ->id;
+    if(PCMANAGER_REPLACEID_ERROR == 
+        PCMANAGER_ReplaceID(mold_id,mid)){
+        return SET_MY_ID_ERROR;
+    }
+    m_self->id = mid;
+    return SET_MY_ID_OK;
 }
 
 int node_conn(int sock,pPCNodeInfo newnode){
     int res = Distribution_newID(newnode->id);
     newnode->id = res;
-    resetHisID(sock,res);
+    AgentInfo_SetID(sock,res);
     return 1;
 }
 
 int cb_newnode(int sock){
     int res,mid;
-    pPCNodeInfo newnode = agentCtrl_recvPCNode(sock);
-    if(newnode == AGENTCTRL_RECVPCNODE_ERROR){
+    pPCNodeInfo newnode;
+    newnode = AgentInfo_Recv(sock);
+    if(newnode == AGENTINFO_RECV_ERROR){
         return 0;
     }
     switch(newnode->conn.LinkType){
@@ -159,26 +96,33 @@ int cb_newnode(int sock){
         node_conn(sock,newnode);
         res = PCMANAGER_ADDNeighbor(newnode);
         if(res == PCMANAGER_ADDNEIGHBOR_ERROR){
+            Printf_Error("ADD Neighbor Error");
             return 0;
         }
-        agentCtrl_sendPCNode(sock,m_self);
         break;
     case IAM_ADMIN_NODE:
         // add this node and set it upper
-        mid = askMyID(sock);
+        mid = SetMyID(sock);
         Printf_DEBUG("client is IAM_ADMIN_NODE");
         res = PCMANAGER_ADDNeighbor(newnode);
         if(res == PCMANAGER_ADDNEIGHBOR_ERROR){
+            Printf_Error("Add Admin Error");
             return 0;
         }
         res = PCMANAGER_SETUpperAdmin(newnode->id);
         if(res == PCMANAGER_SETUPPER_ERROR){
+            Printf_Error("Set Upper Error");
             return 0;
         }
         break;
     case UNKONWN_NODE:
         // do nothing Print Error
         Printf_Error("UNKNOWN NODE TYPE");
+        break;
+    }
+Printf_OK("the number agent = %d",PCMANAGER_GETNeighborNum());
+    if(AgentInfo_Send(sock,m_self)==0){
+        return 0;
     }
     return 1;
 }
@@ -221,20 +165,27 @@ int AGENTCTRL_Connect(char *url,int port){
     switch(m_self->conn.LinkType){
         case NEIGHBOR_NODE:
         case IAM_ADMIN_NODE:
+            Printf_DEBUG("ADMIN ");
             sock = AGENTINT_Connect_IAM_NEW_NODE(url,port);
-            agentCtrl_sendPCNode(sock,m_self);
+            if(AGENTINFO_SEND_ERROR 
+                == AgentInfo_Send(sock,m_self)){
+                return AGENTCTRL_CONNECT_ERROR;
+            }
             int hisid = Distribution_newID(maxid);
-            resetHisID(sock,hisid);
-            agentCtrl_sendPCNode(sock,serverinfo);
+            AgentInfo_SetID(sock,hisid);
+            serverinfo = AgentInfo_Recv(sock);
             break;
         case UNKONWN_NODE:
         case MYSELF_NODE:
             sock = AGENTINT_Connect_IAM_NEW_NODE(url,port);
-            agentCtrl_sendPCNode(sock,m_self);
-            int mid = askMyID(sock);
-            PCMANAGER_ReplaceID(m_self->id,mid);
-            m_self->id = mid;
-            serverinfo=agentCtrl_recvPCNode(sock);
+            if(AGENTINFO_SEND_ERROR == 
+                AgentInfo_Send(sock,m_self)){
+                return AGENTCTRL_CONNECT_ERROR;
+            }
+            int mid = SetMyID(sock);
+       //     PCMANAGER_ReplaceID(m_self->id,mid);
+       //     m_self->id = mid;
+            serverinfo =AgentInfo_Recv(sock);
             break;
         default:
             Printf_Error("Don't Know LinkType");
