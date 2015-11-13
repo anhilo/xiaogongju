@@ -18,8 +18,8 @@ clientobj = $(object_lib) $(AgentLib) $(node_client)
 serverobj = $(object_lib) $(AgentLib) $(node_server) 
 objects   = $(object_lib) $(AgentLib) $(node_client) $(node_server)
 EWhere : $(objects)
-	cc -o nserver  $(LINUX_LINK) $(serverobj)
-	cc -o nclient  $(LINUX_LINK) $(clientobj)
+	cc -o nserver $(serverobj) $(LINUX_LINK)
+	cc -o nclient $(clientobj) $(LINUX_LINK)
 	rm $(objects)
 clean:
 	rm nserver

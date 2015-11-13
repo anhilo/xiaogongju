@@ -97,6 +97,7 @@ int cb_newnode(int sock){
         res = PCMANAGER_ADDNeighbor(newnode);
         if(res == PCMANAGER_ADDNEIGHBOR_ERROR){
             Printf_Error("ADD Neighbor Error");
+AgentInfo_SendNTH(sock);
             return 0;
         }
         break;
@@ -107,11 +108,13 @@ int cb_newnode(int sock){
         res = PCMANAGER_ADDNeighbor(newnode);
         if(res == PCMANAGER_ADDNEIGHBOR_ERROR){
             Printf_Error("Add Admin Error");
+AgentInfo_SendNTH(sock);
             return 0;
         }
         res = PCMANAGER_SETUpperAdmin(newnode->id);
         if(res == PCMANAGER_SETUPPER_ERROR){
             Printf_Error("Set Upper Error");
+AgentInfo_SendNTH(sock);
             return 0;
         }
         break;
@@ -191,6 +194,7 @@ int AGENTCTRL_Connect(char *url,int port){
             Printf_Error("Don't Know LinkType");
             return AGENTCTRL_CONNECT_ERROR;
     }
+if(serverinfo != NULL)
     Printf_OK("Server node --> id  = %d , pcname = %s",
         serverinfo->id,serverinfo->PCName);
     return sock;

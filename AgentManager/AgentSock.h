@@ -20,4 +20,6 @@ int AgentInfo_SetID(int sock,int id);
 
 #define AGENTINFO_RECVID_ERROR -1
 int AgentInfo_RecvID(int sock);
+
+int AgentInfo_SendNTH(int sock);
 #endif
