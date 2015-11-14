@@ -265,3 +265,15 @@ int PCMANAGER_HAVENode(int id){
     return PCMANAGER_HAVANODE_NO;
         
 }
+
+int PCMANAGER_Traversal_Neighbor(pfunNodeCall callback){
+    int result = 0;
+    if(list == NULL || callback == NULL){
+        return PCMANAGER_TRAVERSAL_NEIGHBOR_ERROR;
+    }
+    result = ListNode_Traversal(list,callback);
+    if(result == LISTNODE_TRAVERSAL_ERROR){
+        return PCMANAGER_TRAVERSAL_NEIGHBOR_ERROR;
+    }
+    return PCMANAGER_TRAVERSAL_NEIGHBOR_OK;
+}

@@ -38,6 +38,132 @@ int AGENTCTRL_Init_Node(char *pcname,int ostype){
     return AgentCTRL_Init(pcname,ostype,MYSELF_NODE);
 }
 
+//*************************************
+#define CMD_PROTO_MAX_LEN        20
+#define CMD_LISTENER_RECV_ERROR   1
+#define CMD_LISTENER_RECV_OK      2
+#define CMD_LISTENER_NOTHING_READ 3
+int CMD_Listener(int sock,char *cmd_data){
+    char buffer[CMD_PROTO_MAX_LEN];
+    if(API_socket_read_state(sock) == SOCKET_CAN_READ_STATE){
+        if(SOCKET_RECV_ERROR == 
+            API_socket_recv(sock,cmd_data,CMD_PROTO_MAX_LEN)){
+            return CMD_LISTENER_RECV_ERROR;
+        }
+        else{
+            return CMD_LISTENER_RECV_OK;
+        }
+    }
+    return CMD_LISTENER_NOTHING_READ;
+}
+
+#define CMD_HEAD_SEND_MESSAGE   1
+#define CMD_HEAD_NEW_TUNNEL     2
+#define CMD_HEAD_BROADCAST      4
+typedef struct CMDINFO{
+    char cmd;      // 1 byte
+    int fromid;    // 4 byte
+    int toid;      // 4 byte
+    char datalen;  // 1 byte
+    char data[CMD_PROTO_MAX_LEN - 10];
+}CmdInfo,pCmdInfo;
+
+pCmdInfo parseCmdInfo(char *cmdbuf){
+    pCmdInfo cmdinfo= (pCmdInfo)malloc(sizeof(CmdInfo));
+    cmdinfo.cmd = cmdbuf[0];
+    cmdinfo.fromid = API_m_chartoi(&(cmdbuf[1]),4);
+    cmdinfo.toid   = API_m_chartoi(&(cmdbuf[5]),4);
+    cmdinfo.datalen= cmdbuf[9];
+    memcpy(cmdinfo.data,&(cmdbuf[10]),CMD_PROTO_MAX_LEN-10);
+    return cmdinfo;
+}
+
+int BuildCmdInfo(pCmdInfo cmd,char *cmdBuf){
+    char buffer[CMD_PROTO_MAX_LEN - 10];
+    if(cmdBuf == NULL) return 0;
+    cmdBuf[0] = cmd.cmd;
+    API_m_itochar(cmd.fromid,buffer,4);
+    memcpy(&(cmdBuf[1]),buffer,4);
+    API_m_itochar(cmd.toid,buffer,4);
+    memcpy(&(cmdBuf[5]),buffer,4);
+    cmdBuf[9] = cmd.datalen;
+    memcpy(&(cmdBuf[10]),cmd.data,CMD_PROTO_MAX_LEN-10);
+    return 1;
+}
+
+int SendMessage(int nextjump,pCmdInfo cmd){
+    pPCNodeInfo node = PCMANAGER_GETNodeInfo(nextjump);
+    int next_sock = node->conn.cmd_socket;
+    char cmdData[CMD_PROTO_MAX_LEN];
+    BuildCmdInfo(cmd,cmdData);
+    if( SOCKET_SEND_ERROR == 
+        API_socket_send(next_sock,cmdData,CMD_PROTO_MAX_LEN)){
+        return 0;
+    }
+    return 1;
+}
+
+int BuildTunnel(int nextjump){
+    pPCNodeInfo node = PCMANAGER_GETNextJump(nextjump);
+    if(node->conn.LinkType == 
+}
+
+#define Parse_and_Do_it_OK      1
+#define Parse_Error             2
+#define Parse_OK_But_Do_Error   3
+int parse_and_do_it(char *cmd_buf,pPCNodeInfo info){
+    pCmdInfo cmd = parseCmdInfo(cmd_buf);
+    switch(cmd.cmd){
+        case CMD_HEAD_SEND_MESSAGE:
+            int nextjump = PCMANAGER_GETNextJump(cmd.toinfo);
+            if(nextjump == PCMANAGER_GETNEXTJUMP_ERROR){
+                return Parse_OK_But_Do_Error;
+            }
+            SendMessage(nextjump,cmd);
+            break;
+        case CMD_HEAD_NEW_TUNNEL:
+            int nextjump = PCMANAGER_GETNextJump(cmd.toinfo);
+            if(nextjump == PCMANAGER_GETNEXTJUMP_ERROR){
+                return Parse_OK_But_Do_Error;
+            }
+//            int nextsock = BuildTunnel(nextjump,cmd_buf);
+Printf_DEBUG("Remember Add Code Here");
+            break;
+        case CMD_HEAD_BROADCAST:
+            break;
+        default:
+            Printf_Error("What???");
+            return Parse_Error;
+    }
+}
+
+int callBack_for_EachNode(pNodeData data){
+    char cmd_buf[CMD_PROTO_MAX_LEN];
+    pPCNodeInfo node = (pPCNodeInfo)data;
+    if(node->id == m_self ->id){
+        return 1;
+    }
+    else {
+        int read_state = 
+        CMD_Listener(node->conn.cmd_socket,cmd_buf);
+        if(read_state == CMD_LISTENER_NOTHING_READ){
+            return 1;
+        }
+        else if(read_state == CMD_LISTENER_RECV_ERROR){
+            return 1;
+        }
+        parse_and_do_it(cmd_data,node);
+    }
+}
+
+MIC_THREAD_FUN_DEF(travelList_and_setListener,novalue){
+    PCMANAGER_Traversal_Neighbor(
+}
+
+int Start_CMD_Lister(){
+    MIC_THREAD_HANDLE_ID handle;
+}
+//*************************************
 int Distribution_newID(int oldid){
     maxid = (maxid>oldid) ? (maxid) : (oldid);
     if( PCMANAGER_HAVENode(oldid)){

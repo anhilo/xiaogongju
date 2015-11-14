@@ -74,4 +74,7 @@ int PCMANAGER_GETAllNodeNum();
 #define PCMANAGER_HAVANODE_YES          1
 int PCMANAGER_HAVENode(int id);
 
+#define PCMANAGER_TRAVERSAL_NEIGHBOR_ERROR -1
+#define PCMANAGER_TRAVERSAL_NEIGHBOR_OK     1
+int PCMANAGER_Traversal_Neighbor(pfunNodeCall callback);
 #endif
