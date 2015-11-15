@@ -70,11 +70,20 @@ int PCMANAGER_GETNeighborNum();
 #define PCMANAGER_GETALLNODENUM_ERROR  -1
 int PCMANAGER_GETAllNodeNum();
 
+// 13. 查询是否存在相应ID
 #define PCMANAGER_HAVANODE_NO           0
 #define PCMANAGER_HAVANODE_YES          1
 int PCMANAGER_HAVENode(int id);
 
+// 14. 遍历所有临近节点，并将节点内容作为callback函数的参数
 #define PCMANAGER_TRAVERSAL_NEIGHBOR_ERROR -1
 #define PCMANAGER_TRAVERSAL_NEIGHBOR_OK     1
 int PCMANAGER_Traversal_Neighbor(pfunNodeCall callback);
+
+// 15. 分配一个未用过的id
+int PCMANAGER_Get_Fresh_ID();
+
+
+// 16. 获得跟节点信息
+pPCNodeInfo PCMANAGER_Get_RootNode();
 #endif

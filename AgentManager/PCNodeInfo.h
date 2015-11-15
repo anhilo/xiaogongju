@@ -16,7 +16,7 @@
 #define REMOTION_NODE       6
 #define UNKONWN_NODE        7
 typedef struct PCConnInfo{
-    int LinkType;
+    int ConnType;
     char IPaddr[MAX_IP_ADDR_LEN];
     int port;
     int cmd_socket;
@@ -31,6 +31,7 @@ typedef struct PCNodeData{
     int id;
     int OSType; // OS_Type // 
     char PCName[MAX_PCNAME_LEN];
+    int NodeType ;
     PCConn conn;
 }PCNodeInfo,*pPCNodeInfo;
 
@@ -44,7 +45,8 @@ int PCNODE_SETAllData(
     int id,
     int OSType,
     char *PCName,
-    int LinkType,
+    int NodeType,
+    int ConnType,
     char *ipaddr,
     int port,
     int cmd_socket

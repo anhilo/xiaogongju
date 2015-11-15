@@ -1,6 +1,6 @@
 #include "generic.h"
-#include"AgentManager/AgentInteractive.h"
-#include"AgentManager/AgentCTRL.h"
+#include"AgentManager/AgentConversationCTRL.h"
+//#include"AgentManager/AgentCTRL.h"
 
 //int fun_newnode(int sock){
 //    MyPrintf("new node here %d.",sock);
@@ -23,10 +23,8 @@
 //}
 
 int main(){
-    AGENTCTRL_Init_Node(
-        "The Server Node.",
-        1);
-    AGENTCTRL_StartServer(8888,200);                                  
+    AGENT_Conversation_Init(20,"This is Server Node",1);
+    AGENT_Conversation_Listen(8888,20);
     while(1){
         MIC_SLEEP(10000);
     }

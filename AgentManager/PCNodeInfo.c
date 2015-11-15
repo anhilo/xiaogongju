@@ -7,6 +7,7 @@ pPCNodeInfo PCNODE_Create(){
         -1,
         PC_OS_UNKNOW,
         "No Name Now",
+        -1,
         UNKONWN_NODE,
         "no ip",
         -1,
@@ -25,7 +26,8 @@ int PCNODE_SETAllData(
     int id,
     int OSType,
     char *PCName,
-    int LinkType,
+    int NodeType,
+    int ConnType,
     char *ipaddr,
     int port,
     int cmd_socket
@@ -40,7 +42,8 @@ int PCNODE_SETAllData(
     node -> id = id;
     node -> OSType = OSType;
     strncpy( node-> PCName , PCName,(unsigned long) MAX_PCNAME_LEN );
-    node -> conn.LinkType = LinkType;
+    node -> NodeType = NodeType;
+    node -> conn.ConnType = ConnType;
     strncpy( node-> conn.IPaddr, 
         ipaddr , (unsigned long)MAX_IP_ADDR_LEN);
     node -> conn.port = port;
@@ -65,7 +68,8 @@ pPCNodeInfo PCNODE_Copy(pPCNodeInfo node){
         node -> id,
         node -> OSType,
         node -> PCName,
-        node -> conn.LinkType,
+        node -> NodeType,
+        node -> conn.ConnType,
         node -> conn.IPaddr,
         node -> conn.port,
         node -> conn.cmd_socket

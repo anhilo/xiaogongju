@@ -18,6 +18,7 @@ int root_id = 0;
 int tree_now= NO_MANAGER;
 pPCNodeInfo rootnode;
 int fatherid = -1;
+int maxid = -1;
 //**********************************************
 int MANAGER_FREE(){
     if(list != NULL){ free(list) ;}
@@ -43,6 +44,7 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself){
 // remember add result check
     root_id = rootnode -> id;
     tree_now = NO_MANAGER;
+    maxid = rootnode->id;
     return PCMANAGER_INIT_OK;
 }
 
@@ -64,6 +66,7 @@ int PCMANAGER_ADDNeighbor(pPCNodeInfo newnode){
             return PCMANAGER_ADDNEIGHBOR_ERROR;
         }
     }
+    maxid = (maxid>newnode->id)?maxid:newnode->id;
     return PCMANAGER_ADDNEIGHBOR_OK;
 }
 
@@ -78,13 +81,14 @@ int PCMANAGER_ADDRemote(int fatherid,pPCNodeInfo newnode){
     if(res == TREE_INSERTNODE_ERROR){
         return PCMANAGER_ADDREMOTE_ERROR;
     }
+    maxid = (maxid>newnode->id)?maxid:newnode->id;
     return PCMANAGER_ADDREMOTE_OK;
 }
 
 int funcallback_ForSetUpper(pNodeData node){
     pPCNodeInfo info = (pPCNodeInfo)node;
     if(info == NULL){  return 0;}
-    if((info->conn).LinkType == UPSTREAM_NODE){
+    if(info->NodeType == UPSTREAM_NODE){
  //       PCNODE_Free(info);
         return 1;
     }
@@ -108,7 +112,7 @@ int PCMANAGER_SETUpperAdmin(int nodeid){
     if( node == NULL){
         return PCMANAGER_SETUPPER_ERROR;
     }
-    (node->conn) .LinkType = UPSTREAM_NODE;
+    node->NodeType = UPSTREAM_NODE;
     int res = ListNode_ReplaceNodeData(list,nodeid,node);
     if(res == LISTNODE_REPLACENODEDATA_ERROR){
         return PCMANAGER_SETUPPER_ERROR;
@@ -141,7 +145,7 @@ int funcallback_For_showMap(pNodeData node){
         info -> id,
         info -> OSType,
         info -> PCName,
-        (info ->conn).LinkType);
+        info ->NodeType);
     info = NULL;
     return 1;
 }
@@ -276,4 +280,21 @@ int PCMANAGER_Traversal_Neighbor(pfunNodeCall callback){
         return PCMANAGER_TRAVERSAL_NEIGHBOR_ERROR;
     }
     return PCMANAGER_TRAVERSAL_NEIGHBOR_OK;
+}
+
+int PCMANAGER_Get_Fresh_ID(){
+    while(
+        maxid >= 0
+        &&
+        PCMANAGER_HAVANODE_YES == 
+        PCMANAGER_HAVENode(maxid)
+    ){
+        maxid ++;
+    }
+    if(maxid >=0 ){return maxid;}
+    return -1;
+}
+
+pPCNodeInfo PCMANAGER_Get_RootNode(){
+    return  PCNODE_Copy(rootnode);
 }

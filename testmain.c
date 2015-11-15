@@ -1,12 +1,15 @@
 #include "generic.h"
 //#include"AgentManager/AgentInteractive.h"
-#include "AgentManager/AgentCTRL.h"
+//#include "AgentManager/AgentCTRL.h"
+#include "AgentManager/AgentConversationCTRL.h"
 
 int main(){
-    AGENTCTRL_Init_Admin(
-        "The client Node",
-        1024);
-    AGENTCTRL_Connect("127.0.0.1",8888);
+    AGENT_Conversation_Init(10,"This Client Node",20);
+    AGENT_Conversation_Connect("127.0.0.1",8888);
+//    AGENTCTRL_Init_Admin(
+//        "The client Node",
+//        1024);
+//    AGENTCTRL_Connect("127.0.0.1",8888);
 	return 0;
 }
 //int main(){
