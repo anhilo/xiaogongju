@@ -24,6 +24,7 @@
 //}
 
 int main(){
+    API_env_init();
     AGENT_Conversation_Init(20,"This is Server Node",MYSELF_NODE);
     AGENT_Conversation_Listen(8888,20);
     while(1){
