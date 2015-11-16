@@ -8,6 +8,7 @@
 #include "PCNodeManager.h"
 #include "PCNodeInfo.h"
 
+
 //====================================
 #define M_INFO_SEND_ERROR     -1
 #define M_INFO_SEND_OK         1
@@ -24,17 +25,88 @@ int m_sendID(int sock,int id);
 int m_recvID(int sock);
 //====================================
 
-int AgentConn_Interactive(int sock){
-    pPCNodeInfo info = PCMANAGER_Get_RootNode();
-    if(info == NULL){return AGENTCONN_INTERACTIVE_ERROR;}
-    if(M_INFO_SEND_ERROR == m_Info_send(sock,info)){
+int when_IAM_ADMIN(int sock){
+    pPCNodeInfo serverinfo;
+    int hisid = PCMANAGER_Get_Fresh_ID();
+    if(M_SENDID_ERROR != m_sendID(sock,hisid)){
+        serverinfo = m_agentInfo_Recv(sock);
+Printf_OK("111111");
+        if(serverinfo != M_INFO_RECV_ERROR){
+            if(PCMANAGER_ADDNEIGHBOR_ERROR!=
+              PCMANAGER_ADDNeighbor(serverinfo)){
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int when_IAM_NORMALNODE(int sock){
+    int myid = m_recvID(sock);
+    PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
+    pPCNodeInfo serverinfo = m_agentInfo_Recv(sock);
+    if(serverinfo->NodeType == MYSELF_NODE){
+        PCMANAGER_ADDNeighbor(serverinfo);
+    }
+}
+
+// be called By client
+int AgentInfo_Interactive(int sock){
+    pPCNodeInfo myself = PCMANAGER_Get_RootNode();
+    if(myself == NULL){return AGENTCONN_INTERACTIVE_ERROR;}
+    if(M_INFO_SEND_ERROR == m_Info_send(sock,myself)){
         return AGENTCONN_INTERACTIVE_ERROR;
     }
     /////// Add code From here
+Printf_DEBUG("22222 %d -> %d",myself->NodeType,MYSELF_NODE);
+//    m_Info_send(sock,myself);
+    switch(myself->NodeType ){
+    case  MYSELF_NODE:
+        when_IAM_NORMALNODE(sock);
+        break;
+    case IAM_ADMIN_NODE:
+        when_IAM_ADMIN(sock);
+        break;
+    default:
+        Printf_Error("NodeType is error");
+        break;
+    }
+Printf_DEBUG("myid now is %d",PCMANAGER_Get_RootID());
     return AGENTCONN_INTERACTIVE_OK;
 }
 
-int on_Agent_Connect(int sock);
+int on_Agent_Connect(int sock){
+    pPCNodeInfo clientinfo = m_agentInfo_Recv(sock);
+    if(clientinfo == NULL){return 0;}
+    // add clientnode 
+    int res = PCMANAGER_ADDNeighbor(clientinfo);
+    if(res == PCMANAGER_ADDNEIGHBOR_ERROR){
+        Printf_Error("11111Add Error");
+    }
+    pPCNodeInfo myself = PCMANAGER_Get_RootNode();
+    switch(clientinfo->NodeType){
+    case IAM_ADMIN_NODE:
+        Printf_OK("CLIENT is Admin");
+        int myid = m_recvID(sock);
+        // reset my id
+        PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
+        // set client is upper
+        PCMANAGER_SETUpperAdmin(clientinfo->id);
+        // send myself
+        m_Info_send(sock,myself);
+        break;
+    case MYSELF_NODE:
+        Printf_OK("Client is Myself_node");
+        int hisid = PCMANAGER_Get_Fresh_ID();
+        m_sendID(sock,hisid);
+        m_Info_send(sock,myself);
+        break;
+    default:
+        return 0;
+    }
+Printf_DEBUG("myid now is %d",PCMANAGER_Get_RootID());
+Printf_DEBUG("agent num %d",PCMANAGER_GETNeighborNum());
+}
 
 
 //******************************************************************

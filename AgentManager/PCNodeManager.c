@@ -49,7 +49,12 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself){
 }
 
 int PCMANAGER_ADDNeighbor(pPCNodeInfo newnode){
-    
+    if(PCMANAGER_HAVENode(newnode->id) 
+        == PCMANAGER_HAVANODE_YES){
+        int newid = PCMANAGER_Get_Fresh_ID();
+        PCMANAGER_ReplaceID(newnode->id ,newid);
+Printf_DEBUG("REPLACE OK");
+    }
     int res = ListNode_InsertNode(
                 list,
                 newnode->id,
@@ -217,6 +222,10 @@ int PCMANAGER_ReplaceID(int oldid,int newid){
         PCNODE_Free(node);
         node = NULL;
     }
+    maxid = (maxid>newid)?maxid:newid;
+    if(oldid == rootnode->id){
+        rootnode->id = newid;
+    }
     return PCMANAGER_REPLACEID_OK;
 }
 
@@ -291,10 +300,17 @@ int PCMANAGER_Get_Fresh_ID(){
     ){
         maxid ++;
     }
-    if(maxid >=0 ){return maxid;}
+    if(maxid >=0 ){
+//Printf_DEBUG("maxid is %d.",maxid);
+        return maxid;
+    }
     return -1;
 }
 
 pPCNodeInfo PCMANAGER_Get_RootNode(){
     return  PCNODE_Copy(rootnode);
+}
+
+int PCMANAGER_Get_RootID(){
+    return rootnode->id;
 }

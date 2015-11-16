@@ -86,4 +86,7 @@ int PCMANAGER_Get_Fresh_ID();
 
 // 16. 获得跟节点信息
 pPCNodeInfo PCMANAGER_Get_RootNode();
+
+// 17. 获得根节点ID
+int PCMANAGER_Get_RootID();
 #endif

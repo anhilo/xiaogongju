@@ -7,6 +7,7 @@
 #include "AgentConversationProxy.h"
 #include "PCNodeInfo.h"
 #include "PCNodeManager.h"
+#include "AgentConnHandle.h"
 //*******************************************************
 #define AGENTCMD_MAX_LEN  1
 //*******************************************************
@@ -40,6 +41,7 @@ int m_callBackForEachAccept(int socket){
     switch(cmdmsg[0]){
         case CMDMSG_NEW_NODE_CONNECT:
             Printf_OK("New Node Here");
+            on_Agent_Connect(socket);
             break;
         case CMDMSG_NEW_TUNNEL_ASK:
             Printf_OK("New Tunnel Ask");
@@ -81,6 +83,11 @@ int AGENT_ConversationProxy_Connect(char *ip,int port){
     if(res == SOCKET_SEND_ERROR){
         return AGENT_CONVERSATIONPROXY_CONNECT_ERROR;
     }
+    if( AGENTCONN_INTERACTIVE_OK 
+        !=  AgentInfo_Interactive(sock)){
+        return AGENT_CONVERSATIONPROXY_CONNECT_ERROR;
+    }
+Printf_OK("connect OK");
     return AGENT_CONVERSATIONPROXY_CONNECT_OK;
 }
 

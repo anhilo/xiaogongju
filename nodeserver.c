@@ -1,4 +1,5 @@
 #include "generic.h"
+#include "AgentManager/PCNodeInfo.h"
 #include"AgentManager/AgentConversationCTRL.h"
 //#include"AgentManager/AgentCTRL.h"
 
@@ -23,7 +24,7 @@
 //}
 
 int main(){
-    AGENT_Conversation_Init(20,"This is Server Node",1);
+    AGENT_Conversation_Init(20,"This is Server Node",MYSELF_NODE);
     AGENT_Conversation_Listen(8888,20);
     while(1){
         MIC_SLEEP(10000);
