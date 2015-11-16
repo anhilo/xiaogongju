@@ -19,6 +19,7 @@ WIN32_LINK = -lwsock32 -lws2_32
 
 out1 = nserver
 out2 = nclient
+winout = nserver.exe nclient.exe
 
 clientobj = $(object_lib) $(AgentLib) $(node_client)
 serverobj = $(object_lib) $(AgentLib) $(node_server) 
@@ -32,4 +33,4 @@ forwin: $(objects)
 	cc -o $(out2) $(clientobj) $(WIN32_LINK)
 	rm $(objects)
 clean:
-	rm $(objects) $(out1) $(out2)
+	rm $(objects) $(out1) $(out2) $(winout)

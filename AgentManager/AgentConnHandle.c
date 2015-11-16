@@ -30,7 +30,6 @@ int when_IAM_ADMIN(int sock){
     int hisid = PCMANAGER_Get_Fresh_ID();
     if(M_SENDID_ERROR != m_sendID(sock,hisid)){
         serverinfo = m_agentInfo_Recv(sock);
-Printf_OK("111111");
         if(serverinfo != M_INFO_RECV_ERROR){
             if(PCMANAGER_ADDNEIGHBOR_ERROR!=
               PCMANAGER_ADDNeighbor(serverinfo)){
@@ -48,6 +47,7 @@ int when_IAM_NORMALNODE(int sock){
     if(serverinfo->NodeType == MYSELF_NODE){
         PCMANAGER_ADDNeighbor(serverinfo);
     }
+    return 1;
 }
 
 // be called By client
@@ -58,7 +58,6 @@ int AgentInfo_Interactive(int sock){
         return AGENTCONN_INTERACTIVE_ERROR;
     }
     /////// Add code From here
-Printf_DEBUG("22222 %d -> %d",myself->NodeType,MYSELF_NODE);
 //    m_Info_send(sock,myself);
     switch(myself->NodeType ){
     case  MYSELF_NODE:
@@ -71,7 +70,6 @@ Printf_DEBUG("22222 %d -> %d",myself->NodeType,MYSELF_NODE);
         Printf_Error("NodeType is error");
         break;
     }
-Printf_DEBUG("myid now is %d",PCMANAGER_Get_RootID());
     return AGENTCONN_INTERACTIVE_OK;
 }
 
@@ -105,7 +103,6 @@ int on_Agent_Connect(int sock){
         return 0;
     }
 Printf_DEBUG("myid now is %d",PCMANAGER_Get_RootID());
-Printf_DEBUG("agent num %d",PCMANAGER_GETNeighborNum());
 }
 
 
