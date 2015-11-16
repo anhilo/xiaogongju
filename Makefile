@@ -5,7 +5,8 @@ AgentLib   =  AgentManager/PCNodeInfo.o \
 			AgentManager/PCNodeManager.o \
 			AgentManager/AgentConversationProxy.o \
 			AgentManager/AgentConversationCTRL.o \
-			AgentManager/AgentConnHandle.o
+			AgentManager/AgentConnHandle.o \
+			AgentManager/AgentCMDInfo.o
 			#AgentManager/AgentCTRL.o \
 			AgentManager/AgentSock.o \
 			AgentManager/AgentInteractive.o
