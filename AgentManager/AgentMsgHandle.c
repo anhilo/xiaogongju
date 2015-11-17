@@ -40,7 +40,7 @@ int SendUpper(int cmd,char *msg,int len){
         return SENDUPPER_ERROR;
     }
     if( SOCKET_SEND_ERROR == 
-        API_socket_send(father_sock,buffer,MAX_SYNCNODE_INFO_LEN)){
+        API_socket_send(father_sock,msg,MAX_SYNCNODE_INFO_LEN)){
         return SENDUPPER_ERROR;
     }
     return SENDUPPER_OK;
@@ -114,7 +114,7 @@ int SendUpperReplaceID(int oldid,int newid){
     char buffer[MAX_SYNCNODE_INFO_LEN];
     API_m_itochar(oldid,buffer,4);
     API_m_itochar(newid,&(buffer[4]),4);
-    return SendUpperInfo(CMD_ID_REPLACE 
+    return SendUpper(CMD_ID_REPLACE 
         ,buffer,MAX_SYNCNODE_INFO_LEN);
 }
 
@@ -136,7 +136,7 @@ int SendAgentInfo(int fatherid,int childid,int ostype,char *pcname){
     API_m_itochar(childid,&(buffer[4]),4);
     API_m_itochar(ostype,&(buffer[8]),4);
     memcpy(&(buffer[12]),pcname,MAX_PCNAME_LEN);
-    return SendUpperInfo(CMD_AGENT_SYNC_UPSTREAM 
+    return SendUpper(CMD_AGENT_SYNC_UPSTREAM 
         ,buffer,MAX_SYNCNODE_INFO_LEN);
 }
 
@@ -196,9 +196,9 @@ int on_UpStreamMsg_Arrive   (int sock){
 ////////////////////           DownStream Start from here            //////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 //****************************************
-#define MAX_DOWNSTREAM_CMD_LEN      2
+#define MAX_DOWNSTREAM_CMD_LEN      5
 // offset 1 消息类型，直达消息还是广播消息
-// offset 2 消息功能，修改ID还是广播节点信息
+// offset 2 当为定点消息时，这里为目标ID
 
 #define CMD_DOWN_DIRECT_POINT_MSG   1   // 直达消息
 #define CMD_DOWN_BROADCAST_MSG      2   // 广播类消息
@@ -210,73 +210,94 @@ int on_UpStreamMsg_Arrive   (int sock){
 #define SENDDOWN_OK        1
 #define SENDDOWN_ERROR     0
 
-int buflok = 0;  // if(lock) wait
-char cmdbuf[MAX_DOWNSTREAM_CMD_LEN];
-char msgbuf[MAX_SYNCNODE_INFO_LEN];
+int buflock = 0;  // if(lock) wait
+char cmdbuf_for_downbroadcast[MAX_DOWNSTREAM_CMD_LEN];
+char msgbuf_for_downbroadcast[MAX_SYNCNODE_INFO_LEN];
 
-int SendDownStream (int broadcasttype,int cmd,int targetid
+int m_for_each_downStreamNode(pNodeData info){
+    if(info == NULL) {return 0;}
+    if(((pPCNodeInfo)info) -> NodeType == UPSTREAM_NODE){
+        // is up stream node
+        return 1;
+    }
+    // is down stream
+    int nextsock = ((pPCNodeInfo)info) ->conn.cmd_socket;
+    if(nextsock != -1){
+        AGENT_ConversationProxy_SendDownStreamHead(nextsock);
+        API_socket_send(nextsock,cmdbuf_for_downbroadcast
+            ,MAX_DOWNSTREAM_CMD_LEN);
+        API_socket_send(nextsock,msgbuf_for_downbroadcast
+            ,MAX_SYNCNODE_INFO_LEN);
+    }
+    return 1;
+}
+
+int SendDownStream (int broadcasttype,int targetid
         ,char *msg,int msglen){
+    pPCNodeInfo info;
     while(buflock) MIC_USLEEP(300);
     buflock = 1;
-    cmdbuf[0] = broadcasttype;
-    cmdbuf[1] = cmd;
+    cmdbuf_for_downbroadcast[0] = broadcasttype;
+    API_m_itochar(targetid,&(cmdbuf_for_downbroadcast[1]),4);
     if(msglen > MAX_SYNCNODE_INFO_LEN) 
         return SENDUPPER_ERROR;
-    memcpy(msgbuf,msg,MAX_SYNCNODE_INFO_LEN);
-    switch(cmdbuf[0]){
-      case CMD_DOWN_DIRECT_POINT_MSG:   // 直达消息
-        pPCNodeInfo info = PCMANAGER_GETNextJump(targetid);
-        m_for_each_downStreamNode(info);
-        break;
-      case CMD_DOWN_BROADCAST_MSG:  // 广播类消息
-        PCMANAGER_Traversal_Neighbor(m_for_each_downStreamNode);
-        break;
+    memcpy(msgbuf_for_downbroadcast,msg,MAX_SYNCNODE_INFO_LEN);
+    switch(cmdbuf_for_downbroadcast[0]){
+        case CMD_DOWN_DIRECT_POINT_MSG :   // 直达消息:
+            info = PCMANAGER_GETNextJump(targetid);
+            m_for_each_downStreamNode(info);
+            break;
+        case CMD_DOWN_BROADCAST_MSG :  // 广播类消息
+            PCMANAGER_Traversal_Neighbor(m_for_each_downStreamNode);
+            break;
+        default:
+            Printf_Error("Send Down Stream Error");
+            break;
     }
     buflock = 0;
     return 0;
 }
 
-int m_for_each_downStreamNode(pPCNodeInfo info){
-    pPCNodeInfo info = PCMANAGER_GETNextJump(targetid);
-    if(info == NULL) {return 0;}
-    if(info -> NodeType == UPSTREAM_NODE){
-        // is up stream node
-        return 1;
+int m_analyze_and_Doit(char *msgbuf_1){
+    Printf_DEBUG("The recv MSG is %s",msgbuf_1);
+    return 1;
+}
+
+int on_recvDirectPoint_Msg(int sock,char *cmdbuf_1,char *msgbuf_1){
+    int targetid =API_m_chartoi(&(cmdbuf_1[1]),4);
+    if(targetid == PCMANAGER_Get_RootID()){
+        // 解析消息类型并处理
+        m_analyze_and_Doit(msgbuf_1);
     }
-    // is down stream
-    int nextsock = info->conn.cmd_socket;
-    if(nextsock != -1){
-        AGENT_ConversationProxy_SendDownStreamHead(nextsock);
-        API_socket_send(nextsock,cmdbuf,MAX_DOWNSTREAM_CMD_LEN);
-        API_socket_send(nextsock,msgbuf,MAX_SYNCNODE_INFO_LEN);
+    else{
+        // 继续向下层节点传递消息
+        SendDownStream(CMD_DOWN_DIRECT_POINT_MSG,targetid,msgbuf_1,
+            MAX_SYNCNODE_INFO_LEN);
     }
     return 1;
 }
 
-int on_recvDirectPoint_smg(int sock){
-    char msgbuf_1[MAX_SYNCNODE_INFO_LEN];
-    API_socket_recv(sock,msgbuf_1,MAX_SYNCNODE_INFO_LEN);
-    int targetid = API_m_chartoi(&(msgbuf_1[4]),4);
-    if(targetid == PCMANAGER_Get_RootID()){
-        Printf_OK("Down broadcast Msg arrived");
-    }
-    else{   // 继续传递消息
-        SendDownStream(
-    }
+int on_broadcast_Down_msg(int sock,char *cmdbuf_1,char *msgbuf_1){
+    // 解析这一消息
+    m_analyze_and_Doit(msgbuf_1);
+    // 继续向子节点方向传递
+    SendDownStream (CMD_DOWN_BROADCAST_MSG,0,
+        msgbuf_1,MAX_SYNCNODE_INFO_LEN);
     return 1;
 }
 
 int on_DownStreamMsg_Arrive (int sock){
-    char cmdmsg_1[MAX_DOWNSTREAM_CMD_LEN];
-    API_socket_recv(sock,cmdmsg_1,MAX_DOWNSTREAM_CMD_LEN);
-    switch(cmdmsg[0]){
+    char cmdbuf_1[MAX_DOWNSTREAM_CMD_LEN];
+    char msgbuf_1[MAX_SYNCNODE_INFO_LEN];
+    API_socket_recv(sock,cmdbuf_1,MAX_DOWNSTREAM_CMD_LEN);
+    API_socket_recv(sock,msgbuf_1,MAX_SYNCNODE_INFO_LEN);
+    switch(cmdbuf_1[0]){
         case CMD_DOWN_DIRECT_POINT_MSG:  // 直达消息
-            on_recvDirectMsg(sock);
+            on_recvDirectPoint_Msg(sock,cmdbuf_1,msgbuf_1);
             break;
         case CMD_DOWN_BROADCAST_MSG:     // 广播消息
-//            on_broadcast_Down_msg(sock);
+            on_broadcast_Down_msg(sock,cmdbuf_1,msgbuf_1);
             break;
     }
     return 1;
 }
-

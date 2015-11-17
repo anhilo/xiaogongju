@@ -26,6 +26,7 @@ out1 = nserver
 out2 = nclient
 testout = nodetest
 winout = nserver.exe nclient.exe nodetest.exe
+nuxout = $(out1) $(out2) $(testout)
 
 clientobj = $(object_lib) $(AgentLib) $(node_client)
 serverobj = $(object_lib) $(AgentLib) $(node_server) 
@@ -42,3 +43,4 @@ forwin: $(objects)
 	rm $(objects)
 clean:
 #	rm $(objects) $(out1) $(out2) $(winout)
+	rm $(winout) $(nuxout)

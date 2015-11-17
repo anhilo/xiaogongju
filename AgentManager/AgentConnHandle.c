@@ -26,19 +26,24 @@ int m_recvID(int sock);
 //====================================
 
 int m_AddNeighborProxy(pPCNodeInfo info){
+    int res = PCMANAGER_ADDNeighbor(info);
     if(PCMANAGER_ADDNEIGHBOR_ID_CLASH == 
-        PCMANAGER_ADDNeighbor(info)){
+        res ){
 // Replace ID and send Replace ID msg here
-        int newid = PCMANAGER_Get_Fresh_ID();
+        int newid = ASK_NEW_ID();
         // send Replace ID msg here
+
         // replace id local
         if(PCMANAGER_REPLACEID_ERROR == 
             PCMANAGER_ReplaceID(info->id,newid)){
             return 0;
         }
+        if(PCMANAGER_ADDNEIGHBOR_OK ==
+              PCMANAGER_ADDNeighbor(info)){
+            return 1;
+        }
     }
-    if(PCMANAGER_ADDNEIGHBOR_OK ==
-          PCMANAGER_ADDNeighbor(serverinfo)){
+    else if(PCMANAGER_ADDNEIGHBOR_OK == res ){
         return 1;
     }
     return 0;
@@ -106,9 +111,9 @@ Printf_DEBUG("the sock is -----> %d",sock);
     clientinfo -> conn.ConnType = CONNTYPE_REVERSE_CONNECT;
     if(clientinfo == NULL){return 0;}
     // add clientnode 
-    if(0 == m_AddNeighborProxy(serverinfo)){
+    if(0 == m_AddNeighborProxy(clientinfo)){
         Printf_Error("Add NeighborProxy Error");
-        reutrn 0;
+        return 0;
     }
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     switch(clientinfo->NodeType){

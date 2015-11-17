@@ -4,12 +4,13 @@
 #include "../generic.h"
 
 // Error return -1
+// 向本地或上游请求新ID
 int ASK_NEW_ID();
-int SendUpStream   (char *msg,int msglen);
-int SendDownStream (char *msg,int msglen);
+
+
 
 int on_UpStreamMsg_Arrive   (int sock);
-int on_DownStreamMsg_Arrive (char *msg,int msglen);
+int on_DownStreamMsg_Arrive (int sock);
 
 
 #endif
