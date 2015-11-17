@@ -109,13 +109,16 @@ pNodeData ListNode_GetNodeData(pLISTHEAD head,int id){
 }
 
 int ListNode_Traversal(pLISTHEAD head,pfunNodeCall callback){
+    if(head == NULL){ return 0; }
     pLISTNODE p = head->head;
     pNodeData node = NULL;
     int k;
-    for(k=0;k<head->nodenum;k++){
+    for(k=0;k<head->nodenum && p!=NULL;k++){
         node = head->fun_copy(p->node);
-        callback(node);
-        head->fun_free(node);
+        if(node != NULL){
+            callback(node);
+            head->fun_free(node);
+        }
         p = p->next_Node;
     }
     return 1;

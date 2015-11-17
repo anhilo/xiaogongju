@@ -51,9 +51,8 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself){
 int PCMANAGER_ADDNeighbor(pPCNodeInfo newnode){
     if(PCMANAGER_HAVENode(newnode->id) 
         == PCMANAGER_HAVANODE_YES){
-        int newid = PCMANAGER_Get_Fresh_ID();
-        PCMANAGER_ReplaceID(newnode->id ,newid);
-Printf_DEBUG("REPLACE OK");
+Printf_DEBUG("ID CLASH Here");
+        return PCMANAGER_ADDNEIGHBOR_ID_CLASH;
     }
     int res = ListNode_InsertNode(
                 list,
@@ -109,6 +108,7 @@ int funcallback_ForSetUpper(pNodeData node){
     return 1;
 }
 
+
 int PCMANAGER_SETUpperAdmin(int nodeid){
     if(tree_now == MANAGER_NOW)
          return PCMANAGER_SETUPPER_ERROR;
@@ -129,8 +129,8 @@ int PCMANAGER_SETUpperAdmin(int nodeid){
     }
     tree_now = MANAGER_NOW;
     fatherid = nodeid ;
-//    PCNODE_Free(node);
-//    node = NULL;
+    PCNODE_Free(node);
+    node = NULL;
     return PCMANAGER_SETUPPER_OK;
 }
 

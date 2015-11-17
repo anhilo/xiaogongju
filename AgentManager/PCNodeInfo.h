@@ -24,10 +24,9 @@ typedef struct PCConnInfo{
 // NodeType 
 #define IAM_ADMIN_NODE      1 // Neighbor
 #define MYSELF_NODE         2 // Neighbor
-#define WITH_ADMIN_NODE     3 // Neighbor
-#define UPSTREAM_NODE       4 // REMOTE_CHILD
-#define MYSELF_NODE_REMOTE  5 // REMOTE_CHILD
-#define UNKONWN_NODE        6 // UNKNOWN
+#define UPSTREAM_NODE       3 // REMOTE_CHILD
+#define MYSELF_NODE_REMOTE  4 // REMOTE_CHILD
+#define UNKONWN_NODE        5 // UNKNOWN
 typedef struct PCNodeData{
     int id;
     int OSType; // OS_Type // 

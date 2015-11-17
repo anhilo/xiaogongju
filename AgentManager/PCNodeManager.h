@@ -12,8 +12,9 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself);
 
 // 2. 添加临近节点
 //    向主机添加临近节点，如果已经更新了管理树，则向管理树添加临近节点
-#define PCMANAGER_ADDNEIGHBOR_ERROR  -1
-#define PCMANAGER_ADDNEIGHBOR_OK      1
+#define PCMANAGER_ADDNEIGHBOR_ERROR   -1
+#define PCMANAGER_ADDNEIGHBOR_OK       1
+#define PCMANAGER_ADDNEIGHBOR_ID_CLASH 2
 int PCMANAGER_ADDNeighbor(pPCNodeInfo newnode);
 
 // 3. 添加远端节点

@@ -25,6 +25,26 @@ int m_sendID(int sock,int id);
 int m_recvID(int sock);
 //====================================
 
+int m_AddNeighborProxy(pPCNodeInfo info){
+    if(PCMANAGER_ADDNEIGHBOR_ID_CLASH == 
+        PCMANAGER_ADDNeighbor(info)){
+// Replace ID and send Replace ID msg here
+        int newid = PCMANAGER_Get_Fresh_ID();
+        // send Replace ID msg here
+        // replace id local
+        if(PCMANAGER_REPLACEID_ERROR == 
+            PCMANAGER_ReplaceID(info->id,newid)){
+            return 0;
+        }
+    }
+    if(PCMANAGER_ADDNEIGHBOR_OK ==
+          PCMANAGER_ADDNeighbor(serverinfo)){
+        return 1;
+    }
+    return 0;
+}
+
+
 int when_IAM_ADMIN(int sock,char *ip,int port){
     pPCNodeInfo serverinfo;
     int hisid = PCMANAGER_Get_Fresh_ID();
@@ -34,8 +54,7 @@ int when_IAM_ADMIN(int sock,char *ip,int port){
             serverinfo->conn.ConnType = CONNTYPE_DIRECT_CONNECT;
             memcpy(serverinfo->conn.IPaddr,ip,MAX_IP_ADDR_LEN);
             serverinfo->conn.port = port;
-            if(PCMANAGER_ADDNEIGHBOR_ERROR!=
-              PCMANAGER_ADDNeighbor(serverinfo)){
+            if(1 == m_AddNeighborProxy(serverinfo)){
                 return 1;
             }
         }
@@ -51,7 +70,9 @@ int when_IAM_NORMALNODE(int sock,char *ip,int port){
         serverinfo->conn.ConnType = CONNTYPE_DIRECT_CONNECT;
         memcpy(serverinfo->conn.IPaddr,ip,MAX_IP_ADDR_LEN);
         serverinfo->conn.port = port;
-        PCMANAGER_ADDNeighbor(serverinfo);
+        if(1 == m_AddNeighborProxy(serverinfo)){
+            return 1;
+        }
     }
     return 1;
 }
@@ -85,9 +106,9 @@ Printf_DEBUG("the sock is -----> %d",sock);
     clientinfo -> conn.ConnType = CONNTYPE_REVERSE_CONNECT;
     if(clientinfo == NULL){return 0;}
     // add clientnode 
-    int res = PCMANAGER_ADDNeighbor(clientinfo);
-    if(res == PCMANAGER_ADDNEIGHBOR_ERROR){
-        Printf_Error("11111Add Error");
+    if(0 == m_AddNeighborProxy(serverinfo)){
+        Printf_Error("Add NeighborProxy Error");
+        reutrn 0;
     }
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     switch(clientinfo->NodeType){

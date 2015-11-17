@@ -1,40 +1,44 @@
-object_lib = baselib/BaseAPI.o baselib/GlobalFunctions.o \
-			baselib/ListNodeCTRL.o baselib/TreeNodeCTRL.o \
-			sockslib/Sock_Tunnel.o
+object_lib = baselib/BaseAPI.c baselib/GlobalFunctions.c \
+			baselib/ListNodeCTRL.c baselib/TreeNodeCTRL.c \
+			sockslib/Sock_Tunnel.c
 
-AgentLib   =  AgentManager/PCNodeInfo.o \
-			AgentManager/PCNodeManager.o \
-			AgentManager/AgentConversationProxy.o \
-			AgentManager/AgentConversationCTRL.o \
-			AgentManager/AgentConnHandle.o \
-			AgentManager/AgentTunnelHandle.o \
-			AgentManager/AgentMsgHandle.o \
-			AgentManager/AgentCMDInfo.o
-			#AgentManager/AgentCTRL.o \
-			AgentManager/AgentSock.o \
-			AgentManager/AgentInteractive.o
+AgentLib   =  AgentManager/PCNodeInfo.c \
+			AgentManager/PCNodeManager.c \
+			AgentManager/AgentConversationProxy.c \
+			AgentManager/AgentConversationCTRL.c \
+			AgentManager/AgentConnHandle.c \
+			AgentManager/AgentTunnelHandle.c \
+			AgentManager/AgentMsgHandle.c \
+			AgentManager/AgentCMDInfo.c
+			#AgentManager/AgentCTRL.c \
+			AgentManager/AgentSock.c \
+			AgentManager/AgentInteractive.c
           
 
-node_client = testmain.o
-node_server = nodeserver.o
+node_client = nodeclient.c
+node_server = nodeserver.c
+node_test   = testmain.c
 
-LINUX_LINK = -lpthread
+LINUX_LINK = -g -lpthread 
 WIN32_LINK = -lwsock32 -lws2_32
 
 out1 = nserver
 out2 = nclient
-winout = nserver.exe nclient.exe
+testout = nodetest
+winout = nserver.exe nclient.exe nodetest.exe
 
 clientobj = $(object_lib) $(AgentLib) $(node_client)
 serverobj = $(object_lib) $(AgentLib) $(node_server) 
-objects   = $(object_lib) $(AgentLib) $(node_client) $(node_server)
+testobj = $(object_lib) $(AgentLib) $(node_test) 
+objects   = $(object_lib) $(AgentLib) $(node_client) $(node_server) $(node_test)
 EWhere : $(objects)
 	cc -o $(out1) $(serverobj) $(LINUX_LINK)
 	cc -o $(out2) $(clientobj) $(LINUX_LINK)
-	rm $(objects)
+	cc -o $(testout) $(testobj) $(LINUX_LINK)
+#	rm $(objects)
 forwin: $(objects)
 	cc -o $(out1) $(serverobj) $(WIN32_LINK)
 	cc -o $(out2) $(clientobj) $(WIN32_LINK)
 	rm $(objects)
 clean:
-	rm $(objects) $(out1) $(out2) $(winout)
+#	rm $(objects) $(out1) $(out2) $(winout)

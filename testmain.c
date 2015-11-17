@@ -5,117 +5,124 @@
 #include "AgentManager/AgentConversationCTRL.h"
 #include "AgentManager/PCNodeManager.h"
 
-int main(){
-    API_env_init();
-    AGENT_Conversation_Init(10,"This Client Node",MYSELF_NODE);
-    AGENT_Conversation_Connect("127.0.0.1",8888);
-
-
-Printf_OK("******Chile here id now is %d",PCMANAGER_Get_RootID());
-
-
-while(1){
-    MIC_SLEEP(10000);
-}
+//int main(){
+//    API_env_init();
+//    AGENT_Conversation_Init(10,"This Client Node",MYSELF_NODE);
+//    AGENT_Conversation_Connect("127.0.0.1",8888);
+//
+//
+//Printf_OK("******Chile here id now is %d",PCMANAGER_Get_RootID());
+//
+//
+//while(1){
+//    MIC_SLEEP(10000);
+//}
 //    AGENTCTRL_Init_Admin(
 //        "The client Node",
 //        1024);
 //    AGENTCTRL_Connect("127.0.0.1",8888);
-	return 0;
-}
-//int main(){
-//    printf("justtest\n");
-//// set rootnode
-//    pPCNodeInfo rootnode = PCNODE_Create();
-//    PCNODE_SETAllData(rootnode,
-//        0,
-//        PC_OS_LINUX,
-//        "This is a linux OS,rootnode",
-//        NEIGHBOR_NODE,
-//        "127.0.0.1",
-//        -1,
-//        -1);
-//    PCMANAGER_INIT(rootnode);
-//// add neighbor node
-//    pPCNodeInfo nei_node1 = PCNODE_Create();
-//    PCNODE_SETAllData(nei_node1,
-//        1,
-//        PC_OS_WINDOW,
-//        "Windows,Neighbor node1",
-//        NEIGHBOR_NODE,
-//        "192.168.1.1",
-//        8888,
-//        -1);
-//    PCMANAGER_ADDNeighbor(nei_node1);
-//
-//    pPCNodeInfo nei_node2 = PCNODE_Create();
-//    PCNODE_SETAllData(nei_node2,
-//        2,
-//        PC_OS_MACOSX,
-//        "MACOS,Neighbor node2",
-//        NEIGHBOR_NODE,
-//        "192.168.1.1",
-//        8888,
-//        -1);
-//    PCMANAGER_ADDNeighbor(nei_node2);
-//
-//    pPCNodeInfo nei_node3 = PCNODE_Create();
-//    PCNODE_SETAllData(nei_node3,
-//        3,
-//        PC_OS_ARMLINUX,
-//        "ARMLinux,Neighbor node3",
-//        NEIGHBOR_NODE,
-//        "192.168.1.1",
-//        8888,
-//        -1);
-//    PCMANAGER_ADDNeighbor(nei_node3);
-//
-//    pPCNodeInfo nei_node4 = PCNODE_Create();
-//    PCNODE_SETAllData(nei_node4,
-//        4,
-//        PC_OS_LINUX,
-//        "Linux,Neighbor node4",
-//        NEIGHBOR_NODE,
-//        "192.168.1.1",
-//        8888,
-//        -1);
-//    PCMANAGER_ADDNeighbor(nei_node4);
-//
-//    PCMANAGER_SETUpperAdmin(2);
-//// add remote node
-//    pPCNodeInfo nei_node5 = PCNODE_Create();
-//    PCNODE_SETAllData(nei_node5,
-//        5,
-//        PC_OS_LINUX,
-//        "Linux,Neighbor node5",
-//        NEIGHBOR_NODE,
-//        "192.168.1.1",
-//        8888,
-//        -1);
-//    PCMANAGER_ADDRemote(3,nei_node5);
-//    
-//    pPCNodeInfo nei_node6 = PCNODE_Create();
-//    PCNODE_SETAllData(nei_node6,
-//        6,
-//        PC_OS_LINUX,
-//        "Linux,Neighbor node6",
-//        NEIGHBOR_NODE,
-//        "192.168.1.1",
-//        8888,
-//        -1);
-//    PCMANAGER_ADDRemote(3,nei_node6);
-//// set upper admin
-//    PCMANAGER_ShowMap();
-//printf("\n===============================\n");
-////    PCMANAGER_ReplaceID(3,10);
-//    
-//    PCMANAGER_RemoveNode(3);
-//    PCMANAGER_ShowMap();
-////    PCMANAGER_UpperAdminLost();
-////printf("=====lost \n");
-////    PCMANAGER_ShowMap();
-////    PCMANAGER_SETUpperAdmin(2);
+//	return 0;
 //}
+int main(){
+    printf("justtest\n");
+// set rootnode
+    pPCNodeInfo rootnode = PCNODE_Create();
+    PCNODE_SETAllData(rootnode,
+        0,
+        PC_OS_LINUX,
+        "This is a linux OS,rootnode",
+        MYSELF_NODE,
+        CONNTYPE_DIRECT_CONNECT,
+        "127.0.0.1",
+        -1,
+        -1);
+    PCMANAGER_INIT(rootnode);
+// add neighbor node
+    pPCNodeInfo nei_node1 = PCNODE_Create();
+    PCNODE_SETAllData(nei_node1,
+        1,
+        PC_OS_WINDOW,
+        "Windows,Neighbor node1",
+        MYSELF_NODE,
+        CONNTYPE_DIRECT_CONNECT,
+        "192.168.1.1",
+        8888,
+        -1);
+    PCMANAGER_ADDNeighbor(nei_node1);
+
+    pPCNodeInfo nei_node2 = PCNODE_Create();
+    PCNODE_SETAllData(nei_node2,
+        2,
+        PC_OS_MACOSX,
+        "MACOS,Neighbor node2",
+        MYSELF_NODE,
+        CONNTYPE_DIRECT_CONNECT,
+        "192.168.1.1",
+        8888,
+        -1);
+    PCMANAGER_ADDNeighbor(nei_node2);
+
+    pPCNodeInfo nei_node3 = PCNODE_Create();
+    PCNODE_SETAllData(nei_node3,
+        3,
+        PC_OS_ARMLINUX,
+        "ARMLinux,Neighbor node3",
+        MYSELF_NODE,
+        CONNTYPE_DIRECT_CONNECT,
+        "192.168.1.1",
+        8888,
+        -1);
+    PCMANAGER_ADDNeighbor(nei_node3);
+
+    pPCNodeInfo nei_node4 = PCNODE_Create();
+    PCNODE_SETAllData(nei_node4,
+        4,
+        PC_OS_LINUX,
+        "Linux,Neighbor node4",
+        MYSELF_NODE,
+        CONNTYPE_DIRECT_CONNECT,
+        "192.168.1.1",
+        8888,
+        -1);
+    PCMANAGER_ADDNeighbor(nei_node4);
+
+    PCMANAGER_SETUpperAdmin(2);
+// add remote node
+    pPCNodeInfo nei_node5 = PCNODE_Create();
+    PCNODE_SETAllData(nei_node5,
+        5,
+        PC_OS_LINUX,
+        "Linux,Neighbor node5",
+        MYSELF_NODE,
+        CONNTYPE_DIRECT_CONNECT,
+        "192.168.1.1",
+        8888,
+        -1);
+    PCMANAGER_ADDRemote(3,nei_node5);
+    
+    pPCNodeInfo nei_node6 = PCNODE_Create();
+    PCNODE_SETAllData(nei_node6,
+        6,
+        PC_OS_LINUX,
+        "Linux,Neighbor node6",
+        MYSELF_NODE,
+        CONNTYPE_DIRECT_CONNECT,
+        "192.168.1.1",
+        8888,
+        -1);
+    PCMANAGER_ADDRemote(3,nei_node6);
+// set upper admin
+    PCMANAGER_ShowMap();
+printf("\n===============================\n");
+//    PCMANAGER_ReplaceID(3,10);
+    
+    PCMANAGER_RemoveNode(3);
+    PCMANAGER_ShowMap();
+//    PCMANAGER_UpperAdminLost();
+//printf("=====lost \n");
+//    PCMANAGER_ShowMap();
+//    PCMANAGER_SETUpperAdmin(2);
+}
 
 
 //typedef struct testData{
