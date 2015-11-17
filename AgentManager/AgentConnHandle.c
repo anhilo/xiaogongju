@@ -25,12 +25,15 @@ int m_sendID(int sock,int id);
 int m_recvID(int sock);
 //====================================
 
-int when_IAM_ADMIN(int sock){
+int when_IAM_ADMIN(int sock,char *ip,int port){
     pPCNodeInfo serverinfo;
     int hisid = PCMANAGER_Get_Fresh_ID();
     if(M_SENDID_ERROR != m_sendID(sock,hisid)){
         serverinfo = m_agentInfo_Recv(sock);
         if(serverinfo != M_INFO_RECV_ERROR){
+            serverinfo->conn.ConnType = CONNTYPE_DIRECT_CONNECT;
+            memcpy(serverinfo->conn.IPaddr,ip,MAX_IP_ADDR_LEN);
+            serverinfo->conn.port = port;
             if(PCMANAGER_ADDNEIGHBOR_ERROR!=
               PCMANAGER_ADDNeighbor(serverinfo)){
                 return 1;
@@ -40,18 +43,21 @@ int when_IAM_ADMIN(int sock){
     return 0;
 }
 
-int when_IAM_NORMALNODE(int sock){
+int when_IAM_NORMALNODE(int sock,char *ip,int port){
     int myid = m_recvID(sock);
     PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
     pPCNodeInfo serverinfo = m_agentInfo_Recv(sock);
     if(serverinfo->NodeType == MYSELF_NODE){
+        serverinfo->conn.ConnType = CONNTYPE_DIRECT_CONNECT;
+        memcpy(serverinfo->conn.IPaddr,ip,MAX_IP_ADDR_LEN);
+        serverinfo->conn.port = port;
         PCMANAGER_ADDNeighbor(serverinfo);
     }
     return 1;
 }
 
 // be called By client
-int AgentInfo_Interactive(int sock){
+int AgentInfo_Interactive(int sock,char *ip,int port){
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     if(myself == NULL){return AGENTCONN_INTERACTIVE_ERROR;}
     if(M_INFO_SEND_ERROR == m_Info_send(sock,myself)){
@@ -61,10 +67,10 @@ int AgentInfo_Interactive(int sock){
 //    m_Info_send(sock,myself);
     switch(myself->NodeType ){
     case  MYSELF_NODE:
-        when_IAM_NORMALNODE(sock);
+        when_IAM_NORMALNODE(sock,ip,port);
         break;
     case IAM_ADMIN_NODE:
-        when_IAM_ADMIN(sock);
+        when_IAM_ADMIN(sock,ip,port);
         break;
     default:
         Printf_Error("NodeType is error");
@@ -75,6 +81,8 @@ int AgentInfo_Interactive(int sock){
 
 int on_Agent_Connect(int sock){
     pPCNodeInfo clientinfo = m_agentInfo_Recv(sock);
+Printf_DEBUG("the sock is -----> %d",sock);
+    clientinfo -> conn.ConnType = CONNTYPE_REVERSE_CONNECT;
     if(clientinfo == NULL){return 0;}
     // add clientnode 
     int res = PCMANAGER_ADDNeighbor(clientinfo);
@@ -265,15 +273,15 @@ pPCNodeInfo m_agentInfo_Recv(int sock){
             mostype   = API_m_chartoi(ostype,4);
             mlinktype = API_m_chartoi(linktype,4);
             int res = PCNODE_SETAllData(
-                info,
-                mid,
-                mostype,
-                pcname,
-                mlinktype,
-                -1,
-                "",
-                -1,
-                0);
+                info,       // node
+                mid,        // id
+                mostype,    // OSType
+                pcname,     // pcname
+                mlinktype,  // NodeType
+                -1,         // conntype
+                "",         // ip
+                -1,         // port
+                sock);      // cmd_sock
             if(res == PCNODE_SETALLDATA_ERROR){
                 result =  BUF_ERROR;
             }

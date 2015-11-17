@@ -37,6 +37,11 @@ int tunn_close(int num);
 //MIC_THREAD_FUN_DEF(tunn_run_now,p_num) ;
 //void * tunn_run_now(void *p_num);
 int tunn_get_pool_id_and_lock_it();
+int tunn_set_first_pool_and_getid(int sock);
+int tunn_wait_second_pool(int pool_num,int usec);
+int tunn_set_second_pool(int pool_num,int sock);
+
+
 int tunn_set_first_pool_and_lock_it(int sock,int usec);
 int tunn_set_second_pool_and_run_it(int pool_num,int sock);
 int tunn_sock_to_sock(int from_sock,int to_sock,int usec);

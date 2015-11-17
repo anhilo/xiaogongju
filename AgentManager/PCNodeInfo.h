@@ -6,15 +6,8 @@
 #define MAX_PCNAME_LEN     50
 #define MAX_IP_ADDR_LEN    20
 
-// first conn send msg
-#define IAM_ADMIN_NODE      1
-#define MYSELF_NODE         2
-#define WITH_ADMIN_NODE     3
-// other conn msg
-#define UPSTREAM_NODE       4
-#define NEIGHBOR_NODE       5
-#define REMOTION_NODE       6
-#define UNKONWN_NODE        7
+#define CONNTYPE_DIRECT_CONNECT   1
+#define CONNTYPE_REVERSE_CONNECT  2
 typedef struct PCConnInfo{
     int ConnType;
     char IPaddr[MAX_IP_ADDR_LEN];
@@ -27,6 +20,14 @@ typedef struct PCConnInfo{
 #define PC_OS_ARMLINUX     3
 #define PC_OS_MACOSX       4
 #define PC_OS_UNKNOW       5
+
+// NodeType 
+#define IAM_ADMIN_NODE      1 // Neighbor
+#define MYSELF_NODE         2 // Neighbor
+#define WITH_ADMIN_NODE     3 // Neighbor
+#define UPSTREAM_NODE       4 // REMOTE_CHILD
+#define MYSELF_NODE_REMOTE  5 // REMOTE_CHILD
+#define UNKONWN_NODE        6 // UNKNOWN
 typedef struct PCNodeData{
     int id;
     int OSType; // OS_Type // 

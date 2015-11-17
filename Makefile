@@ -1,11 +1,13 @@
 object_lib = baselib/BaseAPI.o baselib/GlobalFunctions.o \
-			baselib/ListNodeCTRL.o baselib/TreeNodeCTRL.o
+			baselib/ListNodeCTRL.o baselib/TreeNodeCTRL.o \
+			sockslib/Sock_Tunnel.o
 
 AgentLib   =  AgentManager/PCNodeInfo.o \
 			AgentManager/PCNodeManager.o \
 			AgentManager/AgentConversationProxy.o \
 			AgentManager/AgentConversationCTRL.o \
 			AgentManager/AgentConnHandle.o \
+			AgentManager/AgentTunnelHandle.o \
 			AgentManager/AgentCMDInfo.o
 			#AgentManager/AgentCTRL.o \
 			AgentManager/AgentSock.o \

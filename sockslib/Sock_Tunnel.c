@@ -23,17 +23,18 @@ int tunn_init_Pool(){
     return TUNNEL_INIT_OK;
 }
 
-//int tunn_clean(int num){
-//    int i = num;
-//    socks_Pool[i].sock_1 = -1;
-//    socks_Pool[i].sock_2 = -1;
-//    socks_Pool[i].flag = False;
-//    socks_Pool[i].state = NULL_SOCK;
-//    socks_Pool[i].usec_time = -1;
-//    live_num --;
-//    //can_write_pool = True;
-//    return TUNNEL_CLEAN_OK;
-//}
+int tunn_clean(int num){
+    int i = num;
+    socks_Pool[i].sock_1 = -1;
+    socks_Pool[i].sock_2 = -1;
+    socks_Pool[i].flag = False;
+    socks_Pool[i].state = NULL_SOCK;
+    socks_Pool[i].usec_time = -1;
+    live_num --;
+    //can_write_pool = True;
+    return TUNNEL_CLEAN_OK;
+}
+
 int tunn_close(int num){
     int flag = 0;
     if( socks_Pool[ num ].sock_1 > 0){
@@ -46,11 +47,7 @@ int tunn_close(int num){
         socks_Pool[ num ].sock_2 = -1;
         flag = 1;
     }
-   //puts("close tunnel");
-    socks_Pool[ num ].usec_time = -1;
-    socks_Pool[ num ].state = NULL_SOCK;
-    socks_Pool[ num ].flag = False;
-    if (flag) live_num --;
+    if(flag) tunn_clean(num);
     printf("--> %3d <-- (close)used/unused  %d/%d\n",num,live_num,MAX_POOL - live_num);
     return 1; 
 }
@@ -140,6 +137,39 @@ int tunn_get_pool_id_and_lock_it(){
     return TUNNEL_GET_POOL_ID_FALSE;
 }
 
+int tunn_set_first_pool_and_getid(int sock){
+    int pool_id = tunn_get_pool_id_and_lock_it();
+    if(pool_id == TUNNEL_GET_POOL_ID_FALSE){
+        return TUNNEL_GET_POOL_ID_FALSE;
+    }
+    socks_Pool[pool_id].sock_1 = sock;
+    return pool_id;
+}
+
+int tunn_wait_second_pool(int poolnum,int usec){
+    int i=0,res_sock = -1;
+    int mmm_flag = 0;
+    while(i<usec){
+        if(socks_Pool[poolnum].state == SOCK_2_OK){
+            mmm_flag = 1;
+            break;
+        }
+        MIC_USLEEP(1);
+    }
+    if(mmm_flag == 1){
+        res_sock = socks_Pool[poolnum].sock_2;
+        tunn_clean(poolnum);
+        return res_sock;
+    }
+    return -1;
+}
+
+int tunn_set_second_pool(int pool_num,int sock){
+    socks_Pool[pool_num].sock_2 = sock;
+    socks_Pool[pool_num].state  = SOCK_2_OK;
+    return 1;
+}
+
 int tunn_set_first_pool_and_lock_it(int sock,int usec){
     int id ;
     id = tunn_get_pool_id_and_lock_it();
@@ -166,14 +196,10 @@ int tunn_set_second_pool_and_run_it(int num,int sock){
     if( MIC_THREAD_CREATE(thread_1,
         tunn_run_now,
         poolnum) < 0 ){
-//    if( pthread_create( &thread_1,NULL ,
-//      tunn_run_now,
-//      (void *)poolnum)<0){
         perror("could not create one way tunnel\n");
         tunn_close(num);
         return TUNNEL_SET_SECOND_POOL_AND_RUN_IT_FALSE;
     }
-    // pthread_join(thread_1,NULL);
     return TUNNEL_SET_SECOND_POOL_AND_RUN_IT_OK;
 }
 

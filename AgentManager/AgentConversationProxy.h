@@ -17,4 +17,12 @@ int AGENT_ConversationProxy_Connect(char *ip,int port);
 #define AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR -1
 int AGENT_ConversationProxy_Build_Tunnel(int targetid);
 
+#define AGENT_CONVERSATIONPROXY_SENDREVERSEID_ERROR -1
+#define AGENT_CONVERSATIONPROXY_SENDREVERSEID_OK     1
+int AGENT_ConversationProxy_SendRcHead(int sock);
+
+#define AGENT_CONVERSATIONPROXY_TUNNEL_REPLY_ERROR  -1
+#define AGENT_CONVERSATIONPROXY_TUNNEL_REPLY_OK      1
+int AGENT_ConversationProxy_Tunnel_Reply(int sock);
+
 #endif

@@ -254,13 +254,22 @@ MIC_THREAD_FUN_DEF(cbf_for_server_start,pvalue){
     return NULL;
 }
 
-int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
+
+struct struct_for_StartServer{
+    int socket_server;
+    Server_CallBack_Fun function;
+};
+
+MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
+    struct struct_for_StartServer *info = 
+        (struct struct_for_StartServer *)serverinfo;
+    int socks_server  = info->socket_server;
+    Server_CallBack_Fun fun = info-> function;
     struct sockaddr_in client_addr;
     int client_sock;
     int len_sockaddr;
     int fun_result;
     int sockbuf;
-    MIC_THREAD_HANDLE_ID thread_id;
     MyPrintf("start socket server here");
     len_sockaddr = sizeof(struct sockaddr_in);
     MyPrintf("start accept socket client here");
@@ -275,18 +284,36 @@ int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
             (struct ValueForCallBack *)malloc(sizeof(struct ValueForCallBack));
         if(pvalue == NULL) {
             Printf_Error("server start error pvalue is NULL");
-            return API_SOCKET_SERVER_START_ERROR;
+            return ;
         }
         pvalue -> fun = fun;
         pvalue -> socket = client_sock;
+        MIC_THREAD_HANDLE_ID thread_id;
         if( MIC_THREAD_CREATE (thread_id, cbf_for_server_start , pvalue ) <0){
             API_socket_close(sockbuf);
             Printf_Error("server start error thread error");
-            return API_SOCKET_SERVER_START_ERROR;
+            return ;
         }
         MIC_THREAD_JOIN(thread_id);
         MIC_USLEEP(1);
     }
+    return ;
+}
+
+int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
+    MIC_THREAD_HANDLE_ID thread_id;
+    struct struct_for_StartServer *info = 
+        (struct struct_for_StartServer *)
+        malloc(sizeof(struct struct_for_StartServer));
+    info -> socket_server = socks_server;
+    info -> function      = fun;
+Printf_DEBUG("create thread ??? ");
+    if(MIC_THREAD_CREATE(thread_id,StartServerFunction,info)< 0){
+        Printf_Error("Start Server Error");
+        return API_SOCKET_SERVER_START_ERROR;
+    }
+//    MIC_THREAD_JOIN(thread_id);
+    MIC_USLEEP(1);
     return API_SOCKET_SERVER_START_OK;
 }
 

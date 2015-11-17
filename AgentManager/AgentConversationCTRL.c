@@ -31,6 +31,8 @@ int AGENT_Conversation_Init(int ostype,char *pcname,int agent_type){
     if(res == PCMANAGER_INIT_ERROR){
         return AGENT_CONVERSATION_INIT_ERROR;
     }
+
+    AGENT_ConversationProxy_Init();
     return AGENT_CONVERSATION_INIT_OK;
 }
 
