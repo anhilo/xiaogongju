@@ -230,7 +230,12 @@ int API_socket_send(int sock,char *buf,int buflen){
 }
 
 int API_socket_recv(int sock,char *buf,int buflen){
-    return recv(sock,buf,buflen,0);
+    int res = recv(sock,buf,buflen,0);
+    if(res <= 0){
+        API_socket_close(sock);
+        return SOCKET_RECV_ERROR;
+    }
+    return res;
 }
 
 int API_socket_close(int sock){

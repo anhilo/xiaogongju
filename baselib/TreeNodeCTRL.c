@@ -208,11 +208,15 @@ int mTraversal(TreeNode *root , pfunNodeCall callback){
         return 0;
     }
 //    printf("this id is %d , child_num = %d\n",root->id, root->child_num);
-    callback(root->node);
+    if( 0== callback(root->node)){
+        return 0;
+    }
     p = root->child;
     for(k=0;k<root->child_num;k++){
 //printf(">>>>start print child this id = %d \n",root->id);
-        mTraversal(p,callback);
+        if(0 == mTraversal(p,callback)){
+            return 0;
+        }
         p = p->next_Sibling;
     }
     return 1;

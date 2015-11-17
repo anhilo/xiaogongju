@@ -34,11 +34,13 @@ int AGENT_ConversationProxy_Init(){
 
 int m_CMD_Listen(int sock,char *ip,int port){
     char cmdmsg[AGENTCMD_MAX_LEN];
-    if(API_socket_read_state(sock,1,0) == 
-        SOCKET_CAN_READ_STATE){
+
+    int res = API_socket_read_state(sock,1,0);
+
+    if(SOCKET_CAN_READ_STATE == res){
         int nrecv = m_socket_recv(sock,cmdmsg,AGENTCMD_MAX_LEN);
-Printf_DEBUG("cmdmsg[0] == %d",cmdmsg[0]);
-        if(nrecv != SOCKET_RECV_ERROR){
+        if(nrecv != SOCKET_RECV_ERROR 
+){
             switch(cmdmsg[0]){
                 case CMDMSG_NEW_NODE_CONNECT:
 Printf_Error("CONNECT ????");
@@ -58,6 +60,9 @@ Printf_DEBUG("DOWN BROADCAST MSG HERE ");
                     break;
             }
         }
+        else{
+            return 0;
+        }
     }
     return 1;
 }
@@ -68,7 +73,12 @@ int m_Listener_For_EachAgentNode(pNodeData node){
     int cmd_sock = ((pPCNodeInfo)node)->conn.cmd_socket;
     memcpy(ip,((pPCNodeInfo)node)->conn.IPaddr,MAX_IP_ADDR_LEN);
     port = ((pPCNodeInfo)node)->conn.port;
-    m_CMD_Listen(cmd_sock,ip,port);
+    int res = m_CMD_Listen(cmd_sock,ip,port);
+    if(res == 0) {
+        Printf_DEBUG("Need remove this node???");
+        PCMANAGER_RemoveNode(((pPCNodeInfo)node)->id);
+    }
+    return res;
 }
 
 
