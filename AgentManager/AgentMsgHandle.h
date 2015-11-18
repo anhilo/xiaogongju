@@ -7,6 +7,13 @@
 // 向本地或上游请求新ID
 int ASK_NEW_ID();
 
+int SendAgentInfo(int fatherid,int childid,int ostype,char *pcname);
+
+int SendUpperReplaceID(int oldid,int newid);
+
+int SendDown_BroadCast(char *msg,int msglen);
+int SendDown_DirectMsg(int targetid,char *msg,int msglen);
+
 
 
 int on_UpStreamMsg_Arrive   (int sock);

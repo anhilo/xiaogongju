@@ -171,7 +171,6 @@ int on_recv_Agent_Info(int sock){
 //==============================================================================
 //   on_UpStreamMsg_Arrive (int sock)
 //------------------------------------------------------------------------------
-
 int on_UpStreamMsg_Arrive   (int sock){
     char cmdbuf[MAXCMD_LEN];
     API_socket_recv(sock,cmdbuf,MAXCMD_LEN);
@@ -256,6 +255,16 @@ int SendDownStream (int broadcasttype,int targetid
     }
     buflock = 0;
     return 0;
+}
+
+int SendDown_BroadCast(char *msg,int msglen){
+    return SendDownStream(CMD_DOWN_BROADCAST_MSG,
+        0, msg,msglen);
+}
+
+int SendDown_DirectMsg(int targetid ,char *msg,int msglen){
+    return SendDownStream(CMD_DOWN_DIRECT_POINT_MSG,
+        targetid,msg,msglen);
 }
 
 int m_analyze_and_Doit(char *msgbuf_1){

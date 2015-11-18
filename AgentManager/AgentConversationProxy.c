@@ -61,6 +61,7 @@ on_UpStreamMsg_Arrive(sock);
                     break;
                 case CMDMSG_DOWN_BROADCAST_MSG:
 Printf_DEBUG("DOWN BROADCAST MSG HERE ");
+on_DownStreamMsg_Arrive(sock);
                     break;
             }
         }
