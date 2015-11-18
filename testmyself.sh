@@ -7,5 +7,6 @@
 #!/bin/sh
 make
 ./nserver &
+./nadmin  &
 ./nclient &
 ./nclient &

@@ -53,7 +53,7 @@ int PCNODE_SETAllData(
 
 void PCNODE_Free(pPCNodeInfo node){
     if( node != NULL){
-        printf("\tPCNODE_Free() {id = %d}\n",node -> id);
+//        printf("\tPCNODE_Free() {id = %d}\n",node -> id);
         free(node);
         node = NULL;
         return ;
