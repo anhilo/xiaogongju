@@ -93,4 +93,9 @@ int PCMANAGER_Get_RootID();
 
 #define  PCMANAGER_GET_FATHERNODE_ERROR  NULL
 pPCNodeInfo PCMANAGER_Get_FatherNode();
+
+
+#define PCMANAGER_MANAGER_NOW_TRUE   1
+#define PCMANAGER_MANAGER_NOW_FALSE  0
+int PCMANAGER_Manager_Now();
 #endif

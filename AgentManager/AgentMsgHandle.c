@@ -52,23 +52,48 @@ int SendUpper(int cmd,char *msg,int len){
 //------------------------------------------------------------------------------
 int ASK_NEW_ID(){
     int id = -1;
-    pPCNodeInfo self = PCMANAGER_Get_RootNode();
-    switch(self->NodeType){
-        case IAM_ADMIN_NODE:
-        case MYSELF_NODE:
-            id = PCMANAGER_Get_Fresh_ID();
-            break;
-        case UPSTREAM_NODE:
+
+    int manage_now = PCMANAGER_Manager_Now();
+Printf_DEBUG("11111111111111111111111111");
+    switch(manage_now){
+        case PCMANAGER_MANAGER_NOW_TRUE:
+Printf_DEBUG("22222222222222222222222222");
             id = ASK_ID_UPPER();
             break;
+        case PCMANAGER_MANAGER_NOW_FALSE:
+Printf_DEBUG("33333333333333333333333333");
+            id = PCMANAGER_Get_Fresh_ID();
+            break;
         default:
-            Printf_Error("ASK_NEW_ID NO CMD_");
+            Printf_Error("GET FRESH ID ERROR");
             break;
     }
-    if(id == -1){
-        Printf_Error("ASK_NEW_ID GETID_ERROR");
-        return -1;
-    }
+
+
+
+//    pPCNodeInfo self = PCMANAGER_Get_RootNode();
+//Printf_DEBUG("11111111111111111111111111");
+//    switch(self->NodeType){
+//        case IAM_ADMIN_NODE:
+//        case MYSELF_NODE:
+//Printf_DEBUG("22222222222222222222222222");
+//            id = PCMANAGER_Get_Fresh_ID();
+//            break;
+//        case UPSTREAM_NODE:
+//Printf_DEBUG("33333333333333333333333333");
+//            id = ASK_ID_UPPER();
+//            break;
+//        default:
+//Printf_DEBUG("44444444444444444444444444");
+//            Printf_Error("ASK_NEW_ID NO CMD_");
+//            break;
+//    }
+//Printf_DEBUG("55555555555555555555555555");
+//    if(id == -1){
+//        Printf_Error("ASK_NEW_ID GETID_ERROR");
+//        return -1;
+//    }
+//Printf_DEBUG("66666666666666666666666666");
     return id;
 }
 
@@ -84,8 +109,10 @@ int ASK_ID_UPPER(){
     pPCNodeInfo info = PCMANAGER_Get_FatherNode();
     char cmdbuf[MAXCMD_LEN];
     cmdbuf[0] = CMD_ID_ASK;
+Printf_Error("5555555555555555555555");
     if(info == PCMANAGER_GET_FATHERNODE_ERROR)
     {
+Printf_Error("6666666666666666666666");
         return -1;
     }
     // get father socket
@@ -93,17 +120,22 @@ int ASK_ID_UPPER(){
     if( AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_ERROR == 
         AGENT_ConversationProxy_SendUpStreamHead(father_sock)
     ){
+Printf_Error("7777777777777777777777");
         return -1;
     }
+Printf_Error("8888888888888888888888");
     if( SOCKET_SEND_ERROR == 
         API_socket_send(father_sock,cmdbuf,MAXCMD_LEN)){
+Printf_Error("9999999999999999999999");
         return -1;
     }
+Printf_Error("0000000000000000000000");
     char idbuf[4];
     if( SOCKET_RECV_ERROR == 
         API_socket_recv(father_sock,idbuf,4)){
         return -1;
     }
+Printf_Error("aaaaaaaaaaaaaaaaaaaaaa");
     return API_m_chartoi(idbuf,4);
 }
 

@@ -10,13 +10,14 @@
 #include "PCNodeManager.h"
 int AGENT_Conversation_Init(int ostype,char *pcname,int agent_type){
     pPCNodeInfo m_self;
+    int mid = (agent_type == IAM_ADMIN_NODE)?0:1;
     m_self= (pPCNodeInfo)PCNODE_Create();
     if(m_self == NULL){
         return AGENT_CONVERSATION_INIT_ERROR;
     }
     int res = PCNODE_SETAllData(
         m_self,     // node
-        0,          // id
+        mid,        // id
         ostype,     // ostype
         pcname,     // pcname
         agent_type, //nodetype

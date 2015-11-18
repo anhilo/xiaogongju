@@ -19,7 +19,7 @@ MIC_SLEEP(10);
 //char buf2[] = "Hello World BroadCast--->2";
 //SendDown_BroadCast(buf2,strlen(buf2));
 //Printf_OK("Start Send OK");
-Broadcast_ReplaceID(30,20);
+//Broadcast_ReplaceID(30,20);
 
 while(1){
     MIC_SLEEP(10000);

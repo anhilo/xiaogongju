@@ -234,7 +234,9 @@ pPCNodeInfo PCMANAGER_GETNodeInfo(int id){
     int res = -1;
     pPCNodeInfo node = 
         (pPCNodeInfo) ListNode_GetNodeData(list,id);
+Printf_DEBUG("bbbbbbbbbbbbbbbbb");
     if(node == NULL){
+Printf_DEBUG("ccccccccccccccccc");
         node = (pPCNodeInfo)
             Tree_GetNodeData(tree,id);
     }
@@ -303,6 +305,7 @@ int PCMANAGER_Get_Fresh_ID(){
     }
     if(maxid >=0 ){
 //Printf_DEBUG("maxid is %d.",maxid);
+Printf_DEBUG("Fresh new id %d ",maxid);
         return maxid;
     }
     return -1;
@@ -325,4 +328,11 @@ pPCNodeInfo PCMANAGER_Get_FatherNode(){
         return PCMANAGER_GET_FATHERNODE_ERROR;
     }
     return info;
+}
+
+int PCMANAGER_Manager_Now(){
+    if(tree_now == MANAGER_NOW){
+        return PCMANAGER_MANAGER_NOW_TRUE;
+    }
+    return PCMANAGER_MANAGER_NOW_FALSE;
 }

@@ -74,11 +74,27 @@ on_DownStreamMsg_Arrive(sock);
 
 int m_Listener_For_EachAgentNode(pNodeData node){
     char ip[MAX_IP_ADDR_LEN];
-    int port;
+    int port,res = 1;
     int cmd_sock = ((pPCNodeInfo)node)->conn.cmd_socket;
     memcpy(ip,((pPCNodeInfo)node)->conn.IPaddr,MAX_IP_ADDR_LEN);
     port = ((pPCNodeInfo)node)->conn.port;
-    int res = m_CMD_Listen(cmd_sock,ip,port);
+
+    switch(((pPCNodeInfo)node)->NodeType){
+        case IAM_ADMIN_NODE:
+            Printf_OK("Cmd From ADMIN");
+            break;
+        case MYSELF_NODE:
+            res = m_CMD_Listen(cmd_sock,ip,port);
+            break;
+        case UNKONWN_NODE:
+            Printf_Error("UNKNOWN_NODE here");    
+            break;
+        case UPSTREAM_NODE:
+            Printf_Error("UPSTREAM_NODE here how code???");
+            break;
+        default:
+            Printf_Error("UNKNOWN_NODE type--> %d",((pPCNodeInfo)node)->NodeType);    
+    }
     if(res == 0) {
         Printf_DEBUG("Need remove this node???");
         PCMANAGER_RemoveNode(((pPCNodeInfo)node)->id);

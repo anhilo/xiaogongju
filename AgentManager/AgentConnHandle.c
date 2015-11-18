@@ -28,10 +28,13 @@ int m_recvID(int sock);
 
 int m_AddNeighborProxy(pPCNodeInfo info){
     int res = PCMANAGER_ADDNeighbor(info);
+Printf_DEBUG("add ???????????????");
     if(PCMANAGER_ADDNEIGHBOR_ID_CLASH == 
         res ){
 // Replace ID and send Replace ID msg here
+Printf_DEBUG("clash here");
         int newid = ASK_NEW_ID();
+Printf_DEBUG("get new id ~~~~ -> %d",newid);
         // send Replace ID msg here
 Broadcast_ReplaceID(info->id,newid);
         // replace id local
@@ -47,13 +50,14 @@ Broadcast_ReplaceID(info->id,newid);
     else if(PCMANAGER_ADDNEIGHBOR_OK == res ){
         return 1;
     }
+Printf_DEBUG("add error ????");
     return 0;
 }
 
 
 int when_IAM_ADMIN(int sock,char *ip,int port){
     pPCNodeInfo serverinfo;
-    int hisid = PCMANAGER_Get_Fresh_ID();
+    int hisid = ASK_NEW_ID();
     if(M_SENDID_ERROR != m_sendID(sock,hisid)){
         serverinfo = m_agentInfo_Recv(sock);
         if(serverinfo != M_INFO_RECV_ERROR){
@@ -130,7 +134,7 @@ Printf_DEBUG("the sock is -----> %d",sock);
         break;
     case MYSELF_NODE:
         Printf_OK("Client is Myself_node");
-        int hisid = PCMANAGER_Get_Fresh_ID();
+        int hisid = ASK_NEW_ID();
         m_sendID(sock,hisid);
         m_Info_send(sock,myself);
         break;

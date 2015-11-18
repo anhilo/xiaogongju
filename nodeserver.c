@@ -30,11 +30,11 @@ int main(){
     AGENT_Conversation_Listen(8888,20);
     
     MIC_SLEEP(10);
-Printf_DEBUG("start send");
-    int sock2222 = AGENT_ConversationProxy_Build_Tunnel(2);
-    char helloWorld[]="Hello This is from sock";
-    API_socket_send(sock2222,helloWorld,strlen(helloWorld));
-Printf_DEBUG("send ok");
+///Printf_DEBUG("start send");
+///    int sock2222 = AGENT_ConversationProxy_Build_Tunnel(2);
+///    char helloWorld[]="Hello This is from sock";
+///    API_socket_send(sock2222,helloWorld,strlen(helloWorld));
+///Printf_DEBUG("send ok");
 
     while(1){
         MIC_SLEEP(10000);
