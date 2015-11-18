@@ -14,7 +14,7 @@ int SendUpperReplaceID(int oldid,int newid);
 int SendDown_BroadCast(char *msg,int msglen);
 int SendDown_DirectMsg(int targetid,char *msg,int msglen);
 
-
+int Broadcast_ReplaceID(int oldid,int newid);
 
 int on_UpStreamMsg_Arrive   (int sock);
 int on_DownStreamMsg_Arrive (int sock);

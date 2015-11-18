@@ -5,7 +5,7 @@
 
 int main(){
     API_env_init();
-    AGENT_Conversation_Init(10,"This Client Node",MYSELF_NODE);
+    AGENT_Conversation_Init(10,"This Client Node",IAM_ADMIN_NODE);
     AGENT_Conversation_Connect("127.0.0.1",8888);
 
 

@@ -123,6 +123,8 @@ int on_upper_replaceID(int sock){
     API_socket_recv(sock,buffer,MAX_SYNCNODE_INFO_LEN);
     int oldid = API_m_chartoi(buffer,4);
     int newid = API_m_chartoi(&(buffer[4]),4);
+Printf_OK("On upper replace ID msg %d -> %d .",
+        oldid,newid);
     SendUpperReplaceID(oldid,newid);
     return 1;
 }
@@ -182,6 +184,7 @@ int on_UpStreamMsg_Arrive   (int sock){
     case CMD_ID_REPLACE:
         Printf_OK("id need replace");
         on_upper_replaceID(sock);
+        //m_analyze_and_Doit(buffer);
         break;
     case CMD_ID_ASK:
         Printf_OK("ID ASK");
@@ -267,8 +270,24 @@ int SendDown_DirectMsg(int targetid ,char *msg,int msglen){
         targetid,msg,msglen);
 }
 
+int m_ID_Replace(char *msgbuf_1){
+    int oldid = API_m_chartoi(&(msgbuf_1[1]),4);
+    int newid = API_m_chartoi(&(msgbuf_1[5]),4);
+    Printf_OK("[ Replace Msg ] %d -> %d . ",oldid,newid);
+    return 1;
+}
+
 int m_analyze_and_Doit(char *msgbuf_1){
-    Printf_DEBUG("The recv MSG is %s",msgbuf_1);
+//    Printf_DEBUG("The recv MSG is %s",msgbuf_1);
+    switch(msgbuf_1[0]){
+    case CMD_ID_REPLACE:
+        Printf_OK("Recv ID Replace msg");
+        m_ID_Replace(msgbuf_1);
+        break;
+    default:
+        Printf_Error("Error m_analyze_and_Doit");
+        break;
+    }
     return 1;
 }
 
@@ -308,5 +327,24 @@ int on_DownStreamMsg_Arrive (int sock){
             on_broadcast_Down_msg(sock,cmdbuf_1,msgbuf_1);
             break;
     }
+    return 1;
+}
+
+int SendDownReplaceID(int oldid,int newid){
+    char cmd[MAX_SYNCNODE_INFO_LEN];
+    cmd[0] = CMD_ID_REPLACE;
+    API_m_itochar(oldid,&(cmd[1]),4);
+    API_m_itochar(newid,&(cmd[5]),4);
+    SendDown_BroadCast(cmd,MAX_SYNCNODE_INFO_LEN);
+    return 1;
+}
+
+
+//*********************************************
+// Broadcast_ReplaceID(int oldid,int newid);
+//*********************************************
+int Broadcast_ReplaceID(int oldid,int newid){
+    SendUpperReplaceID(oldid,newid);
+    SendDownReplaceID(oldid,newid);
     return 1;
 }

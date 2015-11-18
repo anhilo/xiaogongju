@@ -7,6 +7,7 @@
 #include "AgentConnHandle.h"
 #include "PCNodeManager.h"
 #include "PCNodeInfo.h"
+#include "AgentMsgHandle.h"
 
 
 //====================================
@@ -32,7 +33,7 @@ int m_AddNeighborProxy(pPCNodeInfo info){
 // Replace ID and send Replace ID msg here
         int newid = ASK_NEW_ID();
         // send Replace ID msg here
-
+Broadcast_ReplaceID(info->id,newid);
         // replace id local
         if(PCMANAGER_REPLACEID_ERROR == 
             PCMANAGER_ReplaceID(info->id,newid)){
