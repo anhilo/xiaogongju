@@ -89,4 +89,7 @@ pPCNodeInfo PCMANAGER_Get_RootNode();
 
 // 17. 获得根节点ID
 int PCMANAGER_Get_RootID();
+
+#define  PCMANAGER_GET_FATHERNODE_ERROR  NULL
+pPCNodeInfo PCMANAGER_Get_FatherNode();
 #endif

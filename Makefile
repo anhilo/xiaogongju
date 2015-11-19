@@ -8,6 +8,7 @@ AgentLib   =  AgentManager/PCNodeInfo.o \
 			AgentManager/AgentConversationCTRL.o \
 			AgentManager/AgentConnHandle.o \
 			AgentManager/AgentTunnelHandle.o \
+			AgentManager/AgentMsgHandle.o \
 			AgentManager/AgentCMDInfo.o
 			#AgentManager/AgentCTRL.o \
 			AgentManager/AgentSock.o \

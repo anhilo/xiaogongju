@@ -289,7 +289,7 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
             (struct ValueForCallBack *)malloc(sizeof(struct ValueForCallBack));
         if(pvalue == NULL) {
             Printf_Error("server start error pvalue is NULL");
-            return ;
+            return NULL;
         }
         pvalue -> fun = fun;
         pvalue -> socket = client_sock;
@@ -297,12 +297,12 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
         if( MIC_THREAD_CREATE (thread_id, cbf_for_server_start , pvalue ) <0){
             API_socket_close(sockbuf);
             Printf_Error("server start error thread error");
-            return ;
+            return NULL;
         }
         MIC_THREAD_JOIN(thread_id);
         MIC_USLEEP(1);
     }
-    return ;
+    return NULL;
 }
 
 int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){

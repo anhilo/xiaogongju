@@ -89,4 +89,5 @@ Printf_DEBUG("on_reverse_Reply");
     tunn_set_second_pool(poolid,sock);
     Printf_DEBUG("set second pool OK");
 //    recvtest(sock);
+    return 1;
 }

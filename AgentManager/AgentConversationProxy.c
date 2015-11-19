@@ -9,6 +9,7 @@
 #include "PCNodeManager.h"
 #include "AgentConnHandle.h"
 #include "AgentTunnelHandle.h"
+#include "AgentMsgHandle.h"
 //*******************************************************
 #define AGENTCMD_MAX_LEN  1
 
@@ -17,6 +18,8 @@
 #define CMDMSG_NEW_TUNNEL_ANSWER   3
 #define CMDMSG_UPPER_BROADCAST_MSG 4
 #define CMDMSG_DOWN_BROADCAST_MSG  5
+
+int StartListenerThread();
 //*******************************************************
 int m_socket_send(int sock,char *buffer,int len){
     return API_socket_send(sock,buffer,len);
@@ -54,6 +57,7 @@ Printf_Error("NEW TUNNEL ANSWER????");
                     break;
                 case CMDMSG_UPPER_BROADCAST_MSG:
 Printf_DEBUG("UPPER BROADCAST MSG HERE ");
+on_UpStreamMsg_Arrive(sock);
                     break;
                 case CMDMSG_DOWN_BROADCAST_MSG:
 Printf_DEBUG("DOWN BROADCAST MSG HERE ");
@@ -81,7 +85,6 @@ int m_Listener_For_EachAgentNode(pNodeData node){
     return res;
 }
 
-
 MIC_THREAD_FUN_DEF(Listener_Thread,info){
     while(1){
         PCMANAGER_Traversal_Neighbor(m_Listener_For_EachAgentNode);
@@ -89,7 +92,6 @@ MIC_THREAD_FUN_DEF(Listener_Thread,info){
     }
     return 0;
 }
-
 
 int StartListenerThread(){
     MIC_THREAD_HANDLE_ID thread_id;
@@ -125,6 +127,7 @@ on_reverse_Reply(socket);
             break;
         case CMDMSG_UPPER_BROADCAST_MSG:
             Printf_OK("Upper Stream MSG");  
+//on_UpStreamMsg_Arrive(socket);
             break;
         case CMDMSG_DOWN_BROADCAST_MSG:
             Printf_OK("DOWN Stream MSG");
@@ -194,6 +197,23 @@ int AGENT_ConversationProxy_Tunnel_Reply(int sock){
     }
     return AGENT_CONVERSATIONPROXY_TUNNEL_REPLY_OK;
     
+}
+
+int AGENT_ConversationProxy_SendUpStreamHead(int sock){
+    if(SENDCMD_HEAD_ERROR == 
+        sendCMDHead(sock,CMDMSG_UPPER_BROADCAST_MSG)){ 
+        return AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_ERROR;
+    }
+    return AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_OK;
+}
+
+
+int AGENT_ConversationProxy_SendDownStreamHead(int sock){
+    if(SENDCMD_HEAD_ERROR == 
+        sendCMDHead(sock,CMDMSG_DOWN_BROADCAST_MSG)){ 
+        return AGENT_CONVERSATIONPROXY_SENDDOWNSTREAMHEAD_ERROR;
+    }
+    return AGENT_CONVERSATIONPROXY_SENDDOWNSTREAMHEAD_OK;
 }
 
 int AGENT_ConversationProxy_Build_Tunnel(int targetid){

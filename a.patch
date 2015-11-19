@@ -1,0 +1,305 @@
+diff --git a/AgentManager/AgentChildSync.c b/AgentManager/AgentChildSync.c
+new file mode 100644
+index 0000000..380360a
+--- /dev/null
++++ b/AgentManager/AgentChildSync.c
+@@ -0,0 +1,19 @@
++/**
++* File Name :AgentManager/AgentChildSync.c
++* Author: rootkiter
++* E-mail: rootkiter@rootkiter.com
++* Created Time : Tue 17 Nov 2015 01:01:20 AM PST
++*/
++
++#include "AgentChildSync.h"
++
++#define 
++
++
++int m_ForEachChildAgent_Trigger(){
++}
++
++int ChildNodeInfoSyncTrigger(){
++}
++
++int on_ChildNodeInfo_Arrive(int sock);
+diff --git a/AgentManager/AgentChildSync.h b/AgentManager/AgentChildSync.h
+new file mode 100644
+index 0000000..e0aa60f
+--- /dev/null
++++ b/AgentManager/AgentChildSync.h
+@@ -0,0 +1,10 @@
++#ifndef _AGENTCHILDSYNC_H_
++#define _AGENTCHILDSYNC_H_
++
++#include "../generic.h"
++
++int ChildNodeInfoSyncTrigger();
++
++int on_ChildNodeInfo_Arrive(int sock);
++
++#endif
+diff --git a/AgentManager/AgentConversationProxy.c b/AgentManager/AgentConversationProxy.c
+index c2216a4..a270bcb 100644
+--- a/AgentManager/AgentConversationProxy.c
++++ b/AgentManager/AgentConversationProxy.c
+@@ -9,6 +9,7 @@
+ #include "PCNodeManager.h"
+ #include "AgentConnHandle.h"
+ #include "AgentTunnelHandle.h"
++#include "AgentManager.h"
+ //*******************************************************
+ #define AGENTCMD_MAX_LEN  1
+ 
+@@ -54,6 +55,7 @@ Printf_Error("NEW TUNNEL ANSWER????");
+                     break;
+                 case CMDMSG_UPPER_BROADCAST_MSG:
+ Printf_DEBUG("UPPER BROADCAST MSG HERE ");
++on_UpStreamMsg_Arrive(sock);
+                     break;
+                 case CMDMSG_DOWN_BROADCAST_MSG:
+ Printf_DEBUG("DOWN BROADCAST MSG HERE ");
+@@ -81,7 +83,6 @@ int m_Listener_For_EachAgentNode(pNodeData node){
+     return res;
+ }
+ 
+-
+ MIC_THREAD_FUN_DEF(Listener_Thread,info){
+     while(1){
+         PCMANAGER_Traversal_Neighbor(m_Listener_For_EachAgentNode);
+@@ -90,7 +91,6 @@ MIC_THREAD_FUN_DEF(Listener_Thread,info){
+     return 0;
+ }
+ 
+-
+ int StartListenerThread(){
+     MIC_THREAD_HANDLE_ID thread_id;
+     if(MIC_THREAD_CREATE(thread_id,Listener_Thread,NULL)<0){
+@@ -125,6 +125,7 @@ on_reverse_Reply(socket);
+             break;
+         case CMDMSG_UPPER_BROADCAST_MSG:
+             Printf_OK("Upper Stream MSG");  
++on_UpStreamMsg_Arrive(socket);
+             break;
+         case CMDMSG_DOWN_BROADCAST_MSG:
+             Printf_OK("DOWN Stream MSG");
+@@ -196,6 +197,23 @@ int AGENT_ConversationProxy_Tunnel_Reply(int sock){
+     
+ }
+ 
++int AGENT_ConversationProxy_SendUpStreamHead(int sock){
++    if(SENDCMD_HEAD_ERROR == 
++        sendCMDHead(sock,CMDMSG_UPPER_BROADCAST_MSG)){ 
++        return AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_ERROR;
++    }
++    return AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_OK;
++}
++
++
++int AGENT_ConversationProxy_SendDownStreamHead(int sock){
++    if(SENDCMD_HEAD_ERROR == 
++        sendCMDHead(sock,CMDMSG_DOWN_BROADCAST_MSG)){ 
++        return AGENT_CONVERSATIONPROXY_SENDDOWNSTREAMHEAD_ERROR;
++    }
++    return AGENT_CONVERSATIONPROXY_SENDDOWNSTREAMHEAD_OK;
++}
++
+ int AGENT_ConversationProxy_Build_Tunnel(int targetid){
+     return AGENT_TUNN_BuildTunnel(targetid);
+ //    return AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR;
+diff --git a/AgentManager/AgentConversationProxy.h b/AgentManager/AgentConversationProxy.h
+index 3a71f9b..899d659 100644
+--- a/AgentManager/AgentConversationProxy.h
++++ b/AgentManager/AgentConversationProxy.h
+@@ -25,4 +25,11 @@ int AGENT_ConversationProxy_SendRcHead(int sock);
+ #define AGENT_CONVERSATIONPROXY_TUNNEL_REPLY_OK      1
+ int AGENT_ConversationProxy_Tunnel_Reply(int sock);
+ 
++#define AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_ERROR   -1
++#define AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_OK 1
++int AGENT_ConversationProxy_SendUpStreamHead(int sock);
++
++#define AGENT_CONVERSATIONPROXY_SENDDOWNSTREAMHEAD_ERROR   -1
++#define AGENT_CONVERSATIONPROXY_SENDDOWNSTREAMHEAD_OK       1
++int AGENT_ConversationProxy_SendDownStreamHead(int sock);
+ #endif
+diff --git a/AgentManager/AgentMsgHandle.c b/AgentManager/AgentMsgHandle.c
+new file mode 100644
+index 0000000..8f07894
+--- /dev/null
++++ b/AgentManager/AgentMsgHandle.c
+@@ -0,0 +1,114 @@
++/**
++* File Name :AgentManager/AgentMsgHandle.c
++* Author: rootkiter
++* E-mail: rootkiter@rootkiter.com
++* Created Time : Mon 16 Nov 2015 10:22:24 PM PST
++*/
++
++#include "AgentMsgHandle.h"
++#include "PCNodeManager.h"
++#include "AgentConversationProxy.h"
++
++#define MAXCMD_LEN               2
++#define MAX_SYNCNODE_INFO_LEN  300
++#define CMD_AGENT_SYNC_UPSTREAM  1
++#define CMD_ID_ASK               2
++#define CMD_OTHERINFO            3
++
++
++
++int SendAgentInfo(int fatherid,int childid,char *pcname){
++    char buffer[MAX_SYNCNODE_INFO_LEN];
++    return 0;
++}
++
++
++int SendUpStream   (char *msg,int msglen){
++    if(msglen > 255){
++        Printf_Error("The info UpStream OverFlow");
++        return 0;
++    }
++
++    pPCNodeInfo info = PCMANAGER_Get_FatherNode();
++    char cmdbuf[MAXCMD_LEN];
++    cmdbuf[0] = CMD_AGENT_SYNC_UPSTREAM;
++    if(info == PCMANAGER_GET_FATHERNODE_ERROR){
++        return 0;
++    }
++    int father_sock = info->conn.cmd_socket;
++    if( AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_ERROR == 
++        AGENT_ConversationProxy_SendUpStreamHead(father_sock)
++        || SOCKET_SEND_ERROR == 
++         API_socket_send(father_sock,cmdbuf,MAXCMD_LEN)){
++        return 0;
++    }
++    return 1;
++}
++
++int SendDownStream (char *msg,int msglen){
++
++}
++
++int on_UpStreamMsg_Arrive   (int sock){
++    char cmdbuf[MAXCMD_LEN];
++    API_socket_recv(sock,cmdbuf,MAXCMD_LEN);
++    switch(cmdbuf[0]){
++    case CMD_AGENT_SYNC_UPSTREAM;
++        Printf_OK("start sync here");
++        break;
++    case CMD_ID_ASK:
++        Printf_OK("ID ASK");
++        break;
++    }
++    return 1;
++}
++
++int on_DownStreamMsg_Arrive (char *msg,int msglen);
++
++int ASK_NEW_ID(){
++    int id = -1;
++    pPCNodeInfo self = PCMANAGER_Get_RootNode();
++    switch(self->NodeType){
++        case IAM_ADMIN_NODE:
++            id = PCMANAGER_Get_Fresh_ID();
++            break;
++        case WITH_ADMIN_NODE:
++            id = ASK_ID_UPPER();
++            break;
++        default:
++            Printf_Error("ASK_NEW_ID NO CMD_");
++            break;
++    }
++    if(id == -1){
++        Printf_Error("ASK_NEW_ID GETID_ERROR");
++        return -1;
++    }
++    return id;
++}
++
++int ASK_ID_UPPER(){
++    pPCNodeInfo info = PCMANAGER_Get_FatherNode();
++    char cmdbuf[MAXCMD_LEN];
++    cmdbuf[0] = CMD_ID_ASK;
++    if(info == PCMANAGER_GET_FATHERNODE_ERROR)
++    {
++        return -1;
++    }
++    // get father socket
++    int father_sock = info->conn.cmd_socket;
++    if( AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_ERROR == 
++        AGENT_ConversationProxy_SendUpStreamHead(father_sock)
++    ){
++        return -1;
++    }
++    if( SOCKET_SEND_ERROR == 
++        API_socket_send(father_sock,cmdbuf,MAXCMD_LEN)){
++        return -1;
++    }
++    char idbuf[4];
++    if( SOCKET_RECV_ERROR == 
++        API_socket_recv(father_sock,idbuf,4)){
++        return -1;
++    }
++    return API_m_chartoi(idbuf,4);
++}
+diff --git a/AgentManager/AgentMsgHandle.h b/AgentManager/AgentMsgHandle.h
+new file mode 100644
+index 0000000..52ea059
+--- /dev/null
++++ b/AgentManager/AgentMsgHandle.h
+@@ -0,0 +1,15 @@
++#ifndef _AGENTMSGHANDLE_H_
++#define _AGENTMSGHANDLE_H_
++
++#include "../generic.h"
++
++// Error return -1
++int ASK_NEW_ID();
++int SendUpStream   (char *msg,int msglen);
++int SendDownStream (char *msg,int msglen);
++
++int on_UpStreamMsg_Arrive   (int sock);
++int on_DownStreamMsg_Arrive (char *msg,int msglen);
++
++
++#endif
+diff --git a/AgentManager/PCNodeManager.c b/AgentManager/PCNodeManager.c
+index a625b8f..f86fde2 100644
+--- a/AgentManager/PCNodeManager.c
++++ b/AgentManager/PCNodeManager.c
+@@ -140,6 +140,7 @@ int PCMANAGER_UpperAdminLost(){
+     Tree_BuildTreeRoot(tree,root_id,rootnode);
+ // please add result check here
+     tree_now = NO_MANAGER;
++    fatherid = -1;
+     return PCMANAGER_UPPERADMINLOST_OK;
+ }
+ 
+@@ -314,3 +315,14 @@ pPCNodeInfo PCMANAGER_Get_RootNode(){
+ int PCMANAGER_Get_RootID(){
+     return rootnode->id;
+ }
++
++pPCNodeInfo PCMANAGER_GET_FATHERNODE(){
++    if(tree_now != MANAGER_NOW){
++        return PCMANAGER_GET_FATHERNODE_ERROR;
++    }
++    pPCNodeInfo info = PCMANAGER_GETNodeInfo(fatherid);
++    if( info == PCMANAGER_GETNODEINFO_ERROR ){
++        return PCMANAGER_GET_FATHERNODE_ERROR;
++    }
++    return info;
++}
+diff --git a/AgentManager/PCNodeManager.h b/AgentManager/PCNodeManager.h
+index 7efd06d..89bfc08 100644
+--- a/AgentManager/PCNodeManager.h
++++ b/AgentManager/PCNodeManager.h
+@@ -89,4 +89,7 @@ pPCNodeInfo PCMANAGER_Get_RootNode();
+ 
+ // 17. 获得根节点ID
+ int PCMANAGER_Get_RootID();
++
++#define  PCMANAGER_GET_FATHERNODE_ERROR  NULL
++pPCNodeInfo PCMANAGER_Get_FatherNode();
+ #endif

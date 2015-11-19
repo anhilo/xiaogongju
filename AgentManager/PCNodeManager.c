@@ -140,6 +140,7 @@ int PCMANAGER_UpperAdminLost(){
     Tree_BuildTreeRoot(tree,root_id,rootnode);
 // please add result check here
     tree_now = NO_MANAGER;
+    fatherid = -1;
     return PCMANAGER_UPPERADMINLOST_OK;
 }
 
@@ -313,4 +314,15 @@ pPCNodeInfo PCMANAGER_Get_RootNode(){
 
 int PCMANAGER_Get_RootID(){
     return rootnode->id;
+}
+
+pPCNodeInfo PCMANAGER_Get_FatherNode(){
+    if(tree_now != MANAGER_NOW){
+        return PCMANAGER_GET_FATHERNODE_ERROR;
+    }
+    pPCNodeInfo info = PCMANAGER_GETNodeInfo(fatherid);
+    if( info == PCMANAGER_GETNODEINFO_ERROR ){
+        return PCMANAGER_GET_FATHERNODE_ERROR;
+    }
+    return info;
 }

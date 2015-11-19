@@ -25,4 +25,11 @@ int AGENT_ConversationProxy_SendRcHead(int sock);
 #define AGENT_CONVERSATIONPROXY_TUNNEL_REPLY_OK      1
 int AGENT_ConversationProxy_Tunnel_Reply(int sock);
 
+#define AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_ERROR   -1
+#define AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_OK 1
+int AGENT_ConversationProxy_SendUpStreamHead(int sock);
+
+#define AGENT_CONVERSATIONPROXY_SENDDOWNSTREAMHEAD_ERROR   -1
+#define AGENT_CONVERSATIONPROXY_SENDDOWNSTREAMHEAD_OK       1
+int AGENT_ConversationProxy_SendDownStreamHead(int sock);
 #endif

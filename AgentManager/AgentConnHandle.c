@@ -111,6 +111,7 @@ Printf_DEBUG("the sock is -----> %d",sock);
         return 0;
     }
 Printf_DEBUG("myid now is %d",PCMANAGER_Get_RootID());
+    return 1;
 }
 
 
