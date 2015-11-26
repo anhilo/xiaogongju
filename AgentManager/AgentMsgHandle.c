@@ -40,6 +40,10 @@ int SendUpper(int cmd,char *msg,int len){
         return SENDUPPER_ERROR;
     }
     if( SOCKET_SEND_ERROR == 
+        API_socket_send(father_sock,cmdbuf,MAXCMD_LEN)){
+        return SENDUPPER_ERROR;
+    }
+    if( SOCKET_SEND_ERROR == 
         API_socket_send(father_sock,msg,MAX_SYNCNODE_INFO_LEN)){
         return SENDUPPER_ERROR;
     }
@@ -54,46 +58,17 @@ int ASK_NEW_ID(){
     int id = -1;
 
     int manage_now = PCMANAGER_Manager_Now();
-Printf_DEBUG("11111111111111111111111111");
     switch(manage_now){
         case PCMANAGER_MANAGER_NOW_TRUE:
-Printf_DEBUG("22222222222222222222222222");
             id = ASK_ID_UPPER();
             break;
         case PCMANAGER_MANAGER_NOW_FALSE:
-Printf_DEBUG("33333333333333333333333333");
             id = PCMANAGER_Get_Fresh_ID();
             break;
         default:
             Printf_Error("GET FRESH ID ERROR");
             break;
     }
-
-
-
-//    pPCNodeInfo self = PCMANAGER_Get_RootNode();
-//Printf_DEBUG("11111111111111111111111111");
-//    switch(self->NodeType){
-//        case IAM_ADMIN_NODE:
-//        case MYSELF_NODE:
-//Printf_DEBUG("22222222222222222222222222");
-//            id = PCMANAGER_Get_Fresh_ID();
-//            break;
-//        case UPSTREAM_NODE:
-//Printf_DEBUG("33333333333333333333333333");
-//            id = ASK_ID_UPPER();
-//            break;
-//        default:
-//Printf_DEBUG("44444444444444444444444444");
-//            Printf_Error("ASK_NEW_ID NO CMD_");
-//            break;
-//    }
-//Printf_DEBUG("55555555555555555555555555");
-//    if(id == -1){
-//        Printf_Error("ASK_NEW_ID GETID_ERROR");
-//        return -1;
-//    }
-//Printf_DEBUG("66666666666666666666666666");
     return id;
 }
 
@@ -109,10 +84,8 @@ int ASK_ID_UPPER(){
     pPCNodeInfo info = PCMANAGER_Get_FatherNode();
     char cmdbuf[MAXCMD_LEN];
     cmdbuf[0] = CMD_ID_ASK;
-Printf_Error("5555555555555555555555");
     if(info == PCMANAGER_GET_FATHERNODE_ERROR)
     {
-Printf_Error("6666666666666666666666");
         return -1;
     }
     // get father socket
@@ -120,22 +93,17 @@ Printf_Error("6666666666666666666666");
     if( AGENT_CONVERSATIONPROXY_SENDUPSTREAMHEAD_ERROR == 
         AGENT_ConversationProxy_SendUpStreamHead(father_sock)
     ){
-Printf_Error("7777777777777777777777");
         return -1;
     }
-Printf_Error("8888888888888888888888");
     if( SOCKET_SEND_ERROR == 
         API_socket_send(father_sock,cmdbuf,MAXCMD_LEN)){
-Printf_Error("9999999999999999999999");
         return -1;
     }
-Printf_Error("0000000000000000000000");
     char idbuf[4];
     if( SOCKET_RECV_ERROR == 
         API_socket_recv(father_sock,idbuf,4)){
         return -1;
     }
-Printf_Error("aaaaaaaaaaaaaaaaaaaaaa");
     return API_m_chartoi(idbuf,4);
 }
 
@@ -170,22 +138,27 @@ int SendAgentInfo(int fatherid,int childid,int ostype,char *pcname){
     API_m_itochar(childid,&(buffer[4]),4);
     API_m_itochar(ostype,&(buffer[8]),4);
     memcpy(&(buffer[12]),pcname,MAX_PCNAME_LEN);
+Printf_DEBUG("father id = %d , id = %d , ostype = %d , pcname = %s",
+            fatherid,childid,ostype,pcname);
     return SendUpper(CMD_AGENT_SYNC_UPSTREAM 
         ,buffer,MAX_SYNCNODE_INFO_LEN);
 }
 
 int on_recv_Agent_Info(int sock){
     char buffer[MAX_SYNCNODE_INFO_LEN];
-    if( SOCKET_RECV_ERROR == 
-        API_socket_recv(sock,buffer,
-            MAX_SYNCNODE_INFO_LEN)){
+    int  res2 = API_socket_recv(sock,buffer, MAX_SYNCNODE_INFO_LEN);
+    if( SOCKET_RECV_ERROR == res2
+        ){
         return 0;
     }
+Printf_DEBUG("recv = %d",res2);
     int fatherid = API_m_chartoi(buffer,4);
     int childid  = API_m_chartoi(&(buffer[4]),4);
     int ostype   = API_m_chartoi(&(buffer[8]),4);
     char pcname[MAX_PCNAME_LEN];
     memcpy(pcname,&(buffer[12]),MAX_PCNAME_LEN);
+Printf_DEBUG("father id = %d , id = %d , ostype = %d , pcname = %s",
+            fatherid,childid,ostype,pcname);
     pPCNodeInfo node = PCNODE_Create();
     if(node == NULL){ return 0; }
     int res = PCNODE_SETAllData(
@@ -198,7 +171,8 @@ int on_recv_Agent_Info(int sock){
             "",            // ip
             -1,            // port
             -1);           // cmd_sock
-    PCMANAGER_ADDRemote(fatherid,node);
+    int res3 = PCMANAGER_ADDRemote(fatherid,node);
+    Printf_DEBUG("ADD Remote %d",res3);
     return 0;
 }
 

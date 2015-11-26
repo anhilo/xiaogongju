@@ -15,7 +15,12 @@ int main(){
 
 
 
-//MIC_SLEEP(10);
+MIC_SLEEP(15);
+Printf_DEBUG("start send");
+    int sock2222 = AGENT_ConversationProxy_Build_Tunnel(2);
+    char helloWorld[]="Hello This is from sock";
+    API_socket_send(sock2222,helloWorld,strlen(helloWorld));
+Printf_DEBUG("send ok");
 ////Printf_OK("Start Send BroadCast Msg");
 ////char buf[] = "Hello World BroadCast";
 ////SendDown_BroadCast(buf,strlen(buf));

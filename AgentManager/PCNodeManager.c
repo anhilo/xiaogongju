@@ -15,6 +15,7 @@ pLISTHEAD    list;
 int root_id = 0;
 #define MANAGER_NOW 1
 #define NO_MANAGER  2
+#define IAM_ADMIN   3
 int tree_now= NO_MANAGER;
 pPCNodeInfo rootnode;
 int fatherid = -1;
@@ -28,6 +29,13 @@ int MANAGER_FREE(){
 
 int PCMANAGER_INIT(pPCNodeInfo nodeself){
     rootnode = PCNODE_Copy(nodeself);
+    if(rootnode -> NodeType == 
+        IAM_ADMIN_NODE){
+Printf_DEBUG("cccccccccccccccccccccc");
+        tree_now = IAM_ADMIN;
+    }
+Printf_DEBUG("root->nodetype = %d . %d",
+        rootnode->NodeType , IAM_ADMIN_NODE);
     if(rootnode == NULL) return PCMANAGER_INIT_ERROR;
     tree = Tree_Init_Manager(NULL,
         fun_pcInfo_free,
@@ -45,6 +53,10 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself){
     root_id = rootnode -> id;
     tree_now = NO_MANAGER;
     maxid = rootnode->id;
+    if(rootnode->NodeType == 
+        IAM_ADMIN_NODE){
+        tree_now = IAM_ADMIN;
+    }
     return PCMANAGER_INIT_OK;
 }
 
@@ -61,7 +73,8 @@ Printf_DEBUG("ID CLASH Here");
     if(res == LISTNODE_INSERTNODE_ERROR){
         return PCMANAGER_ADDNEIGHBOR_ERROR;
     }
-    if(tree_now == MANAGER_NOW){
+    if(tree_now == MANAGER_NOW
+        || tree_now == IAM_ADMIN ){  // no tree
         int res2 = Tree_InsertNode(tree,
                     root_id,
                     newnode->id,
@@ -75,7 +88,9 @@ Printf_DEBUG("ID CLASH Here");
 }
 
 int PCMANAGER_ADDRemote(int fatherid,pPCNodeInfo newnode){
-    if(tree_now == NO_MANAGER){  // no tree
+    if(tree_now == NO_MANAGER 
+         ){  // no tree
+    Printf_DEBUG("Not Manager or admin");
         return PCMANAGER_ADDREMOTE_ERROR;
     }
     int res = Tree_InsertNode(tree,
@@ -83,6 +98,7 @@ int PCMANAGER_ADDRemote(int fatherid,pPCNodeInfo newnode){
                 newnode->id,
                 (pNodeData)newnode);
     if(res == TREE_INSERTNODE_ERROR){
+    Printf_DEBUG("remote insert error");
         return PCMANAGER_ADDREMOTE_ERROR;
     }
     maxid = (maxid>newnode->id)?maxid:newnode->id;

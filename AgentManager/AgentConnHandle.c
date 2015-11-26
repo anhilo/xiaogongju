@@ -116,14 +116,14 @@ Printf_DEBUG("the sock is -----> %d",sock);
     clientinfo -> conn.ConnType = CONNTYPE_REVERSE_CONNECT;
     if(clientinfo == NULL){return 0;}
     // add clientnode 
-    if(0 == m_AddNeighborProxy(clientinfo)){
-        Printf_Error("Add NeighborProxy Error");
-        return 0;
-    }
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     switch(clientinfo->NodeType){
     case IAM_ADMIN_NODE:
         Printf_OK("CLIENT is Admin");
+        if(0 == m_AddNeighborProxy(clientinfo)){
+            Printf_Error("Add NeighborProxy Error");
+            return 0;
+        }
         int myid = m_recvID(sock);
         // reset my id
         PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
@@ -136,6 +136,13 @@ Printf_DEBUG("the sock is -----> %d",sock);
         Printf_OK("Client is Myself_node");
         int hisid = ASK_NEW_ID();
         m_sendID(sock,hisid);
+        clientinfo->id = hisid;
+        if(0 == m_AddNeighborProxy(clientinfo)){
+            Printf_Error("Add NeighborProxy Error");
+            return 0;
+        }
+        SendAgentInfo(PCMANAGER_Get_RootID(),clientinfo->id,
+            clientinfo->OSType,clientinfo->PCName);
         m_Info_send(sock,myself);
         break;
     default:
