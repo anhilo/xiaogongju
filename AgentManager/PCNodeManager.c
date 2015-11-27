@@ -31,7 +31,6 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself){
     rootnode = PCNODE_Copy(nodeself);
     if(rootnode -> NodeType == 
         IAM_ADMIN_NODE){
-Printf_DEBUG("cccccccccccccccccccccc");
         tree_now = IAM_ADMIN;
     }
 Printf_DEBUG("root->nodetype = %d . %d",
@@ -250,9 +249,7 @@ pPCNodeInfo PCMANAGER_GETNodeInfo(int id){
     int res = -1;
     pPCNodeInfo node = 
         (pPCNodeInfo) ListNode_GetNodeData(list,id);
-Printf_DEBUG("bbbbbbbbbbbbbbbbb");
     if(node == NULL){
-Printf_DEBUG("ccccccccccccccccc");
         node = (pPCNodeInfo)
             Tree_GetNodeData(tree,id);
     }

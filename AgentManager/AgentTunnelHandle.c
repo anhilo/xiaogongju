@@ -9,15 +9,21 @@
 #include "PCNodeInfo.h"
 #include "AgentConversationProxy.h"
 
+int SendTunnelProto(int sock,int targetid){
+    char cmd_buf[4];
+    API_m_itochar(targetid,cmd_buf,4);
+    API_socket_send(sock,cmd_buf,4);
+    return 1;
+}
 
 int AGENT_TUNN_BuildTunnel(int to_id){
     int target_sock = -1;
+    int result_flag = 0;
     pPCNodeInfo nextnode = PCMANAGER_GETNextJump(to_id);
 
     Printf_DEBUG("Start Build Tunnel");
 
 if(nextnode != NULL){
-    
     Printf_DEBUG("the cmd_sock is ---> %d",
         nextnode->conn.cmd_socket);
 }
@@ -31,7 +37,10 @@ if(nextnode != NULL){
             nextnode -> conn.IPaddr,
             nextnode -> conn.port);
         if(target_sock != SOCKET_CONNECT_ERROR){
-            return target_sock;
+Printf_DEBUG("Build Tunnel OK -1111---> %d",target_sock);
+// Send NEW_TUNNEL_ASK
+            AGENT_ConversationProxy_SendRcHead(target_sock);
+            result_flag = 1;
         }
     }
     else if(nextnode != NULL
@@ -48,11 +57,17 @@ if(nextnode != NULL){
             if(res != SOCKET_SEND_ERROR){
                 target_sock = tunn_wait_second_pool(tunnid, 1000);
                 if(target_sock != -1){
-                    return target_sock;
+                    result_flag = 1;
                 }
             }
         }
         
+    }
+    if(result_flag == 1){
+    // get New Tunnel sock ok
+    //  send new tunnel protocal???
+        SendTunnelProto(target_sock,to_id);
+        return target_sock;
     }
     return AGENT_TUNN_BUILDTUNNEL_ERROR;
 }
@@ -63,6 +78,30 @@ void recvtest(int sock){
 Printf_DEBUG("%s",buffer);
 }
 
+int on_newTunnel_recv(int sock){
+    char cmd_buf[4];
+    API_socket_recv(sock,cmd_buf,4);
+    int targetid = API_m_chartoi(cmd_buf,4);
+Printf_DEBUG("11111111111 -> %d",targetid);
+    if(targetid == PCMANAGER_Get_RootID()){
+Printf_DEBUG("recvtest -> %d",targetid);
+        recvtest(sock);
+    }
+    else{
+Printf_DEBUG("22222222222 -> %d",targetid);
+        int target_sock = AGENT_TUNN_BuildTunnel(targetid);
+        API_socket_send(target_sock,cmd_buf,4);
+Printf_DEBUG("33333333333 -> %d -> %d ",sock,target_sock);
+        tunn_sock_to_sock(sock,target_sock,1000);
+Printf_DEBUG("44444444444 -> %d -> %d ",sock,target_sock);
+    }
+    return 0;
+}
+
+int on_new_tunnel_ask(int sock){
+    on_newTunnel_recv(sock);
+    return 1;
+}
 
 int on_reverse_Tunnel_Ask(int sock,char *ip,int port){
     int reverse_sock = API_socket_connect(ip,port);
@@ -77,7 +116,7 @@ int on_reverse_Tunnel_Ask(int sock,char *ip,int port){
     char poolbuf[4];
     API_socket_recv(sock,poolbuf,4);
     API_socket_send(reverse_sock,poolbuf,4);
-    recvtest(reverse_sock);
+    on_newTunnel_recv(reverse_sock);
     return 1;
 }
 

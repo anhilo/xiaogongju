@@ -254,8 +254,9 @@ MIC_THREAD_FUN_DEF(cbf_for_server_start,pvalue){
         ((struct ValueForCallBack *)pvalue) -> fun;
     int m_sock = 
         ((struct ValueForCallBack *)pvalue) -> socket;
+    MIC_USLEEP(10);
     int res = m_fun(m_sock);
-    free(pvalue);
+    MIC_THREAD_END();
     return NULL;
 }
 
@@ -275,6 +276,7 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
     int len_sockaddr;
     int fun_result;
     int sockbuf;
+    struct ValueForCallBack * pvalue ;
     MyPrintf("start socket server here");
     len_sockaddr = sizeof(struct sockaddr_in);
     MyPrintf("start accept socket client here");
@@ -285,7 +287,7 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
                 ))>= 0 ){
         // 对于每一个新连接的会话，都用fun 函数进行处理
         /// fun 函数应当以线程方式进行处理，以免程序阻塞
-        struct ValueForCallBack * pvalue = 
+        pvalue = 
             (struct ValueForCallBack *)malloc(sizeof(struct ValueForCallBack));
         if(pvalue == NULL) {
             Printf_Error("server start error pvalue is NULL");
@@ -299,8 +301,10 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
             Printf_Error("server start error thread error");
             return NULL;
         }
-        MIC_THREAD_JOIN(thread_id);
+    Printf_DEBUG("New Accept 11111111111");
+        //MIC_THREAD_JOIN(thread_id);
         MIC_USLEEP(1);
+        free(pvalue);
     }
     return NULL;
 }

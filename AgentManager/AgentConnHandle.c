@@ -28,15 +28,12 @@ int m_recvID(int sock);
 
 int m_AddNeighborProxy(pPCNodeInfo info){
     int res = PCMANAGER_ADDNeighbor(info);
-Printf_DEBUG("add ???????????????");
     if(PCMANAGER_ADDNEIGHBOR_ID_CLASH == 
         res ){
 // Replace ID and send Replace ID msg here
-Printf_DEBUG("clash here");
         int newid = ASK_NEW_ID();
-Printf_DEBUG("get new id ~~~~ -> %d",newid);
         // send Replace ID msg here
-Broadcast_ReplaceID(info->id,newid);
+//Broadcast_ReplaceID(info->id,newid);
         // replace id local
         if(PCMANAGER_REPLACEID_ERROR == 
             PCMANAGER_ReplaceID(info->id,newid)){
@@ -50,7 +47,7 @@ Broadcast_ReplaceID(info->id,newid);
     else if(PCMANAGER_ADDNEIGHBOR_OK == res ){
         return 1;
     }
-Printf_DEBUG("add error ????");
+    Printf_Error("add error ????");
     return 0;
 }
 

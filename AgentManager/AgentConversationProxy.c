@@ -84,13 +84,13 @@ int m_Listener_For_EachAgentNode(pNodeData node){
             Printf_OK("Cmd From ADMIN");
             break;
         case MYSELF_NODE:
+        case UPSTREAM_NODE:
             res = m_CMD_Listen(cmd_sock,ip,port);
             break;
         case UNKONWN_NODE:
             Printf_Error("UNKNOWN_NODE here");    
             break;
-        case UPSTREAM_NODE:
-            Printf_Error("UPSTREAM_NODE here how code???");
+        //    Printf_OK("Cmd From UPSTREAM_NODE");
             break;
         default:
             Printf_Error("UNKNOWN_NODE type--> %d",((pPCNodeInfo)node)->NodeType);    
@@ -122,6 +122,7 @@ int StartListenerThread(){
 }
 
 int m_callBackForEachAccept(int socket){
+    Printf_OK("New accept ");
     if(socket == SOCKET_INIT_ERROR){
         return 0;
     }
@@ -137,10 +138,11 @@ int m_callBackForEachAccept(int socket){
             break;
         case CMDMSG_NEW_TUNNEL_ASK:
             Printf_OK("New Tunnel Ask");
+            on_new_tunnel_ask(socket);
             break;
         case CMDMSG_NEW_TUNNEL_ANSWER:
             Printf_OK("New Tunnel Answer");
-on_reverse_Reply(socket);
+            on_reverse_Reply(socket);
             break;
         case CMDMSG_UPPER_BROADCAST_MSG:
             Printf_OK("Upper Stream MSG");  

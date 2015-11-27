@@ -131,9 +131,11 @@ int tunn_get_pool_id_and_lock_it(){
             live_num ++;
             socks_Pool[i].flag = True;
     printf("<-- %3d --> (open)used/unused  %d/%d\n",i,live_num,MAX_POOL - live_num);
+            can_write_pool = True;
             return i;
         }
     }
+    can_write_pool = True;
     return TUNNEL_GET_POOL_ID_FALSE;
 }
 
@@ -183,7 +185,7 @@ int tunn_set_first_pool_and_lock_it(int sock,int usec){
         id = TUNNEL_GET_FIRST_POOL_ID_FALSE;
     }
     // unlock write pool now
-    can_write_pool = True;
+    //can_write_pool = True;
     return id;   
 }
 
@@ -204,6 +206,7 @@ int tunn_set_second_pool_and_run_it(int num,int sock){
 }
 
 int tunn_sock_to_sock(int from_sock,int to_sock,int usec){
+    Printf_DEBUG("55555555555 -> %d",from_sock);
     int num = tunn_set_first_pool_and_lock_it(from_sock,usec);
     if (num != TUNNEL_GET_FIRST_POOL_ID_FALSE){
         if(TUNNEL_SET_SECOND_POOL_AND_RUN_IT_FALSE !=
