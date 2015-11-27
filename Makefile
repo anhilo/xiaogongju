@@ -32,7 +32,7 @@ nuxout = $(out1) $(out2) $(testout) $(out3)
 
 clientobj = $(object_lib) $(AgentLib) $(node_client)
 serverobj = $(object_lib) $(AgentLib) $(node_server) 
-testobj = $(object_lib) $(AgentLib) $(node_test) 
+testobj   = $(object_lib) $(AgentLib) $(node_test) 
 adminobj  = $(object_lib) $(AgentLib) $(node_admin) 
 objects   = $(object_lib) $(AgentLib) $(node_client) $(node_server) $(node_test) $(node_admin)
 EWhere : $(objects)

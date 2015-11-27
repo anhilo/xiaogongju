@@ -46,4 +46,12 @@ int AGENT_Conversation_Connect(char *ip,int port){
     return AGENT_ConversationProxy_Connect(ip,port);
 }
 
-int AGENT_Conversation_Build_SockTunnel(int targetid);
+int AGENT_Conversation_Build_SockTunnel(int targetid){
+    int target_sock = AGENT_ConversationProxy_Build_Tunnel(targetid);
+    if(
+        AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR ==
+        target_sock){
+    return AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR ;
+}
+    return target_sock;
+}

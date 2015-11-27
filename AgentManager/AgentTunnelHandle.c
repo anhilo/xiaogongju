@@ -51,6 +51,7 @@ Printf_DEBUG("Build Tunnel OK -1111---> %d",target_sock);
             == AGENT_ConversationProxy_SendRcHead
             (cmd_sock)){
             int tunnid = tunn_set_first_pool_and_getid(cmd_sock);
+Printf_DEBUG("poolid = %d",tunnid);
             char tunnelid[4];
             API_m_itochar(tunnid,tunnelid,4);
             int res = API_socket_send(cmd_sock,tunnelid,4);
@@ -74,26 +75,22 @@ Printf_DEBUG("Build Tunnel OK -1111---> %d",target_sock);
 
 void recvtest(int sock){
     char buffer[1000];
-    API_socket_recv(sock,buffer,1000);
-Printf_DEBUG("%s",buffer);
+    int len = API_socket_recv(sock,buffer,1000);
+//Printf_DEBUG("%d -- > %d",len,buffer[0]);
+//    len = API_socket_recv(sock,buffer,1000);
+Printf_DEBUG("%d -- > %s",len,buffer);
 }
 
 int on_newTunnel_recv(int sock){
     char cmd_buf[4];
     API_socket_recv(sock,cmd_buf,4);
     int targetid = API_m_chartoi(cmd_buf,4);
-Printf_DEBUG("11111111111 -> %d",targetid);
     if(targetid == PCMANAGER_Get_RootID()){
-Printf_DEBUG("recvtest -> %d",targetid);
         recvtest(sock);
     }
     else{
-Printf_DEBUG("22222222222 -> %d",targetid);
         int target_sock = AGENT_TUNN_BuildTunnel(targetid);
-        API_socket_send(target_sock,cmd_buf,4);
-Printf_DEBUG("33333333333 -> %d -> %d ",sock,target_sock);
         tunn_sock_to_sock(sock,target_sock,1000);
-Printf_DEBUG("44444444444 -> %d -> %d ",sock,target_sock);
     }
     return 0;
 }
@@ -121,12 +118,9 @@ int on_reverse_Tunnel_Ask(int sock,char *ip,int port){
 }
 
 int on_reverse_Reply(int sock){
-Printf_DEBUG("on_reverse_Reply");
     char poolid_buf[4] ;
     API_socket_recv(sock,poolid_buf,4);
     int  poolid = API_m_chartoi(poolid_buf,4);
     tunn_set_second_pool(poolid,sock);
-    Printf_DEBUG("set second pool OK");
-//    recvtest(sock);
     return 1;
 }

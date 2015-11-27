@@ -17,7 +17,7 @@ int main(){
 
 MIC_SLEEP(8);
 Printf_DEBUG("start send");
-    int sock2222 = AGENT_ConversationProxy_Build_Tunnel(2);
+    int sock2222 = AGENT_Conversation_Build_SockTunnel(2);
     char helloWorld[]="Hello This is from sock";
     API_socket_send(sock2222,helloWorld,strlen(helloWorld));
 Printf_DEBUG("send ok");
