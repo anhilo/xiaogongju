@@ -9,7 +9,8 @@
 
 
 
-int m_ForEachChildAgent_Trigger(pPCNodeInfo info){
+int m_ForEachChildAgent_Trigger(pNodeData minfo){
+    pPCNodeInfo info = (pPCNodeInfo)minfo;
     int newid = ASK_NEW_ID();
     // set it id
     resetTargetNewId(info->id,newid);
@@ -17,11 +18,16 @@ int m_ForEachChildAgent_Trigger(pPCNodeInfo info){
     PCMANAGER_ReplaceID(info->id,newid);
     info->id = newid;
     // send agent info upper
-    Sen
+    SendAgentInfo(PCMANAGER_Get_RootID(),
+        newid,
+        info->OSType,
+        info->PCName);
+    return 1;
 }
 
 int ChildNodeInfoSyncTrigger(){
     // Traval every node 
+    PCMANAGER_Traversal_Neighbor();
     // and call m_ForEachChildAgent_Trigger
 }
 

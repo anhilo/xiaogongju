@@ -174,7 +174,12 @@ Printf_DEBUG("father id = %d , id = %d ,
             "",            // ip
             -1,            // port
             -1);           // cmd_sock
-    int res3 = PCMANAGER_ADDRemote(fatherid,node);
+    if(fatherid != PCMANAGER_Get_RootID()){
+        int res3 = PCMANAGER_ADDRemote(
+                fatherid,node);
+    }
+    SendAgentInfo(fatherid,childid,
+            ostype,pcname);
     Printf_DEBUG("ADD Remote %d",res3);
     return 0;
 }
