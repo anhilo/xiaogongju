@@ -14,7 +14,8 @@
 #define CMD_AGENT_SYNC_UPSTREAM  1
 #define CMD_ID_REPLACE           2
 #define CMD_ID_ASK               3
-#define CMD_OTHERINFO            4
+#define CMD_RESET_MYID           4
+#define CMD_OTHERINFO            5
 //****************************************
 int on_ask_id(int sock);
 int ASK_ID_UPPER();
@@ -138,8 +139,9 @@ int SendAgentInfo(int fatherid,int childid,int ostype,char *pcname){
     API_m_itochar(childid,&(buffer[4]),4);
     API_m_itochar(ostype,&(buffer[8]),4);
     memcpy(&(buffer[12]),pcname,MAX_PCNAME_LEN);
-Printf_DEBUG("father id = %d , id = %d , ostype = %d , pcname = %s",
-            fatherid,childid,ostype,pcname);
+    Printf_DEBUG("father id = %d , id = %d , 
+        ostype = %d , pcname = %s",
+        fatherid,childid,ostype,pcname);
     return SendUpper(CMD_AGENT_SYNC_UPSTREAM 
         ,buffer,MAX_SYNCNODE_INFO_LEN);
 }
@@ -157,7 +159,8 @@ Printf_DEBUG("recv = %d",res2);
     int ostype   = API_m_chartoi(&(buffer[8]),4);
     char pcname[MAX_PCNAME_LEN];
     memcpy(pcname,&(buffer[12]),MAX_PCNAME_LEN);
-Printf_DEBUG("father id = %d , id = %d , ostype = %d , pcname = %s",
+Printf_DEBUG("father id = %d , id = %d , 
+            ostype = %d , pcname = %s",
             fatherid,childid,ostype,pcname);
     pPCNodeInfo node = PCNODE_Create();
     if(node == NULL){ return 0; }
@@ -240,7 +243,7 @@ int m_for_each_downStreamNode(pNodeData info){
     return 1;
 }
 
-int SendDownStream (int broadcasttype,int targetid
+int SendDownStream(int broadcasttype,int targetid
         ,char *msg,int msglen){
     pPCNodeInfo info;
     while(buflock) MIC_USLEEP(300);
@@ -256,7 +259,8 @@ int SendDownStream (int broadcasttype,int targetid
             m_for_each_downStreamNode(info);
             break;
         case CMD_DOWN_BROADCAST_MSG :  // 广播类消息
-            PCMANAGER_Traversal_Neighbor(m_for_each_downStreamNode);
+            PCMANAGER_Traversal_Neighbor(
+                m_for_each_downStreamNode);
             break;
         default:
             Printf_Error("Send Down Stream Error");
@@ -290,6 +294,11 @@ int m_analyze_and_Doit(char *msgbuf_1){
         Printf_OK("Recv ID Replace msg");
         m_ID_Replace(msgbuf_1);
         break;
+    case CMD_RESET_MYID:
+        Printf_OK("RESET_MY_Id NOW");
+        on_reset_myself_id(&(msgbuf_1[1]),
+            MAX_SYNCNODE_INFO_LEN-1);
+        break;
     default:
         Printf_Error("Error m_analyze_and_Doit");
         break;
@@ -297,7 +306,8 @@ int m_analyze_and_Doit(char *msgbuf_1){
     return 1;
 }
 
-int on_recvDirectPoint_Msg(int sock,char *cmdbuf_1,char *msgbuf_1){
+int on_recvDirectPoint_Msg(int sock,char *cmdbuf_1,
+        char *msgbuf_1){
     int targetid =API_m_chartoi(&(cmdbuf_1[1]),4);
     if(targetid == PCMANAGER_Get_RootID()){
         // 解析消息类型并处理
@@ -305,13 +315,15 @@ int on_recvDirectPoint_Msg(int sock,char *cmdbuf_1,char *msgbuf_1){
     }
     else{
         // 继续向下层节点传递消息
-        SendDownStream(CMD_DOWN_DIRECT_POINT_MSG,targetid,msgbuf_1,
+        SendDownStream(CMD_DOWN_DIRECT_POINT_MSG,
+            targetid,msgbuf_1,
             MAX_SYNCNODE_INFO_LEN);
     }
     return 1;
 }
 
-int on_broadcast_Down_msg(int sock,char *cmdbuf_1,char *msgbuf_1){
+int on_broadcast_Down_msg(int sock,char *cmdbuf_1,
+        char *msgbuf_1){
     // 解析这一消息
     m_analyze_and_Doit(msgbuf_1);
     // 继续向子节点方向传递
@@ -345,7 +357,6 @@ int SendDownReplaceID(int oldid,int newid){
     return 1;
 }
 
-
 //*********************************************
 // Broadcast_ReplaceID(int oldid,int newid);
 //*********************************************
@@ -354,3 +365,27 @@ int Broadcast_ReplaceID(int oldid,int newid){
     SendDownReplaceID(oldid,newid);
     return 1;
 }
+
+
+//*********************************************
+// int resetTargetNewId(int targetid,int newid)
+// int on_reset_myself_id(char *msg,int len)
+//*********************************************
+int resetTargetNewId(int targetid,int newid){
+    char idbuf[5];
+    idbuf[0] = CMD_RESET_MYID;
+    API_m_itochar(newid,idbuf[1],4);
+    return SendDown_DirectMsg(targetid,idbuf,5);
+}
+
+int on_reset_myself_id(char *msg,int len){
+    if(len < 4) {
+        Printf_Error("on_reset_myself_id Error");
+        return 0;
+    }
+    int newid = API_m_chartoi(idbuf,4);
+    // 
+    Printf_OK("my new id is ~ %d",newid);
+    return 1;
+}
+

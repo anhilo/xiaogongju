@@ -7,13 +7,24 @@
 
 #include "AgentChildSync.h"
 
-#define 
 
 
-int m_ForEachChildAgent_Trigger(){
+int m_ForEachChildAgent_Trigger(pPCNodeInfo info){
+    int newid = ASK_NEW_ID();
+    // set it id
+    resetTargetNewId(info->id,newid);
+    // send set id info
+    PCMANAGER_ReplaceID(info->id,newid);
+    info->id = newid;
+    // send agent info upper
+    Sen
 }
 
 int ChildNodeInfoSyncTrigger(){
+    // Traval every node 
+    // and call m_ForEachChildAgent_Trigger
 }
 
-int on_ChildNodeInfo_Arrive(int sock);
+int on_ChildNodeInfo_Arrive(int sock){
+
+}
