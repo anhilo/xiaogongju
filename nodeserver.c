@@ -2,6 +2,7 @@
 #include "AgentManager/PCNodeInfo.h"
 #include"AgentManager/AgentConversationCTRL.h"
 #include "AgentManager/AgentConversationProxy.h"
+#include "AgentManager/PCNodeManager.h"
 //#include"AgentManager/AgentCTRL.h"
 
 //int fun_newnode(int sock){

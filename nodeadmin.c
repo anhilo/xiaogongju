@@ -6,8 +6,8 @@
 int sendMsgTo(int targetid){
     char buffer[200];
     sprintf(buffer,"Hello Client ->%d<-, This Msg send by Admin.",targetid);
-    buffer[strlen(buffer)+1] = "\0";
-Printf_DEBUG("start send %d",strlen(buffer));
+    buffer[strlen(buffer)+1] = '\0';
+Printf_DEBUG("start send %d",(int)strlen(buffer));
     
     int sock = AGENT_Conversation_Build_SockTunnel(targetid);
     API_socket_send(sock,buffer,strlen(buffer)+1);

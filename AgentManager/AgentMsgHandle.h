@@ -19,5 +19,6 @@ int Broadcast_ReplaceID(int oldid,int newid);
 int on_UpStreamMsg_Arrive   (int sock);
 int on_DownStreamMsg_Arrive (int sock);
 
+int resetTargetNewId(int targetid,int newid);
 
 #endif

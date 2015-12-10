@@ -7,6 +7,8 @@
 
 #include "AgentChildSync.h"
 #include "PCNodeInfo.h"
+#include "AgentMsgHandle.h"
+#include "PCNodeManager.h"
 
 int m_ForEachChildAgent_Trigger(pNodeData minfo){
     pPCNodeInfo info = (pPCNodeInfo)minfo;
