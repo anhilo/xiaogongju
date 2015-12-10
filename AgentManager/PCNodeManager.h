@@ -98,4 +98,10 @@ pPCNodeInfo PCMANAGER_Get_FatherNode();
 #define PCMANAGER_MANAGER_NOW_TRUE   1
 #define PCMANAGER_MANAGER_NOW_FALSE  0
 int PCMANAGER_Manager_Now();
+
+
+int PCMANAGER_Set_RootID(int targetid);
+
+
+int PCMANAGER_Tree_Print();
 #endif

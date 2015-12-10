@@ -9,7 +9,8 @@ AgentLib   =  AgentManager/PCNodeInfo.c \
 			AgentManager/AgentConnHandle.c \
 			AgentManager/AgentTunnelHandle.c \
 			AgentManager/AgentMsgHandle.c \
-			AgentManager/AgentCMDInfo.c
+			AgentManager/AgentCMDInfo.c \
+			AgentManager/AgentChildSync.c
 			#AgentManager/AgentCTRL.c \
 			AgentManager/AgentSock.c \
 			AgentManager/AgentInteractive.c

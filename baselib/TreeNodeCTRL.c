@@ -1,4 +1,5 @@
 #include"TreeNodeCTRL.h"
+#include "../AgentManager/PCNodeInfo.h"
 
 pTreeManager Tree_Init_Manager(
     pfunNodeCall  fun_call,
@@ -61,7 +62,6 @@ pTreeNode mGetNode(pTreeNode root,int id){
     return NULL;
 }
 
-
 pTreeNode GetNode(pTreeManager head,int id){
     if(head == NULL){
         return NULL;
@@ -103,7 +103,9 @@ int Tree_InsertNode(pTreeManager head,int parrentid,int newid, pNodeData pnode){
     }
     //  reset father node state
     newNode->father = node;
-    node-> child = newNode;
+    if(node -> child == NULL){
+        node-> child = newNode;
+    }
     node-> child_num ++;
     
     head -> child_num ++;
@@ -281,5 +283,46 @@ int Tree_HaveNode(pTreeManager head,int id){
     if(p == NULL){
         return 0;
     }
+    return 1;
+}
+
+typedef int (*pfunCallBackForNode)(pNodeData node,int fatherid);
+
+int mNewTravel(pTreeNode root,pfunCallBackForNode callback){
+    int k;
+    TreeNode *p = NULL;
+    if(root ==NULL){
+        return 0;
+    }
+//    printf("this id is %d , child_num = %d\n",root->id, root->child_num);
+    if(root->father != NULL ){
+        if( 0== callback(root->node,root->father->id)){
+            return 0;
+        }
+    }
+    else{
+        if( 0== callback(root->node,-1)){
+            return 0;
+        }
+    }
+    p = root->child;
+    for(k=0;k<root->child_num;k++){
+//printf(">>>>start print child this id = %d \n",root->id);
+        if(0 == mNewTravel(p,callback)){
+            return 0;
+        }
+        p = p->next_Sibling;
+    }
+    return 1;
+}
+
+int TreeNodePrint(pNodeData node,int faterid){
+    pPCNodeInfo info = (pPCNodeInfo)node;
+    Printf_OK("====Father id is %d,id = %d,pcname = %s",faterid,info->id,info->PCName);
+    return 1;
+}
+
+int Tree_Print(pTreeManager head){
+    mNewTravel(head->root,TreeNodePrint);
     return 1;
 }

@@ -66,6 +66,7 @@ Printf_DEBUG("poolid = %d",tunnid);
     }
     if(result_flag == 1){
     // get New Tunnel sock ok
+Printf_DEBUG("get tunnel ok!!!!");
     //  send new tunnel protocal???
         SendTunnelProto(target_sock,to_id);
         return target_sock;

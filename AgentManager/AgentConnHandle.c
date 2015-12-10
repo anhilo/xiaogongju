@@ -8,6 +8,7 @@
 #include "PCNodeManager.h"
 #include "PCNodeInfo.h"
 #include "AgentMsgHandle.h"
+#include "AgentChildSync.h"
 
 
 //====================================
@@ -71,7 +72,8 @@ int when_IAM_ADMIN(int sock,char *ip,int port){
 
 int when_IAM_NORMALNODE(int sock,char *ip,int port){
     int myid = m_recvID(sock);
-    PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
+//    PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
+    PCMANAGER_Set_RootID(myid);
     pPCNodeInfo serverinfo = m_agentInfo_Recv(sock);
     if(serverinfo->NodeType == MYSELF_NODE){
         serverinfo->conn.ConnType = CONNTYPE_DIRECT_CONNECT;
@@ -81,7 +83,7 @@ int when_IAM_NORMALNODE(int sock,char *ip,int port){
             return 1;
         }
     }
-    return 1;
+    return 0;
 }
 
 // be called By client
@@ -128,11 +130,13 @@ Printf_DEBUG("the sock is -----> %d",sock);
         PCMANAGER_SETUpperAdmin(clientinfo->id);
         // send myself
         m_Info_send(sock,myself);
+        ChildNodeInfoSyncTrigger();
         break;
     case MYSELF_NODE:
         Printf_OK("Client is Myself_node");
         int hisid = ASK_NEW_ID();
         m_sendID(sock,hisid);
+        Printf_OK("Client id is %d",hisid);
         clientinfo->id = hisid;
         if(0 == m_AddNeighborProxy(clientinfo)){
             Printf_Error("Add NeighborProxy Error");
@@ -327,7 +331,7 @@ pPCNodeInfo m_agentInfo_Recv(int sock){
     if(result == BUF_ERROR){
         return M_INFO_RECV_ERROR;
     }
-Printf_OK("id = %d,ostype = %d , nodetype = %d, pcname = %s",
+Printf_OK("[recv ]id = %d,ostype = %d , nodetype = %d, pcname = %s",
         info-> id,info->OSType,info->NodeType,info->PCName);
     return info;
 }

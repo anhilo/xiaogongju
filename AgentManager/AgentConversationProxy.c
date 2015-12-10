@@ -60,8 +60,8 @@ Printf_DEBUG("UPPER BROADCAST MSG HERE ");
 on_UpStreamMsg_Arrive(sock);
                     break;
                 case CMDMSG_DOWN_BROADCAST_MSG:
-Printf_DEBUG("DOWN BROADCAST MSG HERE ");
-on_DownStreamMsg_Arrive(sock);
+//Printf_DEBUG("DOWN BROADCAST MSG HERE ");
+                    on_DownStreamMsg_Arrive(sock);
                     break;
             }
         }
@@ -122,7 +122,6 @@ int StartListenerThread(){
 }
 
 int m_callBackForEachAccept(int socket){
-    Printf_OK("New accept ");
     if(socket == SOCKET_INIT_ERROR){
         return 0;
     }

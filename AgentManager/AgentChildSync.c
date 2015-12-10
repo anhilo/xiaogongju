@@ -6,17 +6,33 @@
 */
 
 #include "AgentChildSync.h"
-
-
+#include "PCNodeInfo.h"
 
 int m_ForEachChildAgent_Trigger(pNodeData minfo){
     pPCNodeInfo info = (pPCNodeInfo)minfo;
+    if(info ->NodeType == 
+        MYSELF_NODE_REMOTE
+      || info -> NodeType == UPSTREAM_NODE){
+        return 1;
+    }
     int newid = ASK_NEW_ID();
     // set it id
     resetTargetNewId(info->id,newid);
     // send set id info
-    PCMANAGER_ReplaceID(info->id,newid);
+//    PCMANAGER_ReplaceID(info->id,newid);
+    int oldid = info -> id;
+    info->NodeType = MYSELF_NODE_REMOTE;
     info->id = newid;
+    /// set that node remote
+PCMANAGER_Tree_Print();
+Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
+        oldid,newid,PCMANAGER_Get_RootID());
+//    PCMANAGER_RemoveNode(oldid);
+//    PCMANAGER_ADDNeighbor(info);
+    PCMANAGER_ReplaceID(oldid,newid);
+Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
+        oldid,newid,PCMANAGER_Get_RootID());
+Printf_DEBUG("Add OK");
     // send agent info upper
     SendAgentInfo(PCMANAGER_Get_RootID(),
         newid,
@@ -27,10 +43,9 @@ int m_ForEachChildAgent_Trigger(pNodeData minfo){
 
 int ChildNodeInfoSyncTrigger(){
     // Traval every node 
-    PCMANAGER_Traversal_Neighbor();
     // and call m_ForEachChildAgent_Trigger
+    PCMANAGER_Traversal_Neighbor(
+        m_ForEachChildAgent_Trigger);
+    return 1;
 }
 
-int on_ChildNodeInfo_Arrive(int sock){
-
-}

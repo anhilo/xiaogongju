@@ -31,6 +31,7 @@ int SendUpper(int cmd,char *msg,int len){
         return SENDUPPER_ERROR;
     pPCNodeInfo info = PCMANAGER_Get_FatherNode();
     if(info == PCMANAGER_GET_FATHERNODE_ERROR){
+Printf_DEBUG("NoFather");
         return SENDUPPER_ERROR;
     }
     char cmdbuf[MAXCMD_LEN];
@@ -58,7 +59,9 @@ int SendUpper(int cmd,char *msg,int len){
 int ASK_NEW_ID(){
     int id = -1;
 
+    MIC_USLEEP(1);
     int manage_now = PCMANAGER_Manager_Now();
+    Printf_DEBUG("manager now --> %d",manage_now);
     switch(manage_now){
         case PCMANAGER_MANAGER_NOW_TRUE:
             id = ASK_ID_UPPER();
@@ -139,8 +142,7 @@ int SendAgentInfo(int fatherid,int childid,int ostype,char *pcname){
     API_m_itochar(childid,&(buffer[4]),4);
     API_m_itochar(ostype,&(buffer[8]),4);
     memcpy(&(buffer[12]),pcname,MAX_PCNAME_LEN);
-    Printf_DEBUG("father id = %d , id = %d , 
-        ostype = %d , pcname = %s",
+    Printf_DEBUG("father id = %d , id = %d , ostype = %d , pcname = %s",
         fatherid,childid,ostype,pcname);
     return SendUpper(CMD_AGENT_SYNC_UPSTREAM 
         ,buffer,MAX_SYNCNODE_INFO_LEN);
@@ -159,8 +161,7 @@ Printf_DEBUG("recv = %d",res2);
     int ostype   = API_m_chartoi(&(buffer[8]),4);
     char pcname[MAX_PCNAME_LEN];
     memcpy(pcname,&(buffer[12]),MAX_PCNAME_LEN);
-Printf_DEBUG("father id = %d , id = %d , 
-            ostype = %d , pcname = %s",
+Printf_DEBUG("father id = %d , id = %d , ostype = %d , pcname = %s",
             fatherid,childid,ostype,pcname);
     pPCNodeInfo node = PCNODE_Create();
     if(node == NULL){ return 0; }
@@ -174,8 +175,9 @@ Printf_DEBUG("father id = %d , id = %d ,
             "",            // ip
             -1,            // port
             -1);           // cmd_sock
+    int res3;
     if(fatherid != PCMANAGER_Get_RootID()){
-        int res3 = PCMANAGER_ADDRemote(
+        res3 = PCMANAGER_ADDRemote(
                 fatherid,node);
     }
     SendAgentInfo(fatherid,childid,
@@ -300,7 +302,6 @@ int m_analyze_and_Doit(char *msgbuf_1){
         m_ID_Replace(msgbuf_1);
         break;
     case CMD_RESET_MYID:
-        Printf_OK("RESET_MY_Id NOW");
         on_reset_myself_id(&(msgbuf_1[1]),
             MAX_SYNCNODE_INFO_LEN-1);
         break;
@@ -329,6 +330,7 @@ int on_recvDirectPoint_Msg(int sock,char *cmdbuf_1,
 
 int on_broadcast_Down_msg(int sock,char *cmdbuf_1,
         char *msgbuf_1){
+Printf_DEBUG("Down MSG?????????????????");
     // 解析这一消息
     m_analyze_and_Doit(msgbuf_1);
     // 继续向子节点方向传递
@@ -340,8 +342,10 @@ int on_broadcast_Down_msg(int sock,char *cmdbuf_1,
 int on_DownStreamMsg_Arrive (int sock){
     char cmdbuf_1[MAX_DOWNSTREAM_CMD_LEN];
     char msgbuf_1[MAX_SYNCNODE_INFO_LEN];
-    API_socket_recv(sock,cmdbuf_1,MAX_DOWNSTREAM_CMD_LEN);
-    API_socket_recv(sock,msgbuf_1,MAX_SYNCNODE_INFO_LEN);
+    int recvn1 = API_socket_recv(sock,cmdbuf_1,MAX_DOWNSTREAM_CMD_LEN);
+    int recvn2 = API_socket_recv(sock,msgbuf_1,MAX_SYNCNODE_INFO_LEN);
+//    Printf_Error("n1 = %d,n2 = %d",recvn1,recvn2);
+//    Printf_Error("recv[1] = %d, recv[2] = %d, recv[3] = %d, recv[4] = %d",msgbuf_1[1],msgbuf_1[2],msgbuf_1[3],msgbuf_1[4]);
     switch(cmdbuf_1[0]){
         case CMD_DOWN_DIRECT_POINT_MSG:  // 直达消息
             on_recvDirectPoint_Msg(sock,cmdbuf_1,msgbuf_1);
@@ -379,7 +383,9 @@ int Broadcast_ReplaceID(int oldid,int newid){
 int resetTargetNewId(int targetid,int newid){
     char idbuf[5];
     idbuf[0] = CMD_RESET_MYID;
-    API_m_itochar(newid,idbuf[1],4);
+    API_m_itochar(newid,&idbuf[1],4);
+    Printf_DEBUG("targetid = %d,newid = %d",
+        targetid,newid);
     return SendDown_DirectMsg(targetid,idbuf,5);
 }
 
@@ -388,9 +394,10 @@ int on_reset_myself_id(char *msg,int len){
         Printf_Error("on_reset_myself_id Error");
         return 0;
     }
-    int newid = API_m_chartoi(idbuf,4);
+    int newid = API_m_chartoi(msg,4);
     // 
     Printf_OK("my new id is ~ %d",newid);
+    PCMANAGER_Set_RootID(newid);
     return 1;
 }
 

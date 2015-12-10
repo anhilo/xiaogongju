@@ -301,7 +301,6 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
             Printf_Error("server start error thread error");
             return NULL;
         }
-    Printf_DEBUG("New Accept 11111111111");
         //MIC_THREAD_JOIN(thread_id);
         MIC_USLEEP(1);
         free(pvalue);

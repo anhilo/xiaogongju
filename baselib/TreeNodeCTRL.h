@@ -53,7 +53,6 @@ pNodeData Tree_GetNodeData(pTreeManager head,int id);
 
 //int Tree_Free(TreeNode *root,CallBackForNodeData dataFreeAddr);
 
-//int Tree_Print(TreeNode *root);
 
 int Tree_GetNextJump(pTreeManager head,int id);
 
@@ -66,4 +65,6 @@ int Tree_GetNodesNum(pTreeManager head);
 int Tree_CleanUp(pTreeManager head);
 
 int Tree_HaveNode(pTreeManager head,int id);
+
+int Tree_Print(pTreeManager head);
 #endif

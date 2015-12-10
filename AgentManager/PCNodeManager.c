@@ -62,7 +62,7 @@ Printf_DEBUG("root->nodetype = %d . %d",
 int PCMANAGER_ADDNeighbor(pPCNodeInfo newnode){
     if(PCMANAGER_HAVENode(newnode->id) 
         == PCMANAGER_HAVANODE_YES){
-Printf_DEBUG("ID CLASH Here");
+Printf_DEBUG("ID CLASH Here --> %d",newnode->id);
         return PCMANAGER_ADDNEIGHBOR_ID_CLASH;
     }
     int res = ListNode_InsertNode(
@@ -143,7 +143,7 @@ int PCMANAGER_SETUpperAdmin(int nodeid){
         return PCMANAGER_SETUPPER_ERROR;
     }
     tree_now = MANAGER_NOW;
-    fatherid = nodeid ;
+    fatherid = nodeid;
     PCNODE_Free(node);
     node = NULL;
     return PCMANAGER_SETUPPER_OK;
@@ -287,8 +287,17 @@ int PCMANAGER_GETAllNodeNum(){
 }
 
 int PCMANAGER_HAVENode(int id){
-    if( ListNode_HaveNode(list,id)
-        || Tree_HaveNode(tree,id)){
+    int res = ListNode_HaveNode(list,id);
+    int res2= Tree_HaveNode(tree,id);
+    if( id == root_id) {
+        return PCMANAGER_HAVANODE_YES;
+    }
+    if( res  ){
+    Printf_DEBUG("Found %d from ListNode-->%d",id,res);
+        return PCMANAGER_HAVANODE_YES;
+    }
+    else if(res2){
+    Printf_DEBUG("Found %d from Tree-->%d",id,res2);
         return PCMANAGER_HAVANODE_YES;
     }
     return PCMANAGER_HAVANODE_NO;
@@ -332,10 +341,18 @@ int PCMANAGER_Get_RootID(){
     return rootnode->id;
 }
 
+int PCMANAGER_Set_RootID(int newid){
+    root_id = newid;
+    rootnode->id = newid;
+    return 1;
+}
+
 pPCNodeInfo PCMANAGER_Get_FatherNode(){
     if(tree_now != MANAGER_NOW){
+//Printf_DEBUG("Manager_now Error");
         return PCMANAGER_GET_FATHERNODE_ERROR;
     }
+//Printf_DEBUG("fatherid = %d getfater node",fatherid);
     pPCNodeInfo info = PCMANAGER_GETNodeInfo(fatherid);
     if( info == PCMANAGER_GETNODEINFO_ERROR ){
         return PCMANAGER_GET_FATHERNODE_ERROR;
@@ -348,4 +365,12 @@ int PCMANAGER_Manager_Now(){
         return PCMANAGER_MANAGER_NOW_TRUE;
     }
     return PCMANAGER_MANAGER_NOW_FALSE;
+}
+
+
+
+
+int PCMANAGER_Tree_Print(){
+    Tree_Print(tree);
+    return 1;
 }
