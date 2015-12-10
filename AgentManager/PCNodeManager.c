@@ -33,9 +33,14 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself){
         IAM_ADMIN_NODE){
         tree_now = IAM_ADMIN;
     }
-Printf_DEBUG("root->nodetype = %d . %d",
-        rootnode->NodeType , IAM_ADMIN_NODE);
     if(rootnode == NULL) return PCMANAGER_INIT_ERROR;
+
+    root_id = rootnode -> id;
+    tree_now = NO_MANAGER;
+    maxid = rootnode->id;
+Printf_DEBUG("rootid = %d ",
+        root_id);
+/// start build Tree and list
     tree = Tree_Init_Manager(NULL,
         fun_pcInfo_free,
         fun_pcInfo_copy);
@@ -49,9 +54,6 @@ Printf_DEBUG("root->nodetype = %d . %d",
 // remember add result check
     Tree_BuildTreeRoot(tree,root_id,rootnode);
 // remember add result check
-    root_id = rootnode -> id;
-    tree_now = NO_MANAGER;
-    maxid = rootnode->id;
     if(rootnode->NodeType == 
         IAM_ADMIN_NODE){
         tree_now = IAM_ADMIN;
@@ -238,7 +240,7 @@ int PCMANAGER_ReplaceID(int oldid,int newid){
         PCNODE_Free(node);
         node = NULL;
     }
-    maxid = (maxid>newid)?maxid:newid;
+    maxid = (maxid>newid)?(maxid+1):(newid+1);
     if(oldid == rootnode->id){
         rootnode->id = newid;
     }
@@ -344,6 +346,7 @@ int PCMANAGER_Get_RootID(){
 int PCMANAGER_Set_RootID(int newid){
     root_id = newid;
     rootnode->id = newid;
+    maxid = (maxid>newid)?(maxid+1):(newid+1);
     return 1;
 }
 
@@ -366,8 +369,6 @@ int PCMANAGER_Manager_Now(){
     }
     return PCMANAGER_MANAGER_NOW_FALSE;
 }
-
-
 
 
 int PCMANAGER_Tree_Print(){

@@ -35,6 +35,12 @@ int main(){
 ///    char helloWorld[]="Hello This is from sock";
 ///    API_socket_send(sock2222,helloWorld,strlen(helloWorld));
 ///Printf_DEBUG("send ok");
+    if(PCMANAGER_HAVENode(5)){
+        Printf_OK("found 1111111111111111111111");
+    }
+    else{
+        Printf_OK("not found 1111111111111111111111");
+    }
 
     while(1){
         MIC_SLEEP(10000);

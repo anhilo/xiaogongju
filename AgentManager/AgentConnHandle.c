@@ -31,11 +31,7 @@ int m_AddNeighborProxy(pPCNodeInfo info){
     int res = PCMANAGER_ADDNeighbor(info);
     if(PCMANAGER_ADDNEIGHBOR_ID_CLASH == 
         res ){
-// Replace ID and send Replace ID msg here
         int newid = ASK_NEW_ID();
-        // send Replace ID msg here
-//Broadcast_ReplaceID(info->id,newid);
-        // replace id local
         if(PCMANAGER_REPLACEID_ERROR == 
             PCMANAGER_ReplaceID(info->id,newid)){
             return 0;
@@ -125,7 +121,8 @@ Printf_DEBUG("the sock is -----> %d",sock);
         }
         int myid = m_recvID(sock);
         // reset my id
-        PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
+        PCMANAGER_Set_RootID(myid);
+   //     PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
         // set client is upper
         PCMANAGER_SETUpperAdmin(clientinfo->id);
         // send myself
