@@ -3,17 +3,17 @@
 #include "AgentManager/AgentConversationCTRL.h"
 #include "AgentManager/PCNodeManager.h"
 
-int sendMsgTo(int targetid){
-    char buffer[200];
-    sprintf(buffer,"Hello Client ->%d<-, This Msg send by Admin.",targetid);
-    buffer[strlen(buffer)+1] = '\0';
-Printf_DEBUG("start send %d",(int)strlen(buffer));
-    
-    int sock = AGENT_Conversation_Build_SockTunnel(targetid);
-    API_socket_send(sock,buffer,strlen(buffer)+1);
-Printf_DEBUG("send ok");
-    return 1;
-}
+//int sendMsgTo(int targetid){
+//    char buffer[200];
+//    sprintf(buffer,"Hello Client ->%d<-, This Msg send by Admin.",targetid);
+//    buffer[strlen(buffer)+1] = '\0';
+//Printf_DEBUG("start send %d",(int)strlen(buffer));
+//    
+//    int sock = AGENT_Conversation_Build_SockTunnel(targetid);
+//    API_socket_send(sock,buffer,strlen(buffer)+1);
+//Printf_DEBUG("send ok");
+//    return 1;
+//}
 int whileMain();
 int readline(char *desbuf,char stopchar,int maxlen);
 
@@ -38,18 +38,29 @@ int main(){
 
 
 #define MAX_READLINE_LEN  300
+char remoteip[MAX_IP_ADDR_LEN] = "127.0.0.1";
+int  remoteport = 8888;
+//char localip[]  = "127.0.0.1";
+//int  localip    = 9999;
 int whileMain(){
     char line[MAX_READLINE_LEN];
-    printf(">>>>");
+    char inputformat[MAX_READLINE_LEN];
+    printf(">>>> ");
     readline(line,'\n',MAX_READLINE_LEN);
     while(!startWith(line,"quit")){
         if(startWith(line,"sendmsg")){
             Printf_OK("send msg here");
             Printf_OK(line);
+
         }
         else if(startWith(line,"connect")){
             Printf_OK("target agent connect new agent");
-            Printf_OK(line);
+//            Printf_OK(line);
+            sprintf(inputformat,"connect %s%ds %s","%",MAX_IP_ADDR_LEN,"%d");
+//            Printf_OK(inputformat,"HelloWorld");
+            sscanf(line,inputformat,remoteip,&remoteport);
+            Printf_OK("remote ip   :%s\n",remoteip);
+            Printf_OK("remote port :%d\n",remoteport);
         }
         else if(startWith(line,"listen")){
             Printf_OK("target agent listen new port here");

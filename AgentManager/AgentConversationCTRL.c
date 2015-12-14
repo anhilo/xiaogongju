@@ -55,3 +55,7 @@ int AGENT_Conversation_Build_SockTunnel(int targetid){
 }
     return target_sock;
 }
+
+int AGENT_Conversation_GetID(){
+    return PCMANAGER_Get_RootID();
+}
