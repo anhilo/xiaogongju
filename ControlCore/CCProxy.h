@@ -13,6 +13,8 @@ int CCProxy_Init(int node_type);
 int CCProxy_ListenAgent(int targetid,
     int rport);
 
+
+int CCProxy_onNewTunnel(int clientsock);
 #define CCPROXY_CONNECTAGENT_ERROR    -1
 #define CCPROXY_CONNECTAGENT_OK        1
 int CCProxy_AgentConnect(int targetid,
