@@ -6,16 +6,18 @@
 */
 
 #include "CCProxy.h"
+#include "CC_AgentConn.h"
 #include "../AgentManager/AgentConversationCTRL.h"
 #include "../AgentManager/PCNodeInfo.h"
+
 
 int CCProxy_Init(int ostype,char *pcname,int node_type){
     int agent_type ,os_type;
     if(node_type == NODETYPE_ADMIN_NODE){
-        agent_type == IAM_ADMIN_NODE;
+        agent_type = IAM_ADMIN_NODE;
     }
     else{
-        agent_type == MYSELF_NODE;
+        agent_type = MYSELF_NODE;
     }
     switch(ostype){
     case OSTYPE_LINUX_OS:
@@ -70,19 +72,23 @@ int CCProxy_Init(int ostype,char *pcname,int node_type){
 int m_BuildTargetSock(int targetid,int ccproxy_cmd){
     int targetsock = 
     AGENT_Conversation_Build_SockTunnel(targetid);
-    if(targetsock != 
-    AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR){
+Printf_DEBUG("11111111111111111111111111111111");
+    if(targetsock == 
+    AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR){
         return CCPROXY_LISTENAGENT_ERROR;
     }
+Printf_DEBUG("22222222222222222222222222222222");
     char cmdmsg[MAX_CCPROXY_LEN];
     cmdmsg[CCTRL_TYPE_OFFSET] = 
         ccproxy_cmd;
+Printf_DEBUG("33333333333333333333333333333333");
     if(SOCKET_SEND_ERROR == 
         API_socket_send(targetsock,cmdmsg,
             MAX_CCPROXY_LEN)
     ){
         return -1;
     }
+Printf_DEBUG("44444444444444444444444444444444");
     return targetsock;
 }
 
@@ -139,6 +145,7 @@ int m_onListenAgent(int clientsock){
 
 int CCProxy_AgentConnect(int targetid,
     char *remoteip,int rport){
+    int targetsock = -1;
     if(AGENT_Conversation_GetID() == 
         targetid){
         int res = AGENT_Conversation_Connect(remoteip,rport);
@@ -148,7 +155,7 @@ int CCProxy_AgentConnect(int targetid,
         return CCPROXY_LISTENAGENT_OK;
     }
     else{
-        int targetsock = m_BuildTargetSock(targetid,
+        targetsock = m_BuildTargetSock(targetid,
             AGENT_CONN_COMMAND_CONNECT);
         if(targetsock == -1){
             return CCPROXY_CONNECTAGENT_ERROR;
@@ -182,19 +189,48 @@ int m_onAgentConnect(int clientsock){
     return 1;
 }
 
-int CCProxy_SendMsg(int targetsock,char *msg,int msglen){
-    
+#define MAX_MSG_LEN   300
+int CCProxy_SendMsg(int targetid,char *msg,int msglen){
+    if(msglen > MAX_MSG_LEN || strlen(msg)>msglen){
+        return 0;
+    }
+    int targetsock = m_BuildTargetSock(targetid,AGENT_SERVER_COMMAND_SENDMSG);
+    if( -1 == targetsock ){
+        Printf_Error("eeeeeeeeeeeeeeeee");
+        return 0;
+    }
+    API_socket_send(targetsock,msg,msglen);
+    Printf_Error("fffffffffffffffff");
+    return 1;
+}
+
+int m_onRecvMsg(int clientsock){
+    char buffer[MAX_MSG_LEN];
+    int res = API_socket_recv(clientsock,buffer,MAX_MSG_LEN);
+    if(res > MAX_MSG_LEN){
+        Printf_Error( "RECV MSG ERROR");
+        return CCPROXY_SENDMSG_ERROR;
+    }
+    else{
+        buffer[res]= '\0';
+        Printf_OK("recv msg: %s",buffer);
+    }
+    return CCPROXY_SENDMSG_OK;
 }
 
 int CCProxy_onNewTunnel(int clientsock){
     char cmdmsg[MAX_CCPROXY_LEN];
     API_socket_recv(clientsock,cmdmsg,MAX_CCPROXY_LEN);
+    Printf_DEBUG("ddddddddddddddddddddddddddd");
     switch(cmdmsg[CCTRL_TYPE_OFFSET]){
     case AGENT_CONN_COMMAND_LISTEN:
         return m_onListenAgent(clientsock);
         break;
     case AGENT_CONN_COMMAND_CONNECT:
         return m_onAgentConnect(clientsock);
+        break;
+    case AGENT_SERVER_COMMAND_SENDMSG:
+        return m_onRecvMsg(clientsock);
         break;
     default:
         return 0;

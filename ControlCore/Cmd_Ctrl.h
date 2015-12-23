@@ -3,14 +3,6 @@
 
 #include "../generic.h"
 
-#define NODETYPE_ADMIN_NODE  1
-#define NODETYPE_NORMAL_NODE 2
-
-#define OSTYPE_LINUX_OS       1
-#define OSTYPE_ARMLINUX_OS    2
-#define OSTYPE_WINDOW_OS      3
-#define OSTYPE_MACOSX_OS      4
-#define OSTYPE_UNKNOW_OS      5
 
 //************** AgentCtrl  ******************************
 #define CMD_CTRL_LISTENAGENT_ERROR -1

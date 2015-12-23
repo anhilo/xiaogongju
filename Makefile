@@ -10,10 +10,10 @@ AgentLib   =  AgentManager/PCNodeInfo.c \
 			AgentManager/AgentTunnelHandle.c \
 			AgentManager/AgentMsgHandle.c \
 			AgentManager/AgentCMDInfo.c \
-			AgentManager/AgentChildSync.c
-			#AgentManager/AgentCTRL.c \
-			AgentManager/AgentSock.c \
-			AgentManager/AgentInteractive.c
+			AgentManager/AgentChildSync.c \
+			ControlCore/CC_AgentConn.c \
+			ControlCore/CCProxy.c 
+#			ControlCore/Cmd_Ctrl.c
           
 
 node_admin  = nodeadmin.c

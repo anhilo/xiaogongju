@@ -2,28 +2,28 @@
 #define _CCPROXY_H_
 
 #include "../generic.h"
-
 #define CCPROXY_INIT_ERROR -1
 #define CCPROXY_INIT_OK     1
-int CCProxy_Init(int node_type);
+int CCProxy_Init(int ostype,char *pcname,int node_type);
 
 // agent connect
 #define CCPROXY_LISTENAGENT_ERROR    -1
 #define CCPROXY_LISTENAGENT_OK        1
-int CCProxy_ListenAgent(int targetid,
-    int rport);
+int CCProxy_ListenAgent(int targetid, int rport,int maxnum);
 
 
-int CCProxy_onNewTunnel(int clientsock);
 #define CCPROXY_CONNECTAGENT_ERROR    -1
 #define CCPROXY_CONNECTAGENT_OK        1
-int CCProxy_AgentConnect(int targetid,
-    char *targetip,int rport);
+int CCProxy_AgentConnect(int targetid, char *remoteip,int rport);
 
-// shell
-int CCProxy_startShell(int targetid);
-int CCProxy_onStartShellHere(int clientsock);
+#define CCPROXY_SENDMSG_OK         1
+#define CCPROXY_SENDMSG_ERROR     -1
+int CCProxy_SendMsg(int targetid,char *msg,int msglen);
+int CCProxy_onNewTunnel(int clientsock);
 
+//// shell
+//int CCProxy_startShell(int targetid);
+//int CCProxy_onStartShellHere(int clientsock);
 #endif
 
 

@@ -8,6 +8,7 @@
 #include "PCNodeManager.h"
 #include "PCNodeInfo.h"
 #include "AgentConversationProxy.h"
+#include "../ControlCore/CCProxy.h"
 
 int SendTunnelProto(int sock,int targetid){
     char cmd_buf[4];
@@ -75,11 +76,13 @@ Printf_DEBUG("get tunnel ok!!!!");
 }
 
 void recvtest(int sock){
-    char buffer[1000];
-    int len = API_socket_recv(sock,buffer,1000);
-//Printf_DEBUG("%d -- > %d",len,buffer[0]);
-//    len = API_socket_recv(sock,buffer,1000);
-Printf_DEBUG("%d -- > %s",len,buffer);
+//    char buffer[1000];
+    Printf_DEBUG("ccccccccccccccccccccccccccc");
+    CCProxy_onNewTunnel(sock);
+//    int len = API_socket_recv(sock,buffer,1000);
+////Printf_DEBUG("%d -- > %d",len,buffer[0]);
+////    len = API_socket_recv(sock,buffer,1000);
+//Printf_DEBUG("%d -- > %s",len,buffer);
 }
 
 int on_newTunnel_recv(int sock){
