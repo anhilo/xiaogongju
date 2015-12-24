@@ -72,23 +72,19 @@ int CCProxy_Init(int ostype,char *pcname,int node_type){
 int m_BuildTargetSock(int targetid,int ccproxy_cmd){
     int targetsock = 
     AGENT_Conversation_Build_SockTunnel(targetid);
-Printf_DEBUG("11111111111111111111111111111111");
     if(targetsock == 
     AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR){
         return CCPROXY_LISTENAGENT_ERROR;
     }
-Printf_DEBUG("22222222222222222222222222222222");
     char cmdmsg[MAX_CCPROXY_LEN];
     cmdmsg[CCTRL_TYPE_OFFSET] = 
         ccproxy_cmd;
-Printf_DEBUG("33333333333333333333333333333333");
     if(SOCKET_SEND_ERROR == 
         API_socket_send(targetsock,cmdmsg,
             MAX_CCPROXY_LEN)
     ){
         return -1;
     }
-Printf_DEBUG("44444444444444444444444444444444");
     return targetsock;
 }
 
@@ -196,11 +192,9 @@ int CCProxy_SendMsg(int targetid,char *msg,int msglen){
     }
     int targetsock = m_BuildTargetSock(targetid,AGENT_SERVER_COMMAND_SENDMSG);
     if( -1 == targetsock ){
-        Printf_Error("eeeeeeeeeeeeeeeee");
         return 0;
     }
     API_socket_send(targetsock,msg,msglen);
-    Printf_Error("fffffffffffffffff");
     return 1;
 }
 
@@ -221,7 +215,6 @@ int m_onRecvMsg(int clientsock){
 int CCProxy_onNewTunnel(int clientsock){
     char cmdmsg[MAX_CCPROXY_LEN];
     API_socket_recv(clientsock,cmdmsg,MAX_CCPROXY_LEN);
-    Printf_DEBUG("ddddddddddddddddddddddddddd");
     switch(cmdmsg[CCTRL_TYPE_OFFSET]){
     case AGENT_CONN_COMMAND_LISTEN:
         return m_onListenAgent(clientsock);
