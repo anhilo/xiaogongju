@@ -2,18 +2,9 @@
 #define _PC_NODE_INFO_H_
 
 #include "../generic.h"
+#include "AgentProNet.h"
 
 #define MAX_PCNAME_LEN     50
-#define MAX_IP_ADDR_LEN    20
-
-#define CONNTYPE_DIRECT_CONNECT   1
-#define CONNTYPE_REVERSE_CONNECT  2
-typedef struct PCConnInfo{
-    int ConnType;
-    char IPaddr[MAX_IP_ADDR_LEN];
-    int port;
-    int cmd_socket;
-}PCConn,*pPCConn;
 
 #define PC_OS_LINUX        1
 #define PC_OS_WINDOW       2
