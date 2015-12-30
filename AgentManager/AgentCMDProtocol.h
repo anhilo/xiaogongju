@@ -5,8 +5,6 @@
 /////  第一字段 指令类型
 #define CMDTYPE_NEWCONN   1 // 节点连接协议
 #define CMDTYPE_TRANSMIT  2 // 节点间交互协议
-#define CMDTYPE_SETID     3 // 设置新ID
-#define CMDTYPE_NEWIDASK  4 // 申请新ID
 
 /////  第二字段 指令编号
 #define CMDID_JOB_RPLY         1 // 工作回馈 
@@ -16,7 +14,10 @@
 #define CMDID_NEWID_ASK        5 // 向上级请求新ID
 #define CMDID_NEWID_RPL        6 // 新ID分配响应
 #define CMDID_CHILDSYNC_UPPER  7 // 向上级更新节点信息
+#define CMDID_NEWNODE_HERE     8 // 新节点连接
 
-int CMDPROTO_Parse_And_Do(pAgent_proto proto);
+#define CMDPROTO_PARSE_AND_DO_ERROR     -1
+#define CMDPROTO_PARSE_AND_DO_OK         1
+int CMDPROTO_Parse_And_Do(pAgent_proto proto,pPCConn conn);
 
 #endif

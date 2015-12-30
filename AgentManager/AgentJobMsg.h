@@ -4,31 +4,37 @@
 #include "../generic.h"
 
 #define MAX_DESCRIBE_LEN     50
+#define MAX_RESULT_LEN       50
 #define JOB_STATE_UNKNOWN    0 // 未知
-#define JOB_STATE_STARTING   1 // 启动
-#define JOB_STATE_RUNNING    2 // 运行
-#define JOB_STATE_STOPING    3 // 停止
-#define JOB_STATE_WAITE_RPL  4 // 等待结果
-#define JOB_STATE_PERFECT    5 // 运行结束
-#define JOB_STATE_RELEASE    6 // 释放
+#define JOB_STATE_RELEASE    1 // 初始状态
+#define JOB_STATE_RUNNING    2 // 正在运行
+#define JOB_STATE_WAIT_RPL   3 // 等待结果
+#define JOB_STATE_CAN_STOP   4 
+        // 可以结束(等到了上游回复)
 
-typedef int (*CBF_Jobfun)(pAgent_proto proto,JobDes job);
 typedef struct JOB_DESCRIBE{
     int jobID;   // 工作编号
-    int cmdID;   // 工作内容编号(指令编号)
+    int cmdID;   
+        // 工作内容编号(指令编号)
+        // 根据这个指令编号分配回调处理函数
     char describe[MAX_DESCRIBE_LEN];
         // 工作描述
     int jobState;
         // 工作当前状态
-    CBF_Jobfun fun;
+    char jobresult[MAX_RESULT_LEN];
+        // 设置工作的结果
 }JobDes,*pJobDes;
 
 #define JOB_ECHO_ON      1 // 开启工作回显
 #define JOB_ECHO_OFF     2 // 关闭工作回显
+
+#define JOB_FRESH_ID_LOCK    1
+#define JOB_FRESH_ID_UNLOCK  0
 typedef struct JOB_LIST{
     int MaxJobNum;
     int jobNow;
     int echostate;
+    int freshlock;
     pJobDes joblist;
 }JobList,*pJobList;
 
@@ -36,7 +42,7 @@ typedef struct JOB_LIST{
 pJobList JOB_CreateList();
 
 // 申请一个新的JobID
-#define JOB_GetFreshJobID_ERROR  -1
+#define JOB_GETFRESHJOBID_ERROR  -1
 int JOB_GetFreshJobID(pJobList list); 
 
 // 设置 Job 描述
@@ -49,7 +55,24 @@ int JOB_SetJOB(pJobList list,int jobid,
 #define JOB_SETJOBSTATE_ERROR  -1 
 #define JOB_SETJOBSTATE_OK      1 
 int JOB_SetJOBState(pJobList list,int jobid,
-        int jobstate,CBF_Jobfun fun);
+        int jobstate);
+
+// 设置 Job 结果
+#define JOB_CLOSEJOB_ERROR  -1
+#define JOB_CLOSEJOB_OK      1
+int JOB_CloseJob(pJobList list,int jobid,
+        char *jobResult);
+
+// 等待 Job 结束
+#define JOB_WAITCLOSEJOB_ERROR  -1
+#define JOB_WAITCLOSEJOB_OK      1
+int JOB_WaitCloseJob(pJobList list,int jobid,
+        int sec);
+
+
+#define JOB_GETRESULT_ERROR    -1
+#define JOB_GETRESULT_OK        1
+int JOB_GetResult(pJobList list,int jobid,char *buf,int *buflen);
 
 // 释放 Job 资源
 #define JOB_RELEASEJOB_ERROR   -1

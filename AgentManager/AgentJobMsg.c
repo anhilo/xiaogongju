@@ -14,7 +14,7 @@ pJobList JOB_CreateList(){
     if(NULL == jobList ){
         return JOB_CREATELIST_ERROR;
     }
-    jobdes = (pJobDes)malloc(sizeof(JobDes));
+    jobdes = (pJobDes)malloc(sizeof(JobDes)*MAX_JOB_LIST);
     if(NULL == jobdes){
         free(jobList);
         joblist = NULL;
@@ -25,11 +25,11 @@ pJobList JOB_CreateList(){
         jobdes[i].cmdID    = -1;
         memset(jobdes[i].describe,0,MAX_DESCRIBE_LEN);
         jobdes[i].jobState = JOB_STATE_RELEASE;
-        jobdes[i].fun      = NULL;
     }
     jobList -> joblist     = jobdes;
     jobList -> MaxJobNum   = MAX_JOB_LIST;
     jobList -> jobNow      = 0;
+    jobList -> freshlock   = JOB_FRESH_ID_UNLOCK;
     jobList -> echostate   = JOB_ECHO_ON;
     return jobList;
 }
@@ -38,16 +38,28 @@ pJobList JOB_CreateList(){
 int JOB_GetFreshJobID(pJobList list){
     int times = -1;
     int i = 0;
+    int result = JOB_GETFRESHJOBID_ERROR;
+    times = 0;
+    while(JOB_FRESH_ID_LOCK == list->freshlock){
+        MIC_USLEEP(50);
+        times ++;
+        if(times > 1000){
+            return result;
+        }
+    }
+    list->freshlock = JOB_FRESH_ID_LOCK;
+    times = 0;
     while(times < 1000){
         for(i=0;i<MAX_JOB_LIST;i++){
             if(((list->joblist)[i]).jobState == JOB_STATE_RELEASE){
                 list->jobNow++;
-                return i;
+                result = i;
             }
         }
         MIC_USLEEP(10);
     }
-    return JOB_GetFreshJobID_ERROR;
+    list->freshlock = JOB_FRESH_ID_UNLOCK;
+    return i;
 }
 
 // 设置 Job 描述
@@ -61,15 +73,26 @@ int JOB_SetJOB(pJobList list,int jobid,
     return JOB_SETJOB_OK;
 }
 
-// 配置 Job 资源
+// 配置 Job 状态
 int JOB_SetJOBState(pJobList list,int jobid,
-        int jobstate,CBF_Jobfun fun){
+        int jobstate){
     if(list == NULL || list->joblist){
         return JOB_SETJOBSTATE_ERROR;
     }
     ((list->joblist)[jobid]).jobState = jobstate;
-    ((list->joblist)[jobid]).fun      = fun;
     return JOB_SETJOBSTATE_OK;
+}
+
+// 设置 Job 结果
+int JOB_CloseJob(pJobList list,int jobid,
+        char *jobResult){
+    if(list == NULL || list->joblist){
+        return JOB_CLOSEJOB_ERROR;
+    }
+    memcpy(((list->joblist)[jobid]).jobresult,
+        jobResult,MAX_RESULT_LEN);
+    ((list->joblist)[jobid]).jobState = JOB_STATE_CAN_STOP;
+    return JOB_CLOSEJOB_OK;
 }
 
 // 释放 Job 资源
@@ -77,7 +100,6 @@ int JOB_ReleaseJob(pJobList list,int jobid){
     if(list == NULL || list->joblist){
         return JOB_SETJOBSTATE_ERROR;
     }
-    ((list->joblist)[jobid]).fun      = NULL;
     ((list->joblist)[jobid]).jobState = JOB_STATE_RELEASE;
     return JOB_RELEASEJOB_OK;
 }
@@ -89,4 +111,27 @@ char *JOB_GetSummary(pJobList list,int jobid,char *buffer,int maxbuflen){
         ((list->joblist)[jobid]).describe,
         ((list->joblist)[jobid]).jobState);
     return JOB_GETSUMMARY_OK;
+}
+
+int JOB_WaitCloseJob(pJobList list,int jobid,
+        int sec){
+    int times =0;
+    while((times++)<sec){
+        if(((list->joblist)[jobid]).jobState == 
+            JOB_STATE_CAN_STOP){
+            return JOB_WAITCLOSEJOB_OK;
+        }
+        MIC_SLEEP(1);
+    }
+    return JOB_WAITCLOSEJOB_ERROR;
+}
+
+int JOB_GetResult(pJobList list,int jobid,char **buf,int *buflen){
+    if(buf == NULL){
+        return JOB_GETRESULT_ERROR;
+    }
+    (*buf) = (char *)malloc(sizeof(char)*MAX_RESULT_LEN);
+    memcpy((*buf),((list->joblist)[jobid].jobresult,MAX_RESULT_LEN));
+    *buflen = MAX_RESULT_LEN;
+    return JOB_GETRESULT_OK;
 }

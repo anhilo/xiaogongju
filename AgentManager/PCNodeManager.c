@@ -332,7 +332,7 @@ int PCMANAGER_Get_Fresh_ID(){
 Printf_DEBUG("Fresh new id %d ",maxid);
         return maxid;
     }
-    return -1;
+    return PCMANAGER_GET_FRESH_ID_ERROR;
 }
 
 pPCNodeInfo PCMANAGER_Get_RootNode(){
@@ -363,11 +363,16 @@ pPCNodeInfo PCMANAGER_Get_FatherNode(){
     return info;
 }
 
-int PCMANAGER_Manager_Now(){
-    if(tree_now == MANAGER_NOW){
-        return PCMANAGER_MANAGER_NOW_TRUE;
+int PCMANAGER_Manager_State(){
+    switch(tree_now){
+    case IAM_ADMIN:
+        return PCMANAGER_MANAGER_STATE_IAM_ADMIN;
+    case MANAGER_NOW:
+        return PCMANAGER_MANAGER_STATE_TRUE;
+    default:
+        return PCMANAGER_MANAGER_STATE_FALSE;
     }
-    return PCMANAGER_MANAGER_NOW_FALSE;
+    return PCMANAGER_MANAGER_STATE_FALSE;
 }
 
 

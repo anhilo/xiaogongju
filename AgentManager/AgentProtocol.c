@@ -49,3 +49,12 @@ int PROTO_SetArgs (pAgent_proto proto,int arglen,char *cmdargs){
     return PROTO_SETARGS_OK;
 }
 
+int PROTO_FreeProto(pAgent_proto proto){
+    if(proto == NULL){
+        return PROTO_FREEPROTO_ERROR;
+    }
+    free(proto->cmdargs);
+    proto->cmdargs = NULL;
+    free(proto);
+    return PROTO_FREEPROTO_OK;
+}

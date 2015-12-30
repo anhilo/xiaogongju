@@ -82,6 +82,7 @@ int PCMANAGER_HAVENode(int id);
 int PCMANAGER_Traversal_Neighbor(pfunNodeCall callback);
 
 // 15. 分配一个未用过的id
+#define PCMANAGER_GET_FRESH_ID_ERROR -1
 int PCMANAGER_Get_Fresh_ID();
 
 
@@ -95,9 +96,11 @@ int PCMANAGER_Get_RootID();
 pPCNodeInfo PCMANAGER_Get_FatherNode();
 
 
-#define PCMANAGER_MANAGER_NOW_TRUE   1
-#define PCMANAGER_MANAGER_NOW_FALSE  0
-int PCMANAGER_Manager_Now();
+// 得到本节点的管理状态
+#define PCMANAGER_MANAGER_STATE_FALSE  0
+#define PCMANAGER_MANAGER_STATE_TRUE   1
+#define PCMANAGER_MANAGER_IAM_ADMIN    2
+int PCMANAGER_Manager_State();
 
 
 int PCMANAGER_Set_RootID(int targetid);

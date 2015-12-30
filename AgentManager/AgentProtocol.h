@@ -33,5 +33,8 @@ int PROTO_SetAddress (pAgent_proto proto,int fromid,int toid);
 #define PROTO_SETARGS_OK               1
 int PROTO_SetArgs (pAgent_proto proto,int arglen,char *cmdargs);
 
+#define PROTO_FREEPROTO_ERROR     -1
+#define PROTO_FREEPROTO_OK         1
+int PROTO_FreeProto(pAgent_proto proto);
 
 #endif
