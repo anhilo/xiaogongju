@@ -93,3 +93,42 @@ int PROTO_RecvState(pPCConn conn){
     }
     return PROTO_RECVSTATE_SOCKET_ERROR;
 }
+
+///=======================================================
+///   PCConn Functions
+///=======================================================
+pPCConn PCCONN_CreatePCConnFromSocket(int sock){
+    pPCConn conn = (pPCConn)malloc(sizeof(PCConn));
+    if(conn == NULL){
+        return PCCONN_CREATEPCCONNFROMSOCKET_ERROR;
+    }
+    conn->ConnType   = CONNTYPE_DIRECT_CONNECT;
+    conn->cmd_socket = sock;
+    conn->BusyType   = NET_SESSION_UNUSED_NOW;
+    return conn;
+}
+
+int PCCONN_Free(pPCConn conn){
+    if(conn == NULL){
+        return PCCONN_FREE_ERROR;
+    }
+    free(conn);
+    conn = NULL;
+    return PCCONN_FREE_OK;
+}
+
+pPCConn PCCONN_Copy(pPCConn conn){
+    pPCConn conn1 = NULL;
+    if(conn = NULL){
+        return PCCONN_COPY_ERROR;
+    }
+    conn1 = (pPCConn)malloc(sizeof(PCConn));
+    if(conn1 = NULL){
+        return PCCONN_COPY_ERROR;
+    }
+    conn1->ConnType   = conn->ConnType;
+    conn1->BusyType   = conn->BusyType;
+    conn1->port       = conn->port;
+    conn1->cmd_socket = conn->cmd_socket;
+    memcpy(conn1->IPaddr,conn->IPaddr,MAX_IP_ADDR_LEN);
+}

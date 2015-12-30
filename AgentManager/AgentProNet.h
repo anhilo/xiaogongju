@@ -17,6 +17,17 @@ typedef struct PCConnInfo{
     int cmd_socket;
 }PCConn,*pPCConn;
 
+#define PCCONN_CREATEPCCONNFROMSOCKET_ERROR  NULL
+pPCConn PCCONN_CreatePCConnFromSocket(int sock);
+
+#define PCCONN_COPY_ERROR           NULL
+pPCConn PCCONN_Copy(pPCConn conn); 
+
+#define PCCONN_FREE_ERROR        0
+#define PCCONN_FREE_OK           1
+int PCCONN_Free(pPCConn conn);
+
+
 #define PROTO_SENDPROTO_ERROR         -1
 #define PROTO_SENDPROTO_OK             1
 int PROTO_SendProto(pPCConn conn,pAgent_proto proto);
