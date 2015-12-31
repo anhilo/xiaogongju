@@ -21,9 +21,13 @@ typedef int (*pAgentProto_CBF) (int argc,char *argv);
 int PROTO_Init();   // init cbfnode list
 
 //  send about function
-#define PROTO_CREATEPROTO_ERROR        -1
-#define PROTO_CREATEPROTO_OK            1
-int PROTO_CreateProto(pAgent_proto proto,int cmdtype,int cmdid,int jobid);
+#define PROTO_CREATEPROTO_ERROR     NULL
+pAgent_proto PROTO_CreateProto();
+
+#define PROTO_SETCMD_ERROR            -1
+#define PROTO_SETCMD_OK                1
+int PROTO_SetCMD(pAgent_proto proto,
+    int cmdtype,int cmdid,int jobid);
 
 #define PROTO_SETADDRESS_ERROR        -1
 #define PROTO_SETADDRESS_OK            1

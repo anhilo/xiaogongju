@@ -2,7 +2,8 @@
 #define _AGENTIDCTRL_H_
 
 #include "../generic.h"
-#include "AgentCMDProtocol.h"
+#include "GlobalValue.h"
+#include "AgentProtocol.h"
 // 申请新ID
 #define AGENT_ID_ASK_ERROR  -1
 int AGENT_ID_ASK();

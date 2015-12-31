@@ -2,18 +2,23 @@ object_lib = baselib/BaseAPI.c baselib/GlobalFunctions.c \
 			baselib/ListNodeCTRL.c baselib/TreeNodeCTRL.c \
 			sockslib/Sock_Tunnel.c
 
-AgentLib   =  AgentManager/PCNodeInfo.c \
-			AgentManager/PCNodeManager.c \
-			AgentManager/AgentConversationProxy.c \
-			AgentManager/AgentConversationCTRL.c \
+AgentLib   =  \
+			AgentManager/AgentCMDParse.c \
 			AgentManager/AgentConnHandle.c \
-			AgentManager/AgentTunnelHandle.c \
-			AgentManager/AgentMsgHandle.c \
-			AgentManager/AgentCMDInfo.c \
-			AgentManager/AgentChildSync.c \
+			AgentManager/AgentConversationCTRL.c \
+			AgentManager/AgentConversationProxy.c \
+			AgentManager/AgentIDCtrl.c \
+			AgentManager/AgentJobMsg.c \
+			AgentManager/AgentProNet.c \
+			AgentManager/AgentProtocol.c \
+			AgentManager/GlobalValue.c \
+			AgentManager/PCNodeInfo.c \
+			AgentManager/PCNodeManager.c \
 			ControlCore/CC_AgentConn.c \
-			ControlCore/CCProxy.c 
-#			ControlCore/Cmd_Ctrl.c
+			ControlCore/CCProxy.c \
+			ControlCore/Cmd_Ctrl.c 
+
+
           
 
 node_admin  = nodeadmin.c

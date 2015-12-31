@@ -10,19 +10,34 @@ int PROTO_Init(){   // init cbfnode list
     return PROTO_INIT_OK;
 }
 
-int PROTO_CreateProto(pAgent_proto proto,int cmdtype,int cmdid,int jobid){
-    proto = (pAgent_proto)malloc(sizeof(Agent_proto));
+pAgent_proto PROTO_CreateProto(){
+    pAgent_proto proto = (pAgent_proto)malloc(sizeof(Agent_proto));
     if(proto == NULL){
         return PROTO_CREATEPROTO_ERROR;
     }
-    proto->cmdType = cmdtype;
-    proto->cmdID   = cmdid;
-    proto->jobID   = jobid;
-    proto->fromID  = -1;
-    proto->toID    = -1;
-    proto->argLen  = 0;
-    proto->cmdargs = NULL;
-    return PROTO_CREATEPROTO_OK;
+    proto -> cmdType = 0;
+    proto -> cmdID   = 0;
+    proto -> jobID   = 0;
+    proto -> fromID  = 0;
+    proto -> toID    = 0;
+    proto -> argLen  = 0;
+    proto -> cmdargs = NULL;
+    return proto;
+}
+
+int PROTO_SetCMD(pAgent_proto proto,
+        int cmdtype,int cmdid,int jobid){
+    if(proto == NULL){
+        return PROTO_SETCMD_ERROR;
+    }
+    proto -> cmdType = cmdtype;
+    proto -> cmdID   = cmdid;
+    proto -> jobID   = jobid;
+    proto -> fromID  = -1;
+    proto -> toID    = -1;
+    proto -> argLen  = 0;
+    proto -> cmdargs = NULL;
+    return PROTO_SETCMD_OK;
 }
 
 int PROTO_SetAddress (pAgent_proto proto,int fromid,int toid){

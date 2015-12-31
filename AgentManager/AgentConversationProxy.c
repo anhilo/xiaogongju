@@ -7,9 +7,9 @@
 #include "AgentConversationProxy.h"
 #include "PCNodeInfo.h"
 #include "PCNodeManager.h"
+#include "AgentJobMsg.h"
+#include "AgentCMDParse.h"
 #include "AgentConnHandle.h"
-#include "AgentTunnelHandle.h"
-#include "AgentMsgHandle.h"
 //*******************************************************
 #define AGENTCMD_MAX_LEN  1
 
@@ -25,12 +25,33 @@ int StartListenerThread();
 
 int AGENT_ConversationProxy_Init(){
     StartListenerThread();
+    pJobList joblist = JOB_CreateList();
+    GLOBAL_SetJobList(joblist);
     return AGENT_CONVERSATIONPROXY_INIT_OK;
 }
 
 
 int m_Listener_For_EachAgentNode(pNodeData node){
     int res = 1;
+    pPCNodeInfo info = (pPCNodeInfo)node;
+    pPCConn conn = (pPCConn)(&(info -> conn));
+    pAgent_proto proto = NULL;
+    if(conn == NULL || info == NULL){
+        return 0;
+    }
+    // socket can read
+    if( PROTO_RECVSTATE_CANRECV == 
+        PROTO_RecvState(conn)
+    ){
+        proto = PROTO_RecvProto(conn);
+        if(proto == PROTO_RECVPROTO_ERROR){
+            return 0;
+        }
+        if(CMDPARSE_AND_DO_ERROR == 
+            CMDParse_And_Do(proto,conn)){
+            return 0;
+        }
+    }
     return res;
 }
 
@@ -48,15 +69,28 @@ int StartListenerThread(){
         Printf_Error("Thread id create Error");
         return 0;
     }
-//    MIC_THREAD_JOIN(thread_id);
     MIC_USLEEP(10);
     return 1;
 }
 
 int m_callBackForEachAccept(int socket){
-    pPCConn conn = PROTO_CreatePCConnFromSocket(socket);
-    if(conn == PROTO_CREATEPCCONNFROMSOCKET_ERROR){
+    pPCConn conn = PCCONN_CreatePCConnFromSocket(socket);
+    int jobid;
+    pAgent_proto proto = NULL;
+    if(conn == PCCONN_CREATEPCCONNFROMSOCKET_ERROR){
         return 0;
+    }
+    if( PROTO_RECVSTATE_CANRECV == 
+        PROTO_RecvState(conn)
+    ){
+        proto = PROTO_RecvProto(conn);
+        if(proto == PROTO_RECVPROTO_ERROR){
+            return 0;
+        }
+        if(CMDPARSE_AND_DO_ERROR == 
+            CMDParse_And_Do(proto,conn)){
+            return 0;
+        }
     }
     
     return 1;
@@ -76,6 +110,14 @@ int AGENT_ConversationProxy_StartServer(int port,int maxnum){
 
 int AGENT_ConversationProxy_Connect(char *ip,int port){
     /// conn target and reflush id
+    int sock = API_socket_connect(ip,port);
+    if(sock == SOCKET_CONNECT_ERROR){
+        return AGENT_CONVERSATIONPROXY_CONNECT_ERROR;
+    }
+    if(AGENTCONN_INTERACTIVE_OK != 
+        AgentInfo_Interactive(sock,ip,port)){
+        return AGENT_CONVERSATIONPROXY_CONNECT_ERROR;
+    }
     return AGENT_CONVERSATIONPROXY_CONNECT_OK;
 }
 

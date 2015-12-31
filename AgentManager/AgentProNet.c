@@ -5,13 +5,14 @@
 * Created Time : 一 12/28 20:14:42 2015
 */
 #include "AgentProNet.h"
+#include "GlobalValue.h"
 
 //===========================================================
 //   inline  function 
 //      m_SendData_CmdTunnel( conn,data, data, len);
 #define M_SENDDATA_CMDTUNNEL_ERROR   -1
 #define M_SENDDATA_CMDTUNNEL_OK       1
-int m_SendData_CmdTunnel(pPCConn *conn,char *data,int datalen){
+int m_SendData_CmdTunnel(pPCConn conn,char *data,int datalen){
     int nsend = -1;
     int cmdsocket = -1;
     if(conn == NULL || conn->cmd_socket == -1){
@@ -62,16 +63,20 @@ int PROTO_SendProto(pPCConn conn,pAgent_proto proto){
     return PROTO_SENDPROTO_OK;
 }
 
-int PROTO_RecvProto(pPCConn conn,pAgent_proto proto){
+pAgent_proto PROTO_RecvProto(pPCConn conn){
     int nrecv;
     char cmdbuff[MAX_PROTO_BUFLEN];
-    if(conn == NULL || proto == NULL){
-        return PROTO_GETPROTO_ERROR;
+    pAgent_proto proto = PROTO_CreateProto();
+    if(conn == NULL 
+      || proto == PROTO_CREATEPROTO_ERROR){
+        free(proto);
+        proto = NULL;
+        return PROTO_RECVPROTO_ERROR;
     }
     nrecv = API_socket_recv(conn->cmd_socket,cmdbuff,MAX_PROTO_BUFLEN);
     if(nrecv == 0){ return PROTO_GETPROTO_NOTHING; }
     if(nrecv != MAX_PROTO_BUFLEN){
-        return PROTO_GETPROTO_ERROR;
+        return PROTO_RECVPROTO_ERROR;
     }
     proto->cmdType = API_m_chartoi(&(cmdbuff[ 0]),4);
     proto->cmdID   = API_m_chartoi(&(cmdbuff[ 4]),4);
@@ -80,10 +85,13 @@ int PROTO_RecvProto(pPCConn conn,pAgent_proto proto){
     proto->toID    = API_m_chartoi(&(cmdbuff[16]),4);
     proto->argLen  = API_m_chartoi(&(cmdbuff[20]),4);
     memncpy(proto->cmdargs,&(cmdbuff[24]),MAX_PROTO_BUFLEN-24);
-    return PROTO_GETPROTO_OK;
+    return proto;
 }
 
 int PROTO_RecvState(pPCConn conn){
+    if( conn == NULL){
+        return PROTO_RECVSTATE_SOCKET_ERROR;
+    }
     int res = API_socket_read_state(conn->cmd_socket);
     if(res == SOCKET_CAN_READ_STATE ){
         return PROTO_RECVSTATE_CANRECV;
@@ -132,3 +140,16 @@ pPCConn PCCONN_Copy(pPCConn conn){
     conn1->cmd_socket = conn->cmd_socket;
     memcpy(conn1->IPaddr,conn->IPaddr,MAX_IP_ADDR_LEN);
 }
+
+///=====================================================
+int PROTO_SendPCNodeInfo(pPCConn conn,pPCNodeInfo info){
+    int jobid = JOB_GetFreshJobID(
+        GLOBAL_GetJobList()
+    );
+    if(jobid == JOB_GETFRESHJOBID_ERROR){
+        return PROTO_SENDPROTO_ERROR;
+    }
+    pAgent_proto proto = PROTO_CreateProto(
+}
+
+pPCNodeInfo PROTO_RecvPCNodeInfo(pPCConn conn);

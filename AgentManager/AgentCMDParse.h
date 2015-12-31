@@ -1,7 +1,9 @@
-#ifndef _AGENTCMDPROTOCOL_H_
-#define _AGENTCMDPROTOCOL_H_
+#ifndef _AGENTCMDPARSE_H_
+#define _AGENTCMDPARSE_H_
 
 #include "../generic.h"
+#include "AgentProNet.h"
+#include "AgentProtocol.h"
 /////  第一字段 指令类型
 #define CMDTYPE_NEWCONN   1 // 节点连接协议
 #define CMDTYPE_TRANSMIT  2 // 节点间交互协议
@@ -16,8 +18,8 @@
 #define CMDID_CHILDSYNC_UPPER  7 // 向上级更新节点信息
 #define CMDID_NEWNODE_HERE     8 // 新节点连接
 
-#define CMDPROTO_PARSE_AND_DO_ERROR     -1
-#define CMDPROTO_PARSE_AND_DO_OK         1
-int CMDPROTO_Parse_And_Do(pAgent_proto proto,pPCConn conn);
+#define CMDPARSE_AND_DO_ERROR     -1
+#define CMDPARSE_AND_DO_OK         1
+int CMDParse_And_Do(pAgent_proto proto,pPCConn conn);
 
 #endif

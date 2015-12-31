@@ -5,7 +5,7 @@
 * Created Time : Tue 29 Dec 2015 07:31:43 PM PST
 */
 
-#include "AgentCMDProtocol.h"
+#include "AgentCMDParse.h"
 #include "GlobalValue.h"
 //    int cmdType;
 //    int cmdID;
@@ -40,33 +40,36 @@ int on_MyMsgHere(pAgent_proto proto,pPCConn conn){
 #define ON_TRANSMIT_OK       1
 int on_Transmit(pAgent_proto proto,pPCConn conn){
     Printf_DEBUG("normal cmd info");
-    switch(proto->toID){
-    case PCMANAGER_Get_RootID():
+
+    if(PCMANAGER_Get_RootID() == proto->toID){
         Printf_DEBUG("This is my Msg");
         on_MyMsgHere(proto,conn);
-        break;
+        goto exit;
+    }
+
+    switch(proto->toID){
     case 0:
         Printf_DEBUG("To Admin, transmit it upper");
         break;
     default:
-        Printf_DEBUG("Need find this agent from tree %d"
-            proto->toID);
+        Printf_DEBUG("Need find this agent from tree %d", proto->toID);
         break;
     }
+exit:
     return ON_TRANSMIT_OK;
 }
 
-int CMDPROTO_Parse_And_Do(pAgent_proto proto,pPCConn conn){
-    int result = CMDPROTO_PARSE_AND_DO_ERROR;
+int CMDParse_And_Do(pAgent_proto proto,pPCConn conn){
+    int result = CMDPARSE_AND_DO_ERROR;
     switch(proto->cmdType){
     case CMDTYPE_NEWCONN:
         if(ON_NEWCONN_OK == on_NewConn(proto,conn)){
-            result = CMDPROTO_PARSE_AND_DO_OK;
+            result = CMDPARSE_AND_DO_OK;
         }
         break;
     case CMDTYPE_TRANSMIT:
         if(ON_TRANSMIT_OK == on_Transmit(proto,conn)){
-            result = CMDPROTO_PARSE_AND_DO_OK;
+            result = CMDPARSE_AND_DO_OK;
         }
         break;
     default:

@@ -12,16 +12,16 @@ pJobList joblist = NULL;
 int GLOBAL_SetJobList(pJobList list){
     if(list != NULL){
         Printf_Error("GLOBAL_SetJobList NULL joblist");
-        return 0;
+        return GLOBAL_SETJOBLIST_ERROR;
     }
     joblist = list;
-    return 1;
+    return GLOBAL_SETJOBLIST_OK;
 }
 
 pJobList GLOBAL_GetJobList(){
     if(joblist == NULL){
         Printf_Error("GLOBAL_GetJobList NULL joblist");
-        return NULL;
+        return GLOBAL_GETJOBLIST_ERROR;
     }
 n
     return joblist;

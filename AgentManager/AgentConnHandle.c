@@ -7,8 +7,10 @@
 #include "AgentConnHandle.h"
 #include "PCNodeManager.h"
 #include "PCNodeInfo.h"
-#include "AgentMsgHandle.h"
-#include "AgentChildSync.h"
+//#include "AgentMsgHandle.h"
+//#include "AgentChildSync.h"
+#include "AgentProNet.h"
+#include "AgentCMDParse.h"
 
 
 //====================================
@@ -255,28 +257,48 @@ int m_recvID(int sock){
 int m_Info_send(int sock,pPCNodeInfo info){
     char buffer[1000];
     char idbuf[4],ostype[4],nodetype[4];
+    int  namelen;
     int result = M_INFO_SEND_OK;
+    pPCConn conn = NULL;
+    pAgent_proto proto = NULL;
 
     if(info == NULL){
         result = M_INFO_SEND_ERROR;
+        goto exit;
     }
     else{
-        API_m_itochar (info->id       ,idbuf   ,4);
-        API_m_itochar (info->OSType   ,ostype  ,4);
-        API_m_itochar (info->NodeType  ,nodetype,4);
-        strncpy(buffer, info->PCName , MAX_PCNAME_LEN);
-        // send id
-        if( SEND_INFO_ERROR == send_info(sock ,idbuf,4)
-            // send pcname
-            || SEND_INFO_ERROR == send_info(sock,buffer,MAX_PCNAME_LEN)
-            // send ostype
-            || SEND_INFO_ERROR == send_info(sock,ostype,  4)
-            // send nodetype
-            || SEND_INFO_ERROR == send_info(sock,nodetype,4)){
+        conn = PCCONN_CreatePCConnFromSocket(sock);    
+        namelen = strlen(info->PCName);
+        if(PCCONN_CREATEPCCONNFROMSOCKET_ERROR == conn
+           || namelen > MAX_PCNAME_LEN ){
+            result = M_INFO_SEND_ERROR;
+            goto exit;
+        }
+        
+        API_m_itochar (info->id       ,&(buffer[ 0]) ,4);
+        API_m_itochar (info->OSType   ,&(buffer[ 4]) ,4);
+        API_m_itochar (info->NodeType ,&(buffer[ 8]) ,4);
+        API_m_itochar (namelen        ,&(buffer[12]) ,4);
+        strncpy(&(buffer[16]), info->PCName,namelen+1);
+       // send it  
+        proto = PROTO_CreateProto();
+        if(proto == PROTO_CREATEPROTO_ERROR){
             result =  M_INFO_SEND_ERROR;
+            goto exit;
+        }
+        PROTO_SetCMD(proto,CMDTYPE_NEWCONN,
+            CMDID_NEWNODE_HERE,0);
+        PROTO_SetAddress(proto,-1,-1);
+        PROTO_SetArgs(proto,16+namelen+1,buffer);
+
+        if(PROTO_SENDPROTO_ERROR ==
+            PROTO_SendProto(conn,proto) ){
+            // send error
+            result =  M_INFO_SEND_ERROR;
+            goto exit;
         }
     }
-    // send error
+exit:
     if(result == M_INFO_SEND_ERROR){
         Printf_Error("Send info Error");
     }
@@ -287,44 +309,40 @@ int m_Info_send(int sock,pPCNodeInfo info){
 #define BUF_OK       1
 pPCNodeInfo m_agentInfo_Recv(int sock){
     pPCNodeInfo info = PCNODE_Create();
+    pPCConn conn = PCCONN_CreatePCConnFromSocket(sock);
+    pAgent_proto proto = NULL;
     char pcname[MAX_PCNAME_LEN+1];
     char id[4],ostype[4],linktype[4];
     int  mid,mostype,mlinktype;
     int result = 1;
-    if(info == NULL){
-        result =  BUF_ERROR;
+    if(info == NULL || conn == NULL){
+        result = BUF_ERROR;
+        goto exit;
     }
     else{
         // recv id
-        if( RECV_INFO_ERROR == recv_info(sock,id,4) 
-            // recv name
-            || RECV_INFO_ERROR == recv_info(sock,pcname,MAX_PCNAME_LEN)
-            // recv ostype
-            || RECV_INFO_ERROR == recv_info(sock,ostype,4)
-            // recv nodetype
-            || RECV_INFO_ERROR == recv_info(sock,linktype,4)){
+        
+        if( PROTO_RECVSTATE_CANRECV 
+            != PROTO_RecvState(conn)){
             result = BUF_ERROR;
+            goto exit;
         }
         else{
-            mid       = API_m_chartoi(id,4);
-            mostype   = API_m_chartoi(ostype,4);
-            mlinktype = API_m_chartoi(linktype,4);
-            int res = PCNODE_SETAllData(
-                info,       // node
-                mid,        // id
-                mostype,    // OSType
-                pcname,     // pcname
-                mlinktype,  // NodeType
-                -1,         // conntype
-                "",         // ip
-                -1,         // port
-                sock);      // cmd_sock
-            if(res == PCNODE_SETALLDATA_ERROR){
-                result =  BUF_ERROR;
+            // recv agent info         
+            proto = PROTO_RecvProto(conn);
+            if(PROTO_RECVPROTO_ERROR 
+                == proto){
+                result = BUF_ERROR;
+                goto exit;
+            }
+            if(CMDPARSE_AND_DO_ERROR == 
+                CMDParse_And_Do(proto,conn)){
+                result = BUF_ERROR;
+                goto exit;
             }
         }
     }
-
+exit:
     if(result == BUF_ERROR){
         return M_INFO_RECV_ERROR;
     }

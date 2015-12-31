@@ -5,7 +5,9 @@
 * Created Time : Tue 29 Dec 2015 10:05:33 PM PST
 */
 #include "AgentIDCtrl.h"
-#include "AgentCMDProtocol.h"
+#include "AgentCMDParse.h"
+#include "PCNodeManager.h"
+#include "AgentJobMsg.h"
 
 // 从管理员获得ID
 int Ask_Id_Upper(pJobList list){
@@ -21,7 +23,7 @@ int Ask_Id_Upper(pJobList list){
         // 新建任务
         jobid = JOB_GetFreshJobID(list);
         // 设置任务状态
-        JOB_SetJOBState(list,jobid,JOB_STATE_WAITE_RPL);
+        JOB_SetJOBState(list,jobid,JOB_STATE_WAIT_RPL);
 
         // 新建传输协议
         PROTO_CreateProto(proto,CMDTYPE_TRANSMIT,CMDID_NEWID_ASK,jobid);
@@ -31,7 +33,7 @@ int Ask_Id_Upper(pJobList list){
         PROTO_SetArgs(proto,0,"");
         
         if(PROTO_SENDPROTO_ERROR == 
-            PROTO_SendProto(info->conn,proto)){
+            PROTO_SendProto(&(info->conn),proto)){
             result = -1;
         }
         else {
@@ -42,7 +44,7 @@ int Ask_Id_Upper(pJobList list){
             else{
                 char *buf  = NULL;
                 int buflen =    0;
-                JOB_GetResult(list,jobid,&buf,&buflen);
+                JOB_GetResult(list,jobid, &(buf),&buflen);
                 result = API_m_chartoi(buf,4);
             }
         }
@@ -57,7 +59,7 @@ int AGENT_ID_ASK(){
     int state = PCMANAGER_Manager_State();
     switch(state){
     case PCMANAGER_MANAGER_STATE_TRUE:
-        newid = Ask_Id_Upper();
+        newid = Ask_Id_Upper(GLOBAL_GetJobList());
         if(-1 == newid){
             return AGENT_ID_ASK_ERROR;
         }

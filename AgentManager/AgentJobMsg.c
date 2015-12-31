@@ -10,6 +10,7 @@
 pJobList JOB_CreateList(){
     pJobDes jobdes   = NULL;
     pJobList jobList = (pJobList)malloc(sizeof(JobList));
+    int i  = 0;
 
     if(NULL == jobList ){
         return JOB_CREATELIST_ERROR;
@@ -17,10 +18,10 @@ pJobList JOB_CreateList(){
     jobdes = (pJobDes)malloc(sizeof(JobDes)*MAX_JOB_LIST);
     if(NULL == jobdes){
         free(jobList);
-        joblist = NULL;
+        jobList = NULL;
         return JOB_CREATELIST_ERROR;
     }
-    for(int i=0;i<MAX_JOB_LIST;i++){
+    for(i=0;i<MAX_JOB_LIST;i++){
         jobdes[i].jobID    = -1;
         jobdes[i].cmdID    = -1;
         memset(jobdes[i].describe,0,MAX_DESCRIBE_LEN);
@@ -110,7 +111,7 @@ char *JOB_GetSummary(pJobList list,int jobid,char *buffer,int maxbuflen){
     ssprintf(buffer,"describe :%s , %d",
         ((list->joblist)[jobid]).describe,
         ((list->joblist)[jobid]).jobState);
-    return JOB_GETSUMMARY_OK;
+    return buffer;
 }
 
 int JOB_WaitCloseJob(pJobList list,int jobid,

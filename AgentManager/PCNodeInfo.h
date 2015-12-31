@@ -4,28 +4,6 @@
 #include "../generic.h"
 #include "AgentProNet.h"
 
-#define MAX_PCNAME_LEN     50
-
-#define PC_OS_LINUX        1
-#define PC_OS_WINDOW       2
-#define PC_OS_ARMLINUX     3
-#define PC_OS_MACOSX       4
-#define PC_OS_UNKNOW       5
-
-// NodeType 
-#define IAM_ADMIN_NODE      1 // Neighbor
-#define MYSELF_NODE         2 // Neighbor
-#define UPSTREAM_NODE       3 // REMOTE_CHILD
-#define MYSELF_NODE_REMOTE  4 // REMOTE_CHILD
-#define UNKONWN_NODE        5 // UNKNOWN
-typedef struct PCNodeData{
-    int id;
-    int OSType; // OS_Type // 
-    char PCName[MAX_PCNAME_LEN];
-    int NodeType ;
-    PCConn conn;
-}PCNodeInfo,*pPCNodeInfo;
-
 
 pPCNodeInfo PCNODE_Create();
 
