@@ -23,6 +23,6 @@ pJobList GLOBAL_GetJobList(){
         Printf_Error("GLOBAL_GetJobList NULL joblist");
         return GLOBAL_GETJOBLIST_ERROR;
     }
-n
+
     return joblist;
 }

@@ -366,7 +366,7 @@ pPCNodeInfo PCMANAGER_Get_FatherNode(){
 int PCMANAGER_Manager_State(){
     switch(tree_now){
     case IAM_ADMIN:
-        return PCMANAGER_MANAGER_STATE_IAM_ADMIN;
+        return PCMANAGER_MANAGER_IAM_ADMIN;
     case MANAGER_NOW:
         return PCMANAGER_MANAGER_STATE_TRUE;
     default:

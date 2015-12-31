@@ -10,7 +10,7 @@
 
 int CMD_CTRL_ListenAgent(int targetid,
     int rport){
-    int res = CCProxy_ListenAgent(targetid,rport);
+    int res = CCProxy_ListenAgent(targetid,rport,20);
     if(res == CCPROXY_LISTENAGENT_ERROR){
         return CMD_CTRL_LISTENAGENT_ERROR;
     }
@@ -19,7 +19,7 @@ int CMD_CTRL_ListenAgent(int targetid,
 
 int CMD_CTRL_ConnectAgent(int targetid,
     char *remote_ip,int remote_port){
-    int res = CCProxy_Agentconnect(
+    int res = CCProxy_AgentConnect(
                 targetid,
                 remote_ip,
                 remote_port);

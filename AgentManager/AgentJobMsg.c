@@ -108,7 +108,7 @@ int JOB_ReleaseJob(pJobList list,int jobid){
 // 获取 Job 的摘要信息
 char *JOB_GetSummary(pJobList list,int jobid,char *buffer,int maxbuflen){
     if(maxbuflen>300){return JOB_GETSUMMARY_ERROR;}
-    ssprintf(buffer,"describe :%s , %d",
+    sprintf(buffer,"describe :%s , %d",
         ((list->joblist)[jobid]).describe,
         ((list->joblist)[jobid]).jobState);
     return buffer;
@@ -132,7 +132,8 @@ int JOB_GetResult(pJobList list,int jobid,char **buf,int *buflen){
         return JOB_GETRESULT_ERROR;
     }
     (*buf) = (char *)malloc(sizeof(char)*MAX_RESULT_LEN);
-    memcpy((*buf),((list->joblist)[jobid].jobresult,MAX_RESULT_LEN));
+//    pJobDes jobdes= (list->joblist);
+    memcpy((*buf),(list->joblist)[jobid].jobresult,MAX_RESULT_LEN);
     *buflen = MAX_RESULT_LEN;
     return JOB_GETRESULT_OK;
 }

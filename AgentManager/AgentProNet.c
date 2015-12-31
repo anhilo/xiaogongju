@@ -6,6 +6,7 @@
 */
 #include "AgentProNet.h"
 #include "GlobalValue.h"
+#include "AgentJobMsg.h"
 
 //===========================================================
 //   inline  function 
@@ -56,10 +57,9 @@ int PROTO_SendProto(pPCConn conn,pAgent_proto proto){
     API_m_itochar(proto->toID   ,&(cmdbuff[16])    ,4);
     API_m_itochar(proto->argLen ,&(cmdbuff[20])    ,4);
     memcpy(&(cmdbuff[24]),proto->cmdargs,MAX_PROTO_BUFLEN - 24);
-    if(m_SendData_CmdTunnel(conn) == M_SENDDATA_CMDTUNNEL_ERROR){
-        Printf_Error("PROTO_SENDPROTO_ERROR ");
-        return PROTO_SENDPROTO_ERROR;
-    }
+
+    PROTO_SendProto(conn,proto);
+
     return PROTO_SENDPROTO_OK;
 }
 
@@ -74,7 +74,7 @@ pAgent_proto PROTO_RecvProto(pPCConn conn){
         return PROTO_RECVPROTO_ERROR;
     }
     nrecv = API_socket_recv(conn->cmd_socket,cmdbuff,MAX_PROTO_BUFLEN);
-    if(nrecv == 0){ return PROTO_GETPROTO_NOTHING; }
+    if(nrecv == 0){ return PROTO_RECVPROTO_ERROR; }
     if(nrecv != MAX_PROTO_BUFLEN){
         return PROTO_RECVPROTO_ERROR;
     }
@@ -84,7 +84,7 @@ pAgent_proto PROTO_RecvProto(pPCConn conn){
     proto->fromID  = API_m_chartoi(&(cmdbuff[12]),4);
     proto->toID    = API_m_chartoi(&(cmdbuff[16]),4);
     proto->argLen  = API_m_chartoi(&(cmdbuff[20]),4);
-    memncpy(proto->cmdargs,&(cmdbuff[24]),MAX_PROTO_BUFLEN-24);
+    memcpy(proto->cmdargs,&(cmdbuff[24]),MAX_PROTO_BUFLEN-24);
     return proto;
 }
 
@@ -92,7 +92,7 @@ int PROTO_RecvState(pPCConn conn){
     if( conn == NULL){
         return PROTO_RECVSTATE_SOCKET_ERROR;
     }
-    int res = API_socket_read_state(conn->cmd_socket);
+    int res = API_socket_read_state(conn->cmd_socket,5,0);
     if(res == SOCKET_CAN_READ_STATE ){
         return PROTO_RECVSTATE_CANRECV;
     }
@@ -127,11 +127,11 @@ int PCCONN_Free(pPCConn conn){
 
 pPCConn PCCONN_Copy(pPCConn conn){
     pPCConn conn1 = NULL;
-    if(conn = NULL){
+    if(conn == NULL){
         return PCCONN_COPY_ERROR;
     }
     conn1 = (pPCConn)malloc(sizeof(PCConn));
-    if(conn1 = NULL){
+    if(conn1 == NULL){
         return PCCONN_COPY_ERROR;
     }
     conn1->ConnType   = conn->ConnType;
@@ -139,6 +139,7 @@ pPCConn PCCONN_Copy(pPCConn conn){
     conn1->port       = conn->port;
     conn1->cmd_socket = conn->cmd_socket;
     memcpy(conn1->IPaddr,conn->IPaddr,MAX_IP_ADDR_LEN);
+    return conn1;
 }
 
 ///=====================================================
@@ -149,7 +150,12 @@ int PROTO_SendPCNodeInfo(pPCConn conn,pPCNodeInfo info){
     if(jobid == JOB_GETFRESHJOBID_ERROR){
         return PROTO_SENDPROTO_ERROR;
     }
-    pAgent_proto proto = PROTO_CreateProto(
+    //pAgent_proto proto = PROTO_CreateProto(
+Printf_DEBUG("NEED add COde Here");
+    return 1;
 }
 
-pPCNodeInfo PROTO_RecvPCNodeInfo(pPCConn conn);
+pPCNodeInfo PROTO_RecvPCNodeInfo(pPCConn conn){
+Printf_DEBUG("NEED add COde Here");
+    return NULL;
+}

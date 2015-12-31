@@ -7,6 +7,10 @@
 
 #include "AgentCMDParse.h"
 #include "GlobalValue.h"
+#include "AgentIDCtrl.h"
+#include "AgentJobMsg.h"
+#include "PCNodeManager.h"
+
 //    int cmdType;
 //    int cmdID;
 

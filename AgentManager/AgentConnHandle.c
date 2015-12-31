@@ -7,8 +7,7 @@
 #include "AgentConnHandle.h"
 #include "PCNodeManager.h"
 #include "PCNodeInfo.h"
-//#include "AgentMsgHandle.h"
-//#include "AgentChildSync.h"
+#include "AgentIDCtrl.h"
 #include "AgentProNet.h"
 #include "AgentCMDParse.h"
 
@@ -33,7 +32,7 @@ int m_AddNeighborProxy(pPCNodeInfo info){
     int res = PCMANAGER_ADDNeighbor(info);
     if(PCMANAGER_ADDNEIGHBOR_ID_CLASH == 
         res ){
-        int newid = ASK_NEW_ID();
+        int newid = AGENT_ID_ASK();
         if(PCMANAGER_REPLACEID_ERROR == 
             PCMANAGER_ReplaceID(info->id,newid)){
             return 0;
@@ -53,7 +52,7 @@ int m_AddNeighborProxy(pPCNodeInfo info){
 
 int when_IAM_ADMIN(int sock,char *ip,int port){
     pPCNodeInfo serverinfo;
-    int hisid = ASK_NEW_ID();
+    int hisid = AGENT_ID_ASK();
     if(M_SENDID_ERROR != m_sendID(sock,hisid)){
         serverinfo = m_agentInfo_Recv(sock);
         if(serverinfo != M_INFO_RECV_ERROR){
@@ -129,11 +128,11 @@ Printf_DEBUG("the sock is -----> %d",sock);
         PCMANAGER_SETUpperAdmin(clientinfo->id);
         // send myself
         m_Info_send(sock,myself);
-        ChildNodeInfoSyncTrigger();
+        //ChildNodeInfoSyncTrigger();
         break;
     case MYSELF_NODE:
         Printf_OK("Client is Myself_node");
-        int hisid = ASK_NEW_ID();
+        int hisid = AGENT_ID_ASK();
         m_sendID(sock,hisid);
         Printf_OK("Client id is %d",hisid);
         clientinfo->id = hisid;
@@ -141,9 +140,10 @@ Printf_DEBUG("the sock is -----> %d",sock);
             Printf_Error("Add NeighborProxy Error");
             return 0;
         }
-        SendAgentInfo(PCMANAGER_Get_RootID(),clientinfo->id,
-            clientinfo->OSType,clientinfo->PCName);
-        m_Info_send(sock,myself);
+        Printf_DEBUG("Send Agent Info Here11111111111");
+//        SendAgentInfo(PCMANAGER_Get_RootID(),clientinfo->id,
+//            clientinfo->OSType,clientinfo->PCName);
+//        m_Info_send(sock,myself);
         break;
     default:
         return 0;

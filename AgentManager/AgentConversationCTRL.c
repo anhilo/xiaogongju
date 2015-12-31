@@ -47,13 +47,14 @@ int AGENT_Conversation_Connect(char *ip,int port){
 }
 
 int AGENT_Conversation_Build_SockTunnel(int targetid){
-    int target_sock = AGENT_ConversationProxy_Build_Tunnel(targetid);
-    if(
-        AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR ==
-        target_sock){
-    return AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR ;
-}
-    return target_sock;
+    Printf_Error("Build_SockTunnel !!!!");
+//    int target_sock = AGENT_ConversationProxy_Build_Tunnel(targetid);
+//    if(
+//        AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR ==
+//        target_sock){
+//        return AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR ;
+//    }
+    return -1;
 }
 
 int AGENT_Conversation_GetID(){
