@@ -58,7 +58,10 @@ int PROTO_SendProto(pPCConn conn,pAgent_proto proto){
     API_m_itochar(proto->argLen ,&(cmdbuff[20])    ,4);
     memcpy(&(cmdbuff[24]),proto->cmdargs,MAX_PROTO_BUFLEN - 24);
 
-    PROTO_SendProto(conn,proto);
+////////////// recode here
+Printf_DEBUG("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    m_SendData_CmdTunnel(conn,cmdbuff,MAX_PROTO_BUFLEN);
+Printf_DEBUG("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
 
     return PROTO_SENDPROTO_OK;
 }
@@ -87,6 +90,7 @@ pAgent_proto PROTO_RecvProto(pPCConn conn){
     memcpy(proto->cmdargs,&(cmdbuff[24]),MAX_PROTO_BUFLEN-24);
     return proto;
 }
+
 
 int PROTO_RecvState(pPCConn conn){
     if( conn == NULL){
@@ -155,7 +159,39 @@ Printf_DEBUG("NEED add COde Here");
     return 1;
 }
 
-pPCNodeInfo PROTO_RecvPCNodeInfo(pPCConn conn){
-Printf_DEBUG("NEED add COde Here");
-    return NULL;
+pPCNodeInfo PROTO_AnalysisPCNodeInfo(pPCConn conn,pAgent_proto proto){
+    int nrecv;
+    char cmdbuff[MAX_PROTO_BUFLEN];
+    pPCNodeInfo info = PCNODE_Create();
+    char idbuf[4],ostypebuf[4];
+    char nodetypebuf[4],namelenbuf[4];
+    char pcname [MAX_PCNAME_LEN];
+    int id,ostype,nodetype,namelen;
+    
+Printf_DEBUG("PROTO_AnalysisPCNodeInfo()");
+    if( proto == PROTO_CREATEPROTO_ERROR 
+        || info == NULL){
+        return PROTO_ANALYSISPCNODEINFO_ERROR;
+    }
+    memcpy(cmdbuff,proto->cmdargs,proto->argLen);
+    memcpy(idbuf      , &(cmdbuff[ 0]),4);
+    memcpy(ostypebuf  , &(cmdbuff[ 4]),4);
+    memcpy(nodetypebuf, &(cmdbuff[ 8]),4);
+    memcpy(namelenbuf , &(cmdbuff[12]),4);
+    strncpy(pcname    , &(cmdbuff[16]),MAX_PCNAME_LEN);
+    id       = API_m_chartoi(idbuf      ,4);
+    ostype   = API_m_chartoi(ostypebuf  ,4);
+    nodetype = API_m_chartoi(nodetypebuf,4);
+    namelen  = API_m_chartoi(namelenbuf ,4);
+    PCNODE_SETAllData(info,
+        id,
+        ostype,
+        pcname,
+        nodetype,
+        conn->ConnType,
+        conn->IPaddr,
+        conn->port,
+        conn->cmd_socket
+    );
+    return info;
 }

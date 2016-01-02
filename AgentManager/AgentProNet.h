@@ -33,7 +33,7 @@ pAgent_proto PROTO_RecvProto(pPCConn conn);
 #define PROTO_SENDPCNODEINFO_OK        1
 int PROTO_SendPCNodeInfo(pPCConn conn,pPCNodeInfo info);
 
-#define PROTO_RECVPCNODEINFO_ERROR   NULL
-pPCNodeInfo PROTO_RecvPCNodeInfo(pPCConn conn);
+#define PROTO_ANALYSISPCNODEINFO_ERROR   NULL
+pPCNodeInfo PROTO_AnalysisPCNodeInfo(pPCConn conn,pAgent_proto proto);
 
 #endif

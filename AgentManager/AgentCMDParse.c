@@ -18,6 +18,7 @@
 #define ON_NEWCONN_OK        1
 int on_NewConn(pAgent_proto proto,pPCConn conn){
     Printf_DEBUG("new agent connected here");
+// parse proto -> PCnodeinfo
     return ON_NEWCONN_OK;
 }
 
