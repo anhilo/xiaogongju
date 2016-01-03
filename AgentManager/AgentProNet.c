@@ -28,6 +28,7 @@ int m_SendData_CmdTunnel(pPCConn conn,char *data,int datalen){
     // session lock it
     conn->BusyType = NET_SESSION_BUSY_NOW;
     // send data
+Printf_DEBUG("send data len is %d ",datalen);
     nsend = API_socket_send(cmdsocket,data,datalen);
     // unlock it 
     conn->BusyType = NET_SESSION_UNUSED_NOW;
@@ -40,7 +41,6 @@ int m_SendData_CmdTunnel(pPCConn conn,char *data,int datalen){
 
 //===========================================================
 
-#define MAX_PROTO_BUFLEN   200
 int PROTO_SendProto(pPCConn conn,pAgent_proto proto){
     char cmdbuff[MAX_PROTO_BUFLEN];
     if(conn == NULL || proto == NULL ) {
@@ -56,10 +56,10 @@ int PROTO_SendProto(pPCConn conn,pAgent_proto proto){
     API_m_itochar(proto->fromID ,&(cmdbuff[12])    ,4);
     API_m_itochar(proto->toID   ,&(cmdbuff[16])    ,4);
     API_m_itochar(proto->argLen ,&(cmdbuff[20])    ,4);
-    memcpy(&(cmdbuff[24]),proto->cmdargs,MAX_PROTO_BUFLEN - 24);
+    memcpy(&(cmdbuff[24]),proto->cmdargs,proto->argLen+1);
 
 ////////////// recode here
-Printf_DEBUG("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+Printf_DEBUG("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --> proto->argLen");
     m_SendData_CmdTunnel(conn,cmdbuff,MAX_PROTO_BUFLEN);
 Printf_DEBUG("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
 
@@ -87,7 +87,7 @@ pAgent_proto PROTO_RecvProto(pPCConn conn){
     proto->fromID  = API_m_chartoi(&(cmdbuff[12]),4);
     proto->toID    = API_m_chartoi(&(cmdbuff[16]),4);
     proto->argLen  = API_m_chartoi(&(cmdbuff[20]),4);
-    memcpy(proto->cmdargs,&(cmdbuff[24]),MAX_PROTO_BUFLEN-24);
+    PROTO_SetArgs(proto,nrecv-24,&(cmdbuff[24]));
     return proto;
 }
 
@@ -161,7 +161,7 @@ Printf_DEBUG("NEED add COde Here");
 
 pPCNodeInfo PROTO_AnalysisPCNodeInfo(pPCConn conn,pAgent_proto proto){
     int nrecv;
-    char cmdbuff[MAX_PROTO_BUFLEN];
+    char *cmdbuff;
     pPCNodeInfo info = PCNODE_Create();
     char idbuf[4],ostypebuf[4];
     char nodetypebuf[4],namelenbuf[4];
@@ -173,16 +173,25 @@ Printf_DEBUG("PROTO_AnalysisPCNodeInfo()");
         || info == NULL){
         return PROTO_ANALYSISPCNODEINFO_ERROR;
     }
-    memcpy(cmdbuff,proto->cmdargs,proto->argLen);
+Printf_DEBUG("aaaaaaaaaaaaaaaaaaaaaaaaaa %d",proto->argLen);
+if(proto->cmdargs == NULL){
+    Printf_DEBUG("NULLL?      arglen = %d ",proto->argLen);
+    Printf_DEBUG("NULLL????????");
+}
+    cmdbuff = proto->cmdargs;
+    Printf_DEBUG("before2222222222222222 node pcname %s",&(proto-> cmdargs[16]));
+//    memcpy(cmdbuff,proto->cmdargs,MAX_ARG_LEN);
     memcpy(idbuf      , &(cmdbuff[ 0]),4);
     memcpy(ostypebuf  , &(cmdbuff[ 4]),4);
     memcpy(nodetypebuf, &(cmdbuff[ 8]),4);
     memcpy(namelenbuf , &(cmdbuff[12]),4);
-    strncpy(pcname    , &(cmdbuff[16]),MAX_PCNAME_LEN);
+namelen  = API_m_chartoi(namelenbuf ,4);
+Printf_DEBUG("----> namelen = %d ",namelen);
+Printf_DEBUG("----> name = %s",&(cmdbuff[16]));
+    memcpy(pcname    , &(cmdbuff[16]),namelen);
     id       = API_m_chartoi(idbuf      ,4);
     ostype   = API_m_chartoi(ostypebuf  ,4);
     nodetype = API_m_chartoi(nodetypebuf,4);
-    namelen  = API_m_chartoi(namelenbuf ,4);
     PCNODE_SETAllData(info,
         id,
         ostype,

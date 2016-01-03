@@ -284,6 +284,7 @@ int m_Info_send(int sock,pPCNodeInfo info){
         API_m_itochar (info->OSType   ,&(buffer[ 4]) ,4);
         API_m_itochar (info->NodeType ,&(buffer[ 8]) ,4);
         API_m_itochar (namelen        ,&(buffer[12]) ,4);
+Printf_DEBUG("---> sendinfo - %s",info->PCName);
         strncpy(&(buffer[16]), info->PCName,namelen+1);
        // send it  
         proto = PROTO_CreateProto();

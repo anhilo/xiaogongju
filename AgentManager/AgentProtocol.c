@@ -50,16 +50,23 @@ int PROTO_SetAddress (pAgent_proto proto,int fromid,int toid){
 }
 
 int PROTO_SetArgs (pAgent_proto proto,int arglen,char *cmdargs){
+Printf_DEBUG("1111111111111111");
     if(proto == NULL 
         || arglen > MAX_ARG_LEN){
+Printf_DEBUG("2222222222222222 arglen = %d, MAX_ARG_LEN = %d",
+            arglen,MAX_ARG_LEN);
         return PROTO_SETARGS_ERROR;
     }
     if(proto->cmdargs != NULL){
+Printf_DEBUG("3333333333333333");
         free(proto->cmdargs);
         proto->cmdargs = NULL;
     }
-    proto->cmdargs = (char *)malloc(sizeof(arglen+4));
-    memcpy(proto->cmdargs,cmdargs,arglen);
+Printf_DEBUG("4444444444444444");
+    proto->cmdargs = (char *)malloc(sizeof(arglen+1));
+Printf_DEBUG("5555555555555555");
+    memcpy(proto->cmdargs,cmdargs,arglen+1);
+Printf_DEBUG("6666666666666666 -> %d",arglen+1);
     proto->argLen = arglen;
     return PROTO_SETARGS_OK;
 }

@@ -3,7 +3,8 @@
 
 #include"../generic.h"
 
-#define MAX_ARG_LEN   100
+#define MAX_PROTO_BUFLEN   400
+#define MAX_ARG_LEN        MAX_PROTO_BUFLEN-24
 typedef struct AGENTPROTOCOL{
     int cmdType;
     int cmdID;

@@ -19,6 +19,9 @@
 int on_NewConn(pAgent_proto proto,pPCConn conn){
     Printf_DEBUG("new agent connected here");
 // parse proto -> PCnodeinfo
+    Printf_DEBUG("before node pcname %s",&(proto-> cmdargs[16]));
+    pPCNodeInfo info = PROTO_AnalysisPCNodeInfo(conn,proto);
+    Printf_DEBUG("new node pcname %s",info->PCName);
     return ON_NEWCONN_OK;
 }
 
