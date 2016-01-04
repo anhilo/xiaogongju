@@ -13,19 +13,13 @@
 
 
 //====================================
+pPCNodeInfo m_agentInfo_Recv(pPCConn conn);
+int m_Info_send(pPCConn conn,pPCNodeInfo info);
 #define M_INFO_SEND_ERROR     -1
 #define M_INFO_SEND_OK         1
-int m_Info_send(int sock,pPCNodeInfo info);
+//int m_Info_send(int sock,pPCNodeInfo info);
 #define M_INFO_RECV_ERROR   NULL
 //pPCNodeInfo m_agentInfo_Recv(int sock);
-#define M_SEND_NOTHING_ERROR  -1
-#define M_SEND_NOTHING_OK      1
-int m_send_nothing(int sock);
-#define M_SENDID_ERROR        -1
-#define M_SENDID_OK            1
-int m_sendID(int sock,int id);
-#define M_RECVID_ERROR        -1
-int m_recvID(int sock);
 //====================================
 
 int m_AddNeighborProxy(pPCNodeInfo info){
@@ -85,23 +79,21 @@ int m_AddNeighborProxy(pPCNodeInfo info){
 
 // be called By client
 int AgentInfo_Interactive(int sock,char *ip,int port){
-Printf_Error("444444444444444444444444");
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
-    if(myself == NULL){return AGENTCONN_INTERACTIVE_ERROR;}
-Printf_Error("555555555555555555555555");
-    if(M_INFO_SEND_ERROR == m_Info_send(sock,myself)){
+    pPCConn conn = PCCONN_CreatePCConnFromIPPort(ip,port,sock);
+    if(myself == NULL || conn == NULL){
+        return AGENTCONN_INTERACTIVE_ERROR;
+    }
+    if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
         return AGENTCONN_INTERACTIVE_ERROR;
     }
     /////// Add code From here
 //    m_Info_send(sock,myself);
-Printf_Error("111111111111111111111111");
     switch(myself->NodeType ){
     case  MYSELF_NODE:
-Printf_Error("222222222222222222222222");
 //        when_IAM_NORMALNODE(sock,ip,port);
         break;
     case IAM_ADMIN_NODE:
-Printf_Error("333333333333333333333333");
 //        when_IAM_ADMIN(sock,ip,port);
         break;
     default:
@@ -159,152 +151,35 @@ Printf_DEBUG("myid now is %d",PCMANAGER_Get_RootID());
 
 
 //******************************************************************
-#define SEND_INFO_MSG         1
-#define SEND_NOTHING_MSG      2
-#define RECVOK    1
-#define RECVERROR 2
 
-#define SEND_INFO_ERROR  -1
-#define SEND_INFO_OK      1
-int send_info(int sock,char *buffer,int len){
-    int result,nrecv;
-    char msg  = SEND_INFO_MSG;
-    int nsend = API_socket_send(sock,&msg,1);
-    if(nsend == SOCKET_SEND_ERROR){
-        result =  SEND_INFO_ERROR;
-    }
-    else{
-        nsend = API_socket_send(sock,buffer,len);
-        if(nsend == SOCKET_SEND_ERROR){
-            result =  SEND_INFO_ERROR;
-        }
-        else{
-            nrecv = API_socket_recv(sock,&msg,1);
-            if(nrecv == SOCKET_RECV_ERROR 
-                || msg != RECVOK){
-                result =  SEND_INFO_ERROR;
-            }
-            else{
-                result = SEND_INFO_OK;
-            }
-        }
-    }
-    return result;
-}
-
-int m_send_nothing(int sock){
-    int result,nsend,nrecv;
-    char msg = SEND_NOTHING_MSG;
-    nsend= API_socket_send(sock,&msg,1);
-    if(nsend == SOCKET_SEND_ERROR){
-        result = SEND_INFO_ERROR;
-    }
-    else{
-        nrecv = API_socket_recv(sock,&msg,1);
-        if(nrecv == SOCKET_RECV_ERROR
-            || msg != RECVOK){
-            result = SEND_INFO_ERROR;
-        }
-        else{
-            result = SEND_INFO_OK;
-        }
-    }
-    return result;
-}
-
-#define RECV_INFO_ERROR    -1
-#define RECV_INFO_OK        1
-int recv_info(int sock,char *buffer,int len){
-    int result , nsend,nrecv;
-    char msg ,*buf;
-    nrecv  =API_socket_recv(sock,&msg,1);
-    if(nrecv == SOCKET_RECV_ERROR
-        || msg == SEND_NOTHING_MSG){
-        result = RECV_INFO_ERROR;
-    }
-    else{
-        buf = (char *)malloc(sizeof(char)*len+10);
-        nrecv = API_socket_recv(sock,buf,len);
-        if(nrecv == SOCKET_RECV_ERROR){
-            result = RECV_INFO_ERROR;
-        }
-        else{
-            msg = RECVOK;
-            API_socket_send(sock,&msg,1);
-            result = RECV_INFO_OK;
-        }
-        memcpy(buffer,buf,len);
-        free(buf);
-    }
-    buf = NULL;
-    return result;
-}
-
-int m_sendID(int sock,int id){
-    char buffer[20];
-    API_m_itochar(id,buffer,4);
-    if(send_info(sock,buffer,4)
-        ==SEND_INFO_ERROR){
-        return M_SENDID_ERROR;
-    }
-    return M_SENDID_OK;
-}
-
-int m_recvID(int sock){
-    char buffer[20];
-    if(recv_info(sock,buffer,4) 
-        == RECV_INFO_ERROR){
-        return M_RECVID_ERROR;
-    }
-    return API_m_chartoi(buffer,4);
-}
-
-int m_Info_send(int sock,pPCNodeInfo info){
-    char buffer[1000];
+int m_Info_send(pPCConn conn,pPCNodeInfo info){
+    char buffer[300];
     char idbuf[4],ostype[4],nodetype[4];
     int  namelen;
-    int result = M_INFO_SEND_OK;
-    pPCConn conn = NULL;
-    pAgent_proto proto = NULL;
+    int  result = M_INFO_SEND_OK;
 
-    if(info == NULL){
+    if( conn == NULL || info == NULL ){
         result = M_INFO_SEND_ERROR;
-        goto exit;
     }
     else{
-        conn = PCCONN_CreatePCConnFromSocket(sock);    
         namelen = strlen(info->PCName);
-        if(PCCONN_CREATEPCCONNFROMSOCKET_ERROR == conn
-           || namelen > MAX_PCNAME_LEN ){
+        if( namelen > MAX_PCNAME_LEN ){
             result = M_INFO_SEND_ERROR;
-            goto exit;
         }
-        
-        API_m_itochar (info->id       ,&(buffer[ 0]) ,4);
-        API_m_itochar (info->OSType   ,&(buffer[ 4]) ,4);
-        API_m_itochar (info->NodeType ,&(buffer[ 8]) ,4);
-        API_m_itochar (namelen        ,&(buffer[12]) ,4);
-Printf_DEBUG("---> sendinfo - %s",info->PCName);
-        strncpy(&(buffer[16]), info->PCName,namelen+1);
-       // send it  
-        proto = PROTO_CreateProto();
-        if(proto == PROTO_CREATEPROTO_ERROR){
-            result =  M_INFO_SEND_ERROR;
-            goto exit;
-        }
-        PROTO_SetCMD(proto,CMDTYPE_NEWCONN,
-            CMDID_NEWNODE_HERE,0);
-        PROTO_SetAddress(proto,-1,-1);
-        PROTO_SetArgs(proto,16+namelen+1,buffer);
-
-        if(PROTO_SENDPROTO_ERROR ==
-            PROTO_SendProto(conn,proto) ){
-            // send error
-            result =  M_INFO_SEND_ERROR;
-            goto exit;
+        else{
+            API_m_itochar (info->id       ,&(buffer[ 0]) ,4);
+            API_m_itochar (info->OSType   ,&(buffer[ 4]) ,4);
+            API_m_itochar (info->NodeType ,&(buffer[ 8]) ,4);
+            API_m_itochar (namelen        ,&(buffer[12]) ,4);
+    Printf_DEBUG("---> sendinfo - %s",info->PCName);
+            strncpy(&(buffer[16]), info->PCName,namelen+1);
+           // send it  
+            if( PCCONN_SENDDATA_ERROR == 
+                PCCONN_SendData(conn,buffer,300)){
+                result = M_INFO_SEND_ERROR;
+            }
         }
     }
-exit:
     if(result == M_INFO_SEND_ERROR){
         Printf_Error("Send info Error");
     }
@@ -313,49 +188,133 @@ exit:
 
 #define BUF_ERROR   -1
 #define BUF_OK       1
-pPCNodeInfo m_agentInfo_Recv(int sock){
-//    pPCNodeInfo info = PCNODE_Create();
-//    pPCConn conn = PCCONN_CreatePCConnFromSocket(sock);
-//    pAgent_proto proto = NULL;
-//    char pcname[MAX_PCNAME_LEN+1];
-//    char id[4],ostype[4],linktype[4];
-//    int  mid,mostype,mlinktype;
-//    int result = 1;
-//    if(info == NULL || conn == NULL){
-//        result = BUF_ERROR;
-//        goto exit;
-//    }
-//    else{
-//        // recv id
-//        
-//        if( PROTO_RECVSTATE_CANRECV 
-//            != PROTO_RecvState(conn)){
-//            result = BUF_ERROR;
-//            goto exit;
-//        }
-//        else{
-//            // recv agent info         
-//            proto = PROTO_RecvProto(conn);
-//            if(PROTO_RECVPROTO_ERROR 
-//                == proto){
-//                result = BUF_ERROR;
-//                goto exit;
-//            }
-//            if(CMDPARSE_AND_DO_ERROR == 
-//                CMDParse_And_Do(proto,conn)){
-//                result = BUF_ERROR;
-//                goto exit;
-//            }
-//        }
-//    }
-//exit:
-//    if(result == BUF_ERROR){
-//        return M_INFO_RECV_ERROR;
-//    }
-//Printf_OK("[recv ]id = %d,ostype = %d , nodetype = %d, pcname = %s",
-//        info-> id,info->OSType,info->NodeType,info->PCName);
-//    return info;
-      return M_INFO_RECV_ERROR;
+pPCNodeInfo m_agentInfo_Recv(pPCConn conn){
+    char databuf[300];
+    pPCNodeInfo info = PCNODE_Create();
+    int id,ostype,nodetype,namelen;
+    char pcname[MAX_PCNAME_LEN+1];
+    int result = 1;
+    if(info == NULL || conn == NULL){
+        result = BUF_ERROR;
+    }
+    else{
+        // recv id
+        if(PCCONN_RECVDATA_ERROR == 
+            PCCONN_RecvData(conn,databuf,300)){
+            result = BUF_ERROR;
+        }
+        else{
+            id       = API_m_chartoi(&(databuf[ 0]),4);
+            ostype   = API_m_chartoi(&(databuf[ 4]),4);
+            nodetype = API_m_chartoi(&(databuf[ 8]),4);
+            namelen  = API_m_chartoi(&(databuf[12]),4);
+            strncpy(pcname,&(databuf[16]),MAX_PCNAME_LEN+1);
+            int res = PCNODE_SETAllData(
+                info,
+                id,
+                ostype,
+                pcname,
+                nodetype,
+                conn->ConnType,
+                conn->IPaddr,
+                conn->port,
+                conn->cmd_socket
+            );
+            if(res == PCNODE_SETALLDATA_ERROR){
+                result = BUF_ERROR;
+            }
+        }
+    }
+    if(result == BUF_ERROR){
+        return M_INFO_RECV_ERROR;
+    }
+Printf_OK("[recv ]id = %d,ostype = %d , nodetype = %d, pcname = %s",
+        info-> id,info->OSType,info->NodeType,info->PCName);
+    return info;
 }
 
 //******************************************************************
+
+#define WHEN_IAM_WITHADMIN_CONNECT_ERROR  -1
+#define WHEN_IAM_WITHADMIN_CONNECT_OK      1
+int When_Iam_WithAdmin_Connect(pPCNodeInfo myself,pPCConn conn){
+    // fresh id and send it
+    int newid = AGENT_ID_ASK();
+    AGENT_SENDID_FROM_PCConn(conn,newid);
+    //  get server node info
+Printf_DEBUG("Get Server Info from here");
+    pPCNodeInfo server = NULL;
+    //====================================
+    //  add server to tree
+    m_AddNeighborProxy(server);
+    return WHEN_IAM_WITHADMIN_CONNECT_OK;
+}
+
+#define WHEN_IAM_NORMAL_NODE_ERROR  -1
+#define WHEN_IAM_NORMAL_NODE_OK      1
+int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn){
+
+    return WHEN_IAM_NORMAL_NODE_OK;
+}
+
+#define WHEN_CLIENT_WITH_ADMIN_ERROR   -1
+#define WHEN_CLIENT_WITH_ADMIN_OK       1
+int When_Client_With_Admin(pPCNodeInfo client,pPCConn conn){
+    pPCNodeInfo myself = PCMANAGER_Get_RootNode();
+    //  set myself id
+    int newid = AGENT_GETID_FROM_PCConn(conn);
+    Printf_DEBUG("my new id is %d",newid);
+    PCMANAGER_Set_RootID(newid); // set myself id
+    //  send myself info
+    if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
+        return WHEN_CLIENT_WITH_ADMIN_ERROR;
+    }
+    // add client to tree
+    m_AddNeighborProxy(client);
+    // set it upper
+    PCMANAGER_SETUpperAdmin(client->id);
+    return WHEN_CLIENT_WITH_ADMIN_OK;
+}
+
+#define WHEN_CLIENT_NORMAL_NODE_ERROR  -1
+#define WHEN_CLIENT_NORMAL_NODE_OK      1
+int When_Client_Normal_Node(pPCNodeInfo client,pPCConn conn){
+    pPCNodeInfo myself = PCMANAGER_Get_RootNode();
+    // fresh id and send it
+    int newid = AGENT_ID_ASK();
+    AGENT_SENDID_FROM_PCConn(conn,newid);
+    // send info
+    if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
+        return WHEN_CLIENT_NORMAL_NODE_ERROR;
+    }
+    // add client to tree
+    m_AddNeighborProxy(client);
+    return WHEN_CLIENT_NORMAL_NODE_OK;
+}
+
+int on_NewAgent_Connect(pAgent_proto proto,pPCConn conn){
+    int result = ON_NEWAGENT_CONNECT_ERROR;
+    pPCNodeInfo client = NULL;
+    client = m_agentInfo_Recv(conn);
+    if(client == PROTO_ANALYSISPCNODEINFO_ERROR){
+        Printf_Error("info == NULL or myself == NULL");
+        result = ON_NEWAGENT_CONNECT_ERROR;
+    }
+    else{
+        switch(client->NodeType){
+        case IAM_ADMIN_NODE:
+        case BE_MANAGED_NOW:
+            Printf_DEBUG("client is admin or with admin");
+            break;
+        case MYSELF_NODE:
+            Printf_DEBUG("client is normal node");
+            break;
+        default:
+            Printf_DEBUG("UNKNOWN client node type %d\n",client->NodeType);
+            break;
+        }
+        result = ON_NEWAGENT_CONNECT_OK;
+    }
+    PCNODE_Free(client);
+    return result;
+}

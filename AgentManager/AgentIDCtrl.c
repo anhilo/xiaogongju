@@ -108,3 +108,22 @@ int on_AGENT_ID_Ask(pAgent_proto proto,pPCConn conn){
     }
     return -1;
 }
+
+int AGENT_SENDID_FROM_PCConn(pPCConn conn,int newid){
+    char idbuf[4];
+    API_m_itochar(newid,idbuf,4);
+    if( PCCONN_SENDDATA_ERROR == 
+        PCCONN_SendData(conn,idbuf,4)){
+        return AGENT_SENDID_FROM_PCCONN_ERROR;
+    }
+    return AGENT_SENDID_FROM_PCCONN_OK;
+}
+
+int AGENT_GETID_FROM_PCConn(pPCConn conn){
+    char idbuf[4];
+    if( PCCONN_RECVDATA_ERROR == 
+        PCCONN_RecvData(conn,idbuf,4)){
+        return AGENT_GETID_FROM_PCCONN_ERROR;
+    }
+    return API_m_chartoi(idbuf,4);
+}

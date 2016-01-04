@@ -72,6 +72,7 @@ typedef struct JOB_LIST{
 
 // NodeType 
 #define IAM_ADMIN_NODE      1 // Neighbor
+#define BE_MANAGED_NOW      6 // NormalNode With Admin
 #define MYSELF_NODE         2 // Neighbor
 #define UPSTREAM_NODE       3 // REMOTE_CHILD
 #define MYSELF_NODE_REMOTE  4 // REMOTE_CHILD

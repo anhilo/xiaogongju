@@ -48,6 +48,7 @@ int PCNODE_SETAllData(
         ipaddr , (unsigned long)MAX_IP_ADDR_LEN);
     node -> conn.port = port;
     node -> conn.cmd_socket = cmd_socket;
+    node -> conn.BusyType   = NET_SESSION_UNUSED_NOW;
     return PCNODE_SETALLDATA_OK;
 }
 

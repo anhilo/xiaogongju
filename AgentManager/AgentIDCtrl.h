@@ -13,4 +13,12 @@ int AGENT_ID_ASK();
 #define ON_AGENTID_ASK_OK      1
 int on_AGENT_ID_Ask(pAgent_proto proto,pPCConn conn);
 
+
+#define AGENT_SENDID_FROM_PCCONN_ERROR -1
+#define AGENT_SENDID_FROM_PCCONN_OK     1
+int AGENT_SENDID_FROM_PCConn(pPCConn conn,int newid);
+
+#define AGENT_GETID_FROM_PCCONN_ERROR  -1
+int AGENT_GETID_FROM_PCConn(pPCConn conn);
+
 #endif

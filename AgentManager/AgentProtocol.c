@@ -11,7 +11,7 @@ int PROTO_Init(){   // init cbfnode list
 }
 
 pAgent_proto PROTO_CreateProto(){
-    pAgent_proto proto = (pAgent_proto)malloc(sizeof(Agent_proto));
+    pAgent_proto proto = (pAgent_proto)malloc(sizeof(struct AGENTPROTOCOL));
     if(proto == NULL){
         return PROTO_CREATEPROTO_ERROR;
     }
@@ -50,23 +50,16 @@ int PROTO_SetAddress (pAgent_proto proto,int fromid,int toid){
 }
 
 int PROTO_SetArgs (pAgent_proto proto,int arglen,char *cmdargs){
-Printf_DEBUG("1111111111111111");
     if(proto == NULL 
         || arglen > MAX_ARG_LEN){
-Printf_DEBUG("2222222222222222 arglen = %d, MAX_ARG_LEN = %d",
-            arglen,MAX_ARG_LEN);
         return PROTO_SETARGS_ERROR;
     }
     if(proto->cmdargs != NULL){
-Printf_DEBUG("3333333333333333");
         free(proto->cmdargs);
         proto->cmdargs = NULL;
     }
-Printf_DEBUG("4444444444444444");
-    proto->cmdargs = (char *)malloc(sizeof(arglen+1));
-Printf_DEBUG("5555555555555555");
+    proto->cmdargs = (char *)malloc(sizeof(char)*(arglen+1));
     memcpy(proto->cmdargs,cmdargs,arglen+1);
-Printf_DEBUG("6666666666666666 -> %d",arglen+1);
     proto->argLen = arglen;
     return PROTO_SETARGS_OK;
 }
@@ -75,6 +68,7 @@ int PROTO_FreeProto(pAgent_proto proto){
     if(proto == NULL){
         return PROTO_FREEPROTO_ERROR;
     }
+Printf_DEBUG("PROTO FREE??????????");
     free(proto->cmdargs);
     proto->cmdargs = NULL;
     free(proto);
