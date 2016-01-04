@@ -10,7 +10,7 @@ pJobList joblist = NULL;
 //=====================================
 
 int GLOBAL_SetJobList(pJobList list){
-    if(list != NULL){
+    if(list == NULL){
         Printf_Error("GLOBAL_SetJobList NULL joblist");
         return GLOBAL_SETJOBLIST_ERROR;
     }

@@ -53,12 +53,15 @@ int JOB_GetFreshJobID(pJobList list){
     while(times < 1000){
         for(i=0;i<MAX_JOB_LIST;i++){
             if(((list->joblist)[i]).jobState == JOB_STATE_RELEASE){
+                ((list->joblist)[i]).jobState = JOB_WAITCLOSEJOB_OK;
                 list->jobNow++;
                 result = i;
+                goto exit;
             }
         }
         MIC_USLEEP(10);
     }
+exit:
     list->freshlock = JOB_FRESH_ID_UNLOCK;
     return i;
 }

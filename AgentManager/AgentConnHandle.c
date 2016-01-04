@@ -20,6 +20,8 @@ int m_Info_send(pPCConn conn,pPCNodeInfo info);
 //int m_Info_send(int sock,pPCNodeInfo info);
 #define M_INFO_RECV_ERROR   NULL
 //pPCNodeInfo m_agentInfo_Recv(int sock);
+int When_Iam_WithAdmin_Connect(pPCNodeInfo myself,pPCConn conn);
+int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn);
 //====================================
 
 int m_AddNeighborProxy(pPCNodeInfo info){
@@ -84,17 +86,26 @@ int AgentInfo_Interactive(int sock,char *ip,int port){
     if(myself == NULL || conn == NULL){
         return AGENTCONN_INTERACTIVE_ERROR;
     }
-    if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
+    if(PROTO_SENDPROTO_ERROR == 
+        PROTO_SendPCNodeInfo(conn,myself)){
         return AGENTCONN_INTERACTIVE_ERROR;
     }
+//    if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
+//        return AGENTCONN_INTERACTIVE_ERROR;
+//    }
     /////// Add code From here
-//    m_Info_send(sock,myself);
+    Printf_DEBUG("111111111111");
+    m_Info_send(conn,myself);
     switch(myself->NodeType ){
     case  MYSELF_NODE:
+        Printf_DEBUG("222222222222");
+        When_Iam_Normal_Node(myself,conn);
 //        when_IAM_NORMALNODE(sock,ip,port);
         break;
     case IAM_ADMIN_NODE:
-//        when_IAM_ADMIN(sock,ip,port);
+    case BE_MANAGED_NOW:
+        Printf_DEBUG("333333333333");
+        When_Iam_WithAdmin_Connect(myself,conn);
         break;
     default:
         Printf_Error("NodeType is error");
@@ -243,17 +254,29 @@ int When_Iam_WithAdmin_Connect(pPCNodeInfo myself,pPCConn conn){
     AGENT_SENDID_FROM_PCConn(conn,newid);
     //  get server node info
 Printf_DEBUG("Get Server Info from here");
-    pPCNodeInfo server = NULL;
-    //====================================
+    pPCNodeInfo server = m_agentInfo_Recv(conn);
     //  add server to tree
     m_AddNeighborProxy(server);
+    PCNODE_Free(server);
+    server = NULL;
     return WHEN_IAM_WITHADMIN_CONNECT_OK;
 }
 
 #define WHEN_IAM_NORMAL_NODE_ERROR  -1
 #define WHEN_IAM_NORMAL_NODE_OK      1
 int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn){
-
+    // get my id
+    int newid = AGENT_GETID_FROM_PCConn(conn);
+    Printf_DEBUG("my new id is %d",newid);
+    // set my id 
+    PCMANAGER_Set_RootID(newid);
+    
+    // recv server agent info 
+    pPCNodeInfo server = m_agentInfo_Recv(conn);
+    // add server agent 
+    m_AddNeighborProxy(server);
+    PCNODE_Free(server);
+    server = NULL;
     return WHEN_IAM_NORMAL_NODE_OK;
 }
 
@@ -283,6 +306,7 @@ int When_Client_Normal_Node(pPCNodeInfo client,pPCConn conn){
     // fresh id and send it
     int newid = AGENT_ID_ASK();
     AGENT_SENDID_FROM_PCConn(conn,newid);
+    client->id = newid;
     // send info
     if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
         return WHEN_CLIENT_NORMAL_NODE_ERROR;
@@ -305,9 +329,11 @@ int on_NewAgent_Connect(pAgent_proto proto,pPCConn conn){
         case IAM_ADMIN_NODE:
         case BE_MANAGED_NOW:
             Printf_DEBUG("client is admin or with admin");
+            When_Client_With_Admin(client,conn);
             break;
         case MYSELF_NODE:
             Printf_DEBUG("client is normal node");
+            When_Client_Normal_Node(client,conn);
             break;
         default:
             Printf_DEBUG("UNKNOWN client node type %d\n",client->NodeType);

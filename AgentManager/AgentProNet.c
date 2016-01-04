@@ -7,6 +7,7 @@
 #include "AgentProNet.h"
 #include "GlobalValue.h"
 #include "AgentJobMsg.h"
+#include "AgentCMDParse.h"
 
 //===========================================================
 //   inline  function 
@@ -163,8 +164,18 @@ int PROTO_SendPCNodeInfo(pPCConn conn,pPCNodeInfo info){
     if(jobid == JOB_GETFRESHJOBID_ERROR){
         return PROTO_SENDPROTO_ERROR;
     }
-    //pAgent_proto proto = PROTO_CreateProto(
-Printf_DEBUG("NEED add COde Here");
+    pAgent_proto proto = PROTO_CreateProto();
+    PROTO_SetCMD(proto,
+        CMDTYPE_NEWCONN,     // 新节点连接
+        CMDID_NEWNODE_HERE,  // 新节点连接
+        jobid);
+    PROTO_SetAddress(proto,
+        -1,-1);              // 无须设置消息来回
+    PROTO_SetArgs(proto,
+        0,"");
+Printf_DEBUG("111111111111111");
+    PROTO_SendProto(conn,proto);
+Printf_DEBUG("222222222222222");
     return 1;
 }
 
