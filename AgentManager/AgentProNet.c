@@ -10,38 +10,6 @@
 #include "AgentCMDParse.h"
 
 //===========================================================
-//   inline  function 
-//      m_SendData_CmdTunnel( conn,data, data, len);
-#define M_SENDDATA_CMDTUNNEL_ERROR   -1
-#define M_SENDDATA_CMDTUNNEL_OK       1
-int m_SendData_CmdTunnel(pPCConn conn,char *data,int datalen){
-    int nsend = -1;
-    int cmdsocket = -1;
-    if(conn == NULL || conn->cmd_socket == -1){
-        return M_SENDDATA_CMDTUNNEL_ERROR;
-    }
-    // get cmd_socket
-    cmdsocket = conn->cmd_socket;
-    // session busylock
-    while(NET_SESSION_BUSY_NOW == conn->BusyType){
-        MIC_USLEEP(10);
-    }
-    // session lock it
-    conn->BusyType = NET_SESSION_BUSY_NOW;
-    // send data
-Printf_DEBUG("send data len is %d ",datalen);
-    nsend = API_socket_send(cmdsocket,data,datalen);
-MIC_USLEEP(100);
-    // unlock it 
-    conn->BusyType = NET_SESSION_UNUSED_NOW;
-    // check send state
-    if(nsend != datalen){
-        return M_SENDDATA_CMDTUNNEL_ERROR;
-    }
-    return M_SENDDATA_CMDTUNNEL_OK;
-}
-
-//===========================================================
 
 int PROTO_SendProto(pPCConn conn,pAgent_proto proto){
     char cmdbuff[MAX_PROTO_BUFLEN];
@@ -67,7 +35,7 @@ if(proto == NULL){
     memcpy(&(cmdbuff[24]),proto->cmdargs,proto->argLen+1);
 
 ////////////// recode here
-    m_SendData_CmdTunnel(conn,cmdbuff,MAX_PROTO_BUFLEN);
+    PCCONN_SendData(conn,cmdbuff,MAX_PROTO_BUFLEN);
     return PROTO_SENDPROTO_OK;
 }
 
@@ -110,58 +78,6 @@ int PROTO_RecvState(pPCConn conn){
     return PROTO_RECVSTATE_SOCKET_ERROR;
 }
 
-///=======================================================
-///   PCConn Functions
-///=======================================================
-pPCConn PCCONN_CreatePCConnFromSocket(int sock){
-    pPCConn conn = (pPCConn)malloc(sizeof(PCConn));
-    if(conn == NULL){
-        return PCCONN_CREATEPCCONNFROMSOCKET_ERROR;
-    }
-    conn->ConnType   = CONNTYPE_REVERSE_CONNECT;
-    conn->cmd_socket = sock;
-    conn->BusyType   = NET_SESSION_UNUSED_NOW;
-    return conn;
-}
-
-pPCConn PCCONN_CreatePCConnFromIPPort(char *ip,int port,int sock){
-    pPCConn conn = PCCONN_CreatePCConnFromSocket(sock);
-    if( PCCONN_CREATEPCCONNFROMSOCKET_ERROR == 
-        conn){
-        return PCCONN_CREATEPCCONNFROMIPPORT_ERROR;
-    }
-    conn->ConnType   = CONNTYPE_DIRECT_CONNECT;
-    strncpy(conn->IPaddr,ip,MAX_IP_ADDR_LEN);
-    conn->port       = port;
-    conn->BusyType   = NET_SESSION_UNUSED_NOW;
-    return conn;
-}
-
-int PCCONN_Free(pPCConn conn){
-    if(conn == NULL){
-        return PCCONN_FREE_ERROR;
-    }
-    free(conn);
-    conn = NULL;
-    return PCCONN_FREE_OK;
-}
-
-pPCConn PCCONN_Copy(pPCConn conn){
-    pPCConn conn1 = NULL;
-    if(conn == NULL){
-        return PCCONN_COPY_ERROR;
-    }
-    conn1 = (pPCConn)malloc(sizeof(PCConn));
-    if(conn1 == NULL){
-        return PCCONN_COPY_ERROR;
-    }
-    conn1->ConnType   = conn->ConnType;
-    conn1->BusyType   = conn->BusyType;
-    conn1->port       = conn->port;
-    conn1->cmd_socket = conn->cmd_socket;
-    memcpy(conn1->IPaddr,conn->IPaddr,MAX_IP_ADDR_LEN);
-    return conn1;
-}
 
 ///=====================================================
 int PROTO_SendPCNodeInfo(pPCConn conn,pPCNodeInfo info){
@@ -228,28 +144,3 @@ namelen  = API_m_chartoi(namelenbuf ,4);
     return info;
 }
 
-int PCCONN_SendData(pPCConn conn,char *data,int datalen){
-    int res = m_SendData_CmdTunnel(conn,data,datalen);
-    if(res == M_SENDDATA_CMDTUNNEL_ERROR){
-        return PCCONN_SENDDATA_ERROR;
-    }
-    return datalen;
-}
-
-int PCCONN_RecvData(pPCConn conn,char *data,int maxlen){
-    int nrecv;
-    char cmdbuff[MAX_PROTO_BUFLEN];
-    if( conn == NULL ){
-        return PCCONN_RECVDATA_ERROR;
-    }
-MIC_USLEEP(1);
-    nrecv = API_socket_recv(conn->cmd_socket,cmdbuff,MAX_PROTO_BUFLEN);
-    if(nrecv == 0){ return PCCONN_RECVDATA_ERROR; }
-    if(nrecv > maxlen){
-        Printf_Error("nrecv (%d) > maxlen (%d)",
-            nrecv,maxlen);
-        return PCCONN_RECVDATA_ERROR;
-    }
-    memcpy(data,cmdbuff,maxlen);
-    return nrecv;
-}

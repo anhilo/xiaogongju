@@ -14,6 +14,7 @@ AgentLib   =  \
 			AgentManager/GlobalValue.c \
 			AgentManager/PCNodeInfo.c \
 			AgentManager/PCNodeManager.c \
+			AgentManager/PCConn.c \
 			ControlCore/CC_AgentConn.c \
 			ControlCore/CCProxy.c \
 			ControlCore/Cmd_Ctrl.c 
