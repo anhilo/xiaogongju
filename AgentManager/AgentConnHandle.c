@@ -10,6 +10,7 @@
 #include "AgentIDCtrl.h"
 #include "AgentProNet.h"
 #include "AgentCMDParse.h"
+#include "AgentChildSync.h"
 
 
 //====================================
@@ -296,6 +297,7 @@ int When_Client_With_Admin(pPCNodeInfo client,pPCConn conn){
     m_AddNeighborProxy(client);
     // set it upper
     PCMANAGER_SETUpperAdmin(client->id);
+    ChildNodeInfoSyncTrigger();
     return WHEN_CLIENT_WITH_ADMIN_OK;
 }
 

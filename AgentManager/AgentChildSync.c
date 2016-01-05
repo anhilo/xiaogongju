@@ -9,6 +9,111 @@
 #include "PCNodeInfo.h"
 #include "AgentMsgHandle.h"
 #include "PCNodeManager.h"
+#include "AgentIDCtrl.h"
+#include "AgentCMDParse.h"
+
+#define MAX_SENDCHILDINFO_LEN   200
+
+#define M_SENDCHILDINFO_ERROR   -1
+#define M_SENDCHILDINFO_OK       1
+int m_SendChildInfo(int fatherid,int childid,
+        int ostype,char *pcname){
+    char buffer[MAX_SENDCHILDINFO_LEN];
+    int namelen = strlen(pcname);
+    if(MAX_PCNAME_LEN < namelen){
+        return M_SENDCHILDINFO_ERROR;
+    }
+    int jobid = -1;
+    pAgent_proto proto = PROTO_CreateProto();
+    if( proto == PROTO_CREATEPROTO_ERROR ){
+        return M_SENDCHILDINFO_ERROR;
+    }
+    API_m_itochar(fatherid,&(buffer[ 0]),4);
+    API_m_itochar(childid ,&(buffer[ 4]),4);
+    API_m_itochar(ostype  ,&(buffer[ 8]),4);
+    API_m_itochar(namelen ,&(buffer[12]),4);
+    strncpy(&(buffer[16]),pcname,MAX_PCNAME_LEN);
+    PROTO_SetCMD(proto,CMDTYPE_TRANSMIT,
+            CMDID_CHILDSYNC_UPPER,
+            jobid);
+    PROTO_SetAddress(proto,
+        PCMANAGER_Get_RootID(),
+        AGENTID_UPPER_AGENT);
+    PROTO_SetArgs(proto,
+        MAX_SENDCHILDINFO_LEN,
+        buffer);
+    if(CMDPARSE_SENDPROTO_UPPER_ERROR == 
+        CMDParse_SendProto_Upper(proto)){
+        return M_SENDCHILDINFO_ERROR;
+    }
+    return M_SENDCHILDINFO_OK;
+}
+
+#define M_RECV_AND_ADD_CHILD_ERROR   -1
+#define M_RECV_AND_ADD_CHILD_OK       1
+int m_Recv_And_Add_Child(pAgent_proto proto){
+    pPCNodeInfo info = PCNODE_Create();
+    int fatherid,childid,ostype;
+    int namelen;
+    char pcname[MAX_PCNAME_LEN];
+    fatherid = API_m_chartoi(&((proto->cmdargs)[ 0]),4);
+    childid  = API_m_chartoi(&((proto->cmdargs)[ 4]),4);
+    ostype   = API_m_chartoi(&((proto->cmdargs)[ 8]),4);
+    namelen  = API_m_chartoi(&((proto->cmdargs)[12]),4);
+    strncpy(pcname, &((proto->cmdargs)[16]),MAX_PCNAME_LEN);
+    PCNODE_SETAllData(
+        info,                 // node
+        childid,              // id
+        ostype,               // ostype
+        pcname,               // pcname
+        MYSELF_NODE_REMOTE,   // NodeType
+        CONNTYPE_UNKNOWN,     // ConnType
+        "",                   // ipaddr
+        -1,                   // port
+        -1                    // cmd_socket
+    );
+    PCMANAGER_ADDRemote(fatherid,info);
+    MIC_USLEEP(1);
+    PCNODE_Free(info);
+    return M_RECV_AND_ADD_CHILD_OK;
+}
+
+#define M_RESETTARGETNEWID_ERROR   -1
+#define M_RESETTARGETNEWID_OK       1
+int m_resetTargetNewId(int oldid,int newid){
+    int res = M_RESETTARGETNEWID_ERROR;
+    char newidbuf[4];
+    pPCNodeInfo child = PCMANAGER_GETNextJump(oldid);
+    pPCConn     conn  = &(child->conn);
+    if(conn == NULL || child == NULL){
+        goto error_exit;
+    }
+    pAgent_proto proto = PROTO_CreateProto();
+    PROTO_SetCMD(proto,
+        CMDTYPE_TRANSMIT,
+        CMDID_ID_RESET,
+        -1);
+    PROTO_SetAddress(proto,
+        PCMANAGER_Get_RootID(),
+        oldid);
+    API_m_itochar(newid,newidbuf,4);
+    PROTO_SetArgs(proto,
+        4, newidbuf);
+    PROTO_SendProto(conn,proto);
+    MIC_USLEEP(1);
+    
+    PCMANAGER_ReplaceID(oldid,newid);
+ok_exit:
+    res = M_RESETTARGETNEWID_OK;
+    goto exit;
+error_exit:
+    res = M_RESETTARGETNEWID_ERROR;
+    goto exit;
+exit:
+    PCNODE_Free(child);
+    conn = NULL;
+    return res;
+}
 
 int m_ForEachChildAgent_Trigger(pNodeData minfo){
     pPCNodeInfo info = (pPCNodeInfo)minfo;
@@ -17,26 +122,26 @@ int m_ForEachChildAgent_Trigger(pNodeData minfo){
       || info -> NodeType == UPSTREAM_NODE){
         return 1;
     }
-    int newid = ASK_NEW_ID();
+    int newid = AGENT_ID_ASK();
     // set it id
-    resetTargetNewId(info->id,newid);
+    m_resetTargetNewId(info->id,newid);
     // send set id info
 //    PCMANAGER_ReplaceID(info->id,newid);
-    int oldid = info -> id;
-    info->NodeType = MYSELF_NODE_REMOTE;
-    info->id = newid;
+//    int oldid = info -> id;
+//    info->NodeType = MYSELF_NODE_REMOTE;
+//    info->id = newid;
     /// set that node remote
-PCMANAGER_Tree_Print();
-Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
-        oldid,newid,PCMANAGER_Get_RootID());
+//PCMANAGER_Tree_Print();
+//Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
+//        oldid,newid,PCMANAGER_Get_RootID());
 //    PCMANAGER_RemoveNode(oldid);
 //    PCMANAGER_ADDNeighbor(info);
-    PCMANAGER_ReplaceID(oldid,newid);
-Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
-        oldid,newid,PCMANAGER_Get_RootID());
+//    PCMANAGER_ReplaceID(oldid,newid);
+//Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
+//        oldid,newid,PCMANAGER_Get_RootID());
 Printf_DEBUG("Add OK");
     // send agent info upper
-    SendAgentInfo(PCMANAGER_Get_RootID(),
+    m_SendChildInfo(PCMANAGER_Get_RootID(),
         newid,
         info->OSType,
         info->PCName);
@@ -49,4 +154,21 @@ int ChildNodeInfoSyncTrigger(){
     PCMANAGER_Traversal_Neighbor(
         m_ForEachChildAgent_Trigger);
     return 1;
+}
+
+int on_SyncInfoUpper(pAgent_proto proto){
+    int res = ON_SYNCINFOUPPER_ERROR;
+    int newid = -1;
+    if(proto == NULL){
+        goto error_exit;
+    }
+    m_Recv_And_Add_Child(proto);
+ok_exit:
+    res = ON_SYNCINFOUPPER_OK;
+    goto exit;
+error_exit:
+    res = ON_SYNCINFOUPPER_ERROR;
+    goto exit;
+exit:
+    return res;
 }

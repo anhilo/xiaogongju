@@ -49,10 +49,8 @@ int on_MyMsgHere(pAgent_proto proto,pPCConn conn){
     return 1;
 }
 
-#define M_SENDPROTO_UPPER_ERROR   -1
-#define M_SENDPROTO_UPPER_OK       1
-int m_SendProto_Upper(pAgent_proto proto){
-    int result = M_SENDPROTO_UPPER_ERROR;
+int CMDParse_SendProto_Upper(pAgent_proto proto){
+    int result = CMDPARSE_SENDPROTO_UPPER_ERROR;
     if(PCMANAGER_Get_RootID() == 0){
         // no upper , I'm admin now
         goto error_exit;
@@ -62,20 +60,19 @@ int m_SendProto_Upper(pAgent_proto proto){
         // get father info error
         goto error_exit;
     }
-    pPCConn conn = PCCONN_Copy(&(father->conn));
+    pPCConn conn = &(father->conn);
     if(conn == PCCONN_COPY_ERROR){
         goto error_exit;
     }
     PROTO_SendProto(conn,proto);
     MIC_USLEEP(1);
 ok_exit:
-    result = M_SENDPROTO_UPPER_OK;
+    result = CMDPARSE_SENDPROTO_UPPER_OK;
     goto exit;
 error_exit:
-    result = M_SENDPROTO_UPPER_ERROR;
+    result = CMDPARSE_SENDPROTO_UPPER_ERROR;
     goto exit;
 exit:
-    PCCONN_Free(conn);
     PCNODE_Free(father);
     conn   = NULL;
     father = NULL;
@@ -101,7 +98,7 @@ int on_Transmit(pAgent_proto proto,pPCConn conn){
         // analysis it && To All upper Agent
         Printf_DEBUG("To All upper Agent && analysis it ");
         on_MyMsgHere(proto,conn);
-        m_SendProto_Upper(proto);
+        CMDParse_SendProto_Upper(proto);
         break;
     default:
         Printf_DEBUG("Need find this agent from tree %d", proto->toID);

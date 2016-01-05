@@ -8,6 +8,7 @@
 ///////////////////////////////////////////
 #define MAX_IP_ADDR_LEN    20
 
+#define CONNTYPE_UNKNOWN          0
 #define CONNTYPE_DIRECT_CONNECT   1
 #define CONNTYPE_REVERSE_CONNECT  2
 #define NET_SESSION_BUSY_NOW      1

@@ -106,8 +106,8 @@ int PCCONN_RecvData(pPCConn conn,char *data,int maxlen){
     if( conn == NULL ){
         return PCCONN_RECVDATA_ERROR;
     }
-MIC_USLEEP(1);
-    nrecv = API_socket_recv(conn->cmd_socket,cmdbuff,MAX_PROTO_BUFLEN);
+MIC_USLEEP(10);
+    nrecv = API_socket_recv(conn->cmd_socket,cmdbuff,maxlen);
     if(nrecv == 0){ return PCCONN_RECVDATA_ERROR; }
     if(nrecv > maxlen){
         Printf_Error("nrecv (%d) > maxlen (%d)",

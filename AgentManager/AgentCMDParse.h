@@ -17,6 +17,7 @@
 #define CMDID_NEWID_RPL        6 // 新ID分配响应
 #define CMDID_CHILDSYNC_UPPER  7 // 向上级更新节点信息
 #define CMDID_NEWNODE_HERE     8 // 新节点连接
+#define CMDID_ID_RESET         9 // ID重置
 
 /////  内置ID控制
 #define AGENTID_ADMIN          0 
@@ -34,5 +35,9 @@
 #define CMDPARSE_AND_DO_ERROR     -1
 #define CMDPARSE_AND_DO_OK         1
 int CMDParse_And_Do(pAgent_proto proto,pPCConn conn);
+
+#define CMDPARSE_SENDPROTO_UPPER_ERROR   -1
+#define CMDPARSE_SENDPROTO_UPPER_OK       1
+int CMDParse_SendProto_Upper(pAgent_proto proto);
 
 #endif
