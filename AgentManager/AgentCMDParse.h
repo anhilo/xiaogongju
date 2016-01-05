@@ -18,6 +18,19 @@
 #define CMDID_CHILDSYNC_UPPER  7 // 向上级更新节点信息
 #define CMDID_NEWNODE_HERE     8 // 新节点连接
 
+/////  内置ID控制
+#define AGENTID_ADMIN          0 
+    // 管理员节点的默认ID
+#define AGENTID_UNKNOWN       -1 
+    // 信息和节点ID无关时，使用-1
+#define AGENTID_ALL_AGENT     -2 
+    // 信息将发给所有节点 
+#define AGENTID_UPPER_AGENT   -3 
+    // 信息将发给所有上游节点,并递归上传
+#define AGENTID_DOWN_AGENT    -4 
+    // 信息将广播给所有下游节点,并递归下传
+
+
 #define CMDPARSE_AND_DO_ERROR     -1
 #define CMDPARSE_AND_DO_OK         1
 int CMDParse_And_Do(pAgent_proto proto,pPCConn conn);

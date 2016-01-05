@@ -11,6 +11,7 @@
 #include "AgentJobMsg.h"
 #include "PCNodeManager.h"
 #include "AgentConnHandle.h"
+#include "AgentChildSync.h"
 
 //    int cmdType;
 //    int cmdID;
@@ -37,12 +38,48 @@ int on_MyMsgHere(pAgent_proto proto,pPCConn conn){
         JOB_CloseJob(GLOBAL_GetJobList(),
             proto->jobID,
             proto->cmdargs);
+    case CMDID_CHILDSYNC_UPPER:
+        Printf_DEBUG("sync agent info upper");
+        on_SyncInfoUpper(proto);
         break;
     default:
         Printf_DEBUG("Unsupport now %d",proto->cmdID);
         break;
     }
     return 1;
+}
+
+#define M_SENDPROTO_UPPER_ERROR   -1
+#define M_SENDPROTO_UPPER_OK       1
+int m_SendProto_Upper(pAgent_proto proto){
+    int result = M_SENDPROTO_UPPER_ERROR;
+    if(PCMANAGER_Get_RootID() == 0){
+        // no upper , I'm admin now
+        goto error_exit;
+    }
+    pPCNodeInfo father = PCMANAGER_Get_FatherNode();
+    if(father == PCMANAGER_GET_FATHERNODE_ERROR){
+        // get father info error
+        goto error_exit;
+    }
+    pPCConn conn = PCCONN_Copy(&(father->conn));
+    if(conn == PCCONN_COPY_ERROR){
+        goto error_exit;
+    }
+    PROTO_SendProto(conn,proto);
+    MIC_USLEEP(1);
+ok_exit:
+    result = M_SENDPROTO_UPPER_OK;
+    goto exit;
+error_exit:
+    result = M_SENDPROTO_UPPER_ERROR;
+    goto exit;
+exit:
+    PCCONN_Free(conn);
+    PCNODE_Free(father);
+    conn   = NULL;
+    father = NULL;
+    return result;
 }
 
 #define ON_TRANSMIT_ERROR   -1
@@ -57,8 +94,14 @@ int on_Transmit(pAgent_proto proto,pPCConn conn){
     }
 
     switch(proto->toID){
-    case 0:
+    case AGENTID_ADMIN: // To Admin, transmit it upper
         Printf_DEBUG("To Admin, transmit it upper");
+        break;
+    case AGENTID_UPPER_AGENT: 
+        // analysis it && To All upper Agent
+        Printf_DEBUG("To All upper Agent && analysis it ");
+        on_MyMsgHere(proto,conn);
+        m_SendProto_Upper(proto);
         break;
     default:
         Printf_DEBUG("Need find this agent from tree %d", proto->toID);

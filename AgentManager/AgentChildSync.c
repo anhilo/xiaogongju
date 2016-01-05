@@ -50,4 +50,3 @@ int ChildNodeInfoSyncTrigger(){
         m_ForEachChildAgent_Trigger);
     return 1;
 }
-

@@ -3,6 +3,7 @@ object_lib = baselib/BaseAPI.c baselib/GlobalFunctions.c \
 			sockslib/Sock_Tunnel.c
 
 AgentLib   =  \
+			AgentManager/AgentChildSync.c \
 			AgentManager/AgentCMDParse.c \
 			AgentManager/AgentConnHandle.c \
 			AgentManager/AgentConversationCTRL.c \

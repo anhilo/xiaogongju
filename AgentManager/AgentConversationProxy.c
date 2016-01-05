@@ -34,10 +34,10 @@ int AGENT_ConversationProxy_Init(){
 int m_Listener_For_EachAgentNode(pNodeData node){
     int res = 1;
     pPCNodeInfo info = (pPCNodeInfo)node;
-    pPCConn conn = (pPCConn)(&(info -> conn));
+    pPCConn conn = PCCONN_Copy(&(info -> conn));
     pAgent_proto proto = NULL;
     if(conn == NULL || info == NULL){
-        return 0;
+        res = 0;
     }
     // socket can read
     if( PROTO_RECVSTATE_CANRECV == 
@@ -45,13 +45,22 @@ int m_Listener_For_EachAgentNode(pNodeData node){
     ){
         proto = PROTO_RecvProto(conn);
         if(proto == PROTO_RECVPROTO_ERROR){
-            return 0;
+            res = 0;
         }
         if(CMDPARSE_AND_DO_ERROR == 
             CMDParse_And_Do(proto,conn)){
-            return 0;
+            res = 0;
         }
     }
+ok_exit:
+    res = 1;
+    goto exit;
+error_exit:
+    res = 0;
+    goto exit;
+exit:
+    PCCONN_Free(conn);
+    PROTO_FreeProto(proto);
     return res;
 }
 
