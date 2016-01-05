@@ -31,6 +31,7 @@ int m_SendData_CmdTunnel(pPCConn conn,char *data,int datalen){
     // send data
 Printf_DEBUG("send data len is %d ",datalen);
     nsend = API_socket_send(cmdsocket,data,datalen);
+MIC_USLEEP(100);
     // unlock it 
     conn->BusyType = NET_SESSION_UNUSED_NOW;
     // check send state
@@ -45,6 +46,12 @@ Printf_DEBUG("send data len is %d ",datalen);
 int PROTO_SendProto(pPCConn conn,pAgent_proto proto){
     char cmdbuff[MAX_PROTO_BUFLEN];
     if(conn == NULL || proto == NULL ) {
+if(conn == NULL){
+    Printf_Error("conn is NULL");
+}
+if(proto == NULL){
+    Printf_Error("proto is NULL");
+}
         return PROTO_SENDPROTO_ERROR;
     }
     if(proto->argLen + 24 > MAX_PROTO_BUFLEN){
@@ -235,10 +242,12 @@ int PCCONN_RecvData(pPCConn conn,char *data,int maxlen){
     if( conn == NULL ){
         return PCCONN_RECVDATA_ERROR;
     }
+MIC_USLEEP(1);
     nrecv = API_socket_recv(conn->cmd_socket,cmdbuff,MAX_PROTO_BUFLEN);
     if(nrecv == 0){ return PCCONN_RECVDATA_ERROR; }
     if(nrecv > maxlen){
-        Printf_Error("nrecv > maxlen");
+        Printf_Error("nrecv (%d) > maxlen (%d)",
+            nrecv,maxlen);
         return PCCONN_RECVDATA_ERROR;
     }
     memcpy(data,cmdbuff,maxlen);

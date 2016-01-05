@@ -250,13 +250,18 @@ Printf_OK("[recv ]id = %d,ostype = %d , nodetype = %d, pcname = %s",
 #define WHEN_IAM_WITHADMIN_CONNECT_OK      1
 int When_Iam_WithAdmin_Connect(pPCNodeInfo myself,pPCConn conn){
     // fresh id and send it
+    MIC_USLEEP(100);
     int newid = AGENT_ID_ASK();
+    MIC_USLEEP(1);
     AGENT_SENDID_FROM_PCConn(conn,newid);
+    MIC_USLEEP(1);
     //  get server node info
 Printf_DEBUG("Get Server Info from here");
+    MIC_USLEEP(1);
     pPCNodeInfo server = m_agentInfo_Recv(conn);
     //  add server to tree
     m_AddNeighborProxy(server);
+    MIC_USLEEP(1);
     PCNODE_Free(server);
     server = NULL;
     return WHEN_IAM_WITHADMIN_CONNECT_OK;
@@ -266,15 +271,19 @@ Printf_DEBUG("Get Server Info from here");
 #define WHEN_IAM_NORMAL_NODE_OK      1
 int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn){
     // get my id
+    MIC_USLEEP(1);
     int newid = AGENT_GETID_FROM_PCConn(conn);
     Printf_DEBUG("my new id is %d",newid);
     // set my id 
     PCMANAGER_Set_RootID(newid);
     
+    MIC_USLEEP(1);
     // recv server agent info 
     pPCNodeInfo server = m_agentInfo_Recv(conn);
     // add server agent 
+    MIC_USLEEP(1);
     m_AddNeighborProxy(server);
+    MIC_USLEEP(1);
     PCNODE_Free(server);
     server = NULL;
     return WHEN_IAM_NORMAL_NODE_OK;
@@ -285,15 +294,20 @@ int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn){
 int When_Client_With_Admin(pPCNodeInfo client,pPCConn conn){
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     //  set myself id
+    MIC_USLEEP(1);
     int newid = AGENT_GETID_FROM_PCConn(conn);
     Printf_DEBUG("my new id is %d",newid);
+    MIC_USLEEP(1);
     PCMANAGER_Set_RootID(newid); // set myself id
     //  send myself info
+    MIC_USLEEP(1);
     if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
         return WHEN_CLIENT_WITH_ADMIN_ERROR;
     }
+    MIC_USLEEP(1);
     // add client to tree
     m_AddNeighborProxy(client);
+    MIC_USLEEP(1);
     // set it upper
     PCMANAGER_SETUpperAdmin(client->id);
     return WHEN_CLIENT_WITH_ADMIN_OK;
@@ -304,15 +318,20 @@ int When_Client_With_Admin(pPCNodeInfo client,pPCConn conn){
 int When_Client_Normal_Node(pPCNodeInfo client,pPCConn conn){
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     // fresh id and send it
+    MIC_USLEEP(1);
     int newid = AGENT_ID_ASK();
+    MIC_USLEEP(1);
     AGENT_SENDID_FROM_PCConn(conn,newid);
     client->id = newid;
     // send info
+    MIC_USLEEP(1);
     if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
         return WHEN_CLIENT_NORMAL_NODE_ERROR;
     }
     // add client to tree
+    MIC_USLEEP(1);
     m_AddNeighborProxy(client);
+    MIC_USLEEP(1);
     return WHEN_CLIENT_NORMAL_NODE_OK;
 }
 

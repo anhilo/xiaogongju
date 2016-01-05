@@ -8,6 +8,7 @@
 #include "AgentCMDParse.h"
 #include "PCNodeManager.h"
 #include "AgentJobMsg.h"
+#include "AgentProtocol.h"
 
 // 从管理员获得ID
 int Ask_Id_Upper(pJobList list){
@@ -26,7 +27,9 @@ int Ask_Id_Upper(pJobList list){
         JOB_SetJOBState(list,jobid,JOB_STATE_WAIT_RPL);
 
         // 新建传输协议
-        PROTO_CreateProto(proto,CMDTYPE_TRANSMIT,CMDID_NEWID_ASK,jobid);
+        proto = PROTO_CreateProto();
+        PROTO_SetCMD(proto,CMDTYPE_TRANSMIT,CMDID_NEWID_ASK,jobid);
+//        PROTO_CreateProto(proto,CMDTYPE_TRANSMIT,CMDID_NEWID_ASK,jobid);
         // 从当前节点发送给管理员
         PROTO_SetAddress(proto,PCMANAGER_Get_RootID(),0);
         // 无参数内容
@@ -84,8 +87,8 @@ int sendIDBack(pPCConn conn,
     pAgent_proto proto = NULL;
     char buf[4];
     API_m_itochar(newid,buf,4);
-    PROTO_CreateProto(proto,CMDTYPE_TRANSMIT,
-        CMDID_NEWID_RPL,jobid);
+    proto = PROTO_CreateProto();
+    PROTO_SetCMD(proto,CMDTYPE_TRANSMIT,CMDID_NEWID_RPL,jobid);
     PROTO_SetAddress(proto,PCMANAGER_Get_RootID(),targetid);
     PROTO_SetArgs(proto,4,buf);
     PROTO_SendProto(conn,proto);
@@ -111,6 +114,7 @@ int on_AGENT_ID_Ask(pAgent_proto proto,pPCConn conn){
 
 int AGENT_SENDID_FROM_PCConn(pPCConn conn,int newid){
     char idbuf[4];
+    Printf_DEBUG("111111111 is = %d",newid);
     API_m_itochar(newid,idbuf,4);
     if( PCCONN_SENDDATA_ERROR == 
         PCCONN_SendData(conn,idbuf,4)){

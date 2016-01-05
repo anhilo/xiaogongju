@@ -90,9 +90,19 @@ int JOB_SetJOBState(pJobList list,int jobid,
 // 设置 Job 结果
 int JOB_CloseJob(pJobList list,int jobid,
         char *jobResult){
-    if(list == NULL || list->joblist){
+    if(list == NULL || list->joblist == NULL){
+        if(list == NULL){
+            Printf_DEBUG("list is NULL ~~~~");
+        }
+        else if(list->joblist == NULL){
+            Printf_DEBUG("joblist is NULL ~~~~");
+        }
+        else{
+            Printf_DEBUG("sth is NULL ~~~~");
+        }
         return JOB_CLOSEJOB_ERROR;
     }
+Printf_DEBUG("RECV job  somthing ~~~~");
     memcpy(((list->joblist)[jobid]).jobresult,
         jobResult,MAX_RESULT_LEN);
     ((list->joblist)[jobid]).jobState = JOB_STATE_CAN_STOP;
