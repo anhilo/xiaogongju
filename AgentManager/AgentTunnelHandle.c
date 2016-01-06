@@ -8,123 +8,168 @@
 #include "PCNodeManager.h"
 #include "PCNodeInfo.h"
 #include "AgentConversationProxy.h"
-#include "../ControlCore/CCProxy.h"
+#include "AgentCMDParse.h"
+#include "AgentJobMsg.h"
+//=====================================
+pfun_CBF_Tunnel cbf_newtunnel = NULL;
+//=====================================
 
-int SendTunnelProto(int sock,int targetid){
-    char cmd_buf[4];
-    API_m_itochar(targetid,cmd_buf,4);
-    API_socket_send(sock,cmd_buf,4);
-    return 1;
+#define M_GETTARGETCONN_ERROR       NULL
+pPCConn m_getTargetConn(int targetid){
+    pPCNodeInfo info = PCMANAGER_GETNextJump(targetid);
+    pPCConn conn = NULL;
+    if(info == PCMANAGER_GETNEXTJUMP_ERROR){
+        return M_GETTARGETCONN_ERROR;
+    }
+    conn = &(info->conn);
+    if(conn == NULL){
+        return M_GETTARGETCONN_ERROR;
+    }
+    return conn;
 }
 
-int AGENT_TUNN_BuildTunnel(int to_id){
-    int target_sock = -1;
-    int result_flag = 0;
-    pPCNodeInfo nextnode = PCMANAGER_GETNextJump(to_id);
-
-    Printf_DEBUG("Start Build Tunnel");
-
-if(nextnode != NULL){
-    Printf_DEBUG("the cmd_sock is ---> %d",
-        nextnode->conn.cmd_socket);
+#define M_BUILDDIRECTTUNNEL_ERROR   NULL
+pPCConn m_buildDirectTunnel(pPCConn nextconn,int targetid){
+    ppAgent_proto proto = NULL;
+    PCConn        conn  = NULL;
+    char targetbuf[4];
+    if(nextconn == PCCONN_CONNECT_ERROR){
+        goto error_exit;
+    }
+    conn = PCCONN_Connect(
+        nextconn->IPaddr,
+        nextconn->port
+    );
+    if(conn == PCCONN_CONNECT_ERROR){
+        goto error_exit;
+    }
+    
+    proto = PROTO_CreateProto();
+    if(proto == PROTO_CREATEPROTO_ERROR){
+        goto error_exit;
+    }
+    PROTO_SetCMD(proto,CMDTYPE_TRANSMIT
+        CMDID_NEWTUNNEL_ASK
+        -1);
+    PROTO_SetAddress(proto,
+        PCMANAGER_Get_RootID(),
+        targetid);
+    API_m_itochar(targetid,targetbuf,4);
+    PROTO_SetArgs(proto,
+        4;
+        targetbuf);
+    if(PROTO_SENDPROTO_ERROR == 
+        PROTO_SendProto(conn,proto)){
+        goto error_exit;
+    }
+    goto ok_exit;
+error_exit:
+    conn = M_BUILDDIRECTTUNNEL_ERROR;
+ok_exit:
+    PROTO_FreeProto(proto);
+    return conn
 }
 
-
-    if( nextnode != NULL 
-        && (nextnode -> conn .ConnType 
-         == CONNTYPE_DIRECT_CONNECT)
+#define M_BUILDREVERSETUNNEL_ERROR    NULL
+pPCConn m_buildReverseTunnel(pPCConn nextconn,int targetid){
+    int jobid = -1;
+    pPCConn conn       = M_BUILDREVERSETUNNEL_ERROR;
+    pPCConn *conbuf    = &conn;
+    pAgent_proto proto = NULL;
+    char    *resultbuf = NULL;
+    int       buflen   = sizeof(pPCConn);
+    // check conn
+    if(nextconn == M_GETTARGETCONN_ERROR){
+        goto error_exit;
+    }
+    // send proto
+    jobid = JOB_GetFreshJobID(
+        GLOBAL_GetJobList()
+    );
+    if(jobid == JOB_GETFRESHJOBID_ERROR){
+        goto error_exit;
+    }
+    proto = PROTO_CreateProto();
+    PROTO_SetCMD(proto,
+        CMDTYPE_TRANSMIT,
+        CMDID_NEWTUNNEL_RC_ASK
+        jobid);
+    PROTO_SetArgs(proto,
+        0,
+        "");
+    if(PROTO_SENDPROTO_ERROR == 
+        PROTO_SendProto(conn,proto)){
+        goto error_exit;
+    }
+    // wait Job
+    if(JOB_WAITCLOSEJOB_ERROR == 
+        JOB_WaitCloseJob(
+            GLOBAL_GetJobList(),
+            jobid,
+            1000)
     ){
-        target_sock = API_socket_connect(
-            nextnode -> conn.IPaddr,
-            nextnode -> conn.port);
-        if(target_sock != SOCKET_CONNECT_ERROR){
-Printf_DEBUG("Build Tunnel OK -1111---> %d",target_sock);
-// Send NEW_TUNNEL_ASK
-            AGENT_ConversationProxy_SendRcHead(target_sock);
-            result_flag = 1;
-        }
+        goto error_exit;
     }
-    else if(nextnode != NULL
-        && (nextnode -> conn.ConnType
-         == CONNTYPE_REVERSE_CONNECT)){
-        int cmd_sock = nextnode->conn.cmd_socket;
-        if(AGENT_CONVERSATIONPROXY_SENDREVERSEID_OK
-            == AGENT_ConversationProxy_SendRcHead
-            (cmd_sock)){
-            int tunnid = tunn_set_first_pool_and_getid(cmd_sock);
-Printf_DEBUG("poolid = %d",tunnid);
-            char tunnelid[4];
-            API_m_itochar(tunnid,tunnelid,4);
-            int res = API_socket_send(cmd_sock,tunnelid,4);
-            if(res != SOCKET_SEND_ERROR){
-                target_sock = tunn_wait_second_pool(tunnid, 1000);
-                if(target_sock != -1){
-                    result_flag = 1;
-                }
-            }
-        }
-        
-    }
-    if(result_flag == 1){
-    // get New Tunnel sock ok
-Printf_DEBUG("get tunnel ok!!!!");
-    //  send new tunnel protocal???
-        SendTunnelProto(target_sock,to_id);
-        return target_sock;
-    }
-    return AGENT_TUNN_BUILDTUNNEL_ERROR;
+    // get new conn
+    JOB_GetResult(
+        GLOBAL_GetJobList(),
+        jobid,
+        &resultbuf,
+        &buflen);
+    conbuf = &conn;
+    memcpy(conbuf,resultbuf,sizeof(pPCConn));
+    JOB_ReleaseJob(
+        GLOBAL_GetJobList(),
+        jobid);
+error_exit:
+    conn = M_BUILDREVERSETUNNEL_ERROR;
+ok_exit:
+    PROTO_FreeProto(proto);
+    proto    = NULL;
+    conbuf   = NULL;
+    return conn;
 }
 
-void recvtest(int sock){
-//    char buffer[1000];
-    Printf_DEBUG("ccccccccccccccccccccccccccc");
-    CCProxy_onNewTunnel(sock);
-//    int len = API_socket_recv(sock,buffer,1000);
-////Printf_DEBUG("%d -- > %d",len,buffer[0]);
-////    len = API_socket_recv(sock,buffer,1000);
-//Printf_DEBUG("%d -- > %s",len,buffer);
+//======================================
+//       
+//======================================
+int AGENT_TUNN_Init(pfun_CBF_Tunnel fun){
+    if(fun == NULL){
+        return AGENT_TUNN_INIT_ERROR;
+    }
+    cbf_newtunnel = fun;
+    return AGENT_TUNN_INIT_OK;
 }
 
-int on_newTunnel_recv(int sock){
-    char cmd_buf[4];
-    API_socket_recv(sock,cmd_buf,4);
-    int targetid = API_m_chartoi(cmd_buf,4);
-    if(targetid == PCMANAGER_Get_RootID()){
-        recvtest(sock);
+pPCConn AGENT_TUNN_BuildTunnel(int targetid){
+    pPCConn nextconn = m_getTargetConn(targetid);
+    pPCConn conn     = AGENT_TUNN_BUILDTUNNEL_ERROR;
+    if(nextconn == M_GETTARGETCONN_ERROR){
+        return AGENT_TUNN_BUILDTUNNEL_ERROR;
+    }
+    if(nextconn->ConnType == CONNTYPE_DIRECT_CONNECT){
+        conn = m_buildDirectTunnel(nextconn,targetid);
+        if(M_BUILDDIRECTTUNNEL_ERROR == conn){
+            return AGENT_TUNN_BUILDTUNNEL_ERROR;
+        }
+    }
+    else if(CONNTYPE_REVERSE_CONNECT == 
+        nextconn->ConnType){
+        conn = m_buildReverseTunnel(nextconn,targetid);
+        if(M_BUILDREVERSETUNNEL_ERROR == 
+            conn){
+            return AGENT_TUNN_BUILDTUNNEL_ERROR;
+        }
     }
     else{
-        int target_sock = AGENT_TUNN_BuildTunnel(targetid);
-        tunn_sock_to_sock(sock,target_sock,1000);
+        Printf_Error("UNKNOWN nextconn -> ConnType");
+        return AGENT_TUNN_BUILDTUNNEL_ERROR;
     }
-    return 0;
+    return conn;
 }
 
-int on_new_tunnel_ask(int sock){
-    on_newTunnel_recv(sock);
-    return 1;
+int on_reverse_Tunnel_Ask(pAgent_proto proto,pPCConn conn){
+    
 }
 
-int on_reverse_Tunnel_Ask(int sock,char *ip,int port){
-    int reverse_sock = API_socket_connect(ip,port);
-    if(reverse_sock == SOCKET_CONNECT_ERROR){
-        return 0;
-    }
-    if( AGENT_CONVERSATIONPROXY_TUNNEL_REPLY_ERROR
-        == AGENT_ConversationProxy_Tunnel_Reply(reverse_sock))
-    {
-        return 0;
-    }
-    char poolbuf[4];
-    API_socket_recv(sock,poolbuf,4);
-    API_socket_send(reverse_sock,poolbuf,4);
-    on_newTunnel_recv(reverse_sock);
-    return 1;
-}
-
-int on_reverse_Reply(int sock){
-    char poolid_buf[4] ;
-    API_socket_recv(sock,poolid_buf,4);
-    int  poolid = API_m_chartoi(poolid_buf,4);
-    tunn_set_second_pool(poolid,sock);
-    return 1;
-}
+int on_new_tunnel_ask(pPCConn conn);

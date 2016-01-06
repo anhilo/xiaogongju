@@ -117,3 +117,22 @@ MIC_USLEEP(10);
     memcpy(data,cmdbuff,maxlen);
     return nrecv;
 }
+
+pPCConn PCCONN_Connect(char *ip,int port){
+    int socket = SOCKET_CONNECT_ERROR;
+    pPCConn conn = NULL;
+    if(ip == NULL || port == -1){
+        return PCCONN_CONNECT_ERROR;
+    }
+    socket = API_socket_connect(ip,port);
+    if(socket == SOCKET_CONNECT_ERROR){
+        return PCCONN_CONNECT_ERROR;
+    }
+    conn = PCCONN_CreatePCConnFromIPPort
+        (ip,port,socket);
+    if(conn == PCCONN_CREATEPCCONNFROMSOCKET_ERROR){
+        return PCCONN_CONNECT_ERROR;
+    }
+    return conn;
+}
+

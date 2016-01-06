@@ -13,6 +13,8 @@ pPCConn PCCONN_CreatePCConnFromIPPort(char *ip,int port,int sock);
 #define PCCONN_COPY_ERROR           NULL
 pPCConn PCCONN_Copy(pPCConn conn); 
 
+#define PCCONN_CONNECT_ERROR        NULL
+pPCConn PCCONN_Connect(char *ip,int port);
 
 #define PCCONN_SENDDATA_ERROR   -1
 int PCCONN_SendData(pPCConn conn,char *data,int datalen);
