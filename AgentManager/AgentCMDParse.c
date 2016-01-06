@@ -51,16 +51,18 @@ int on_MyMsgHere(pAgent_proto proto,pPCConn conn){
 
 int CMDParse_SendProto_Upper(pAgent_proto proto){
     int result = CMDPARSE_SENDPROTO_UPPER_ERROR;
+    pPCConn conn     = NULL;
+    pPCNodeInfo father = NULL;
     if(PCMANAGER_Get_RootID() == 0){
         // no upper , I'm admin now
-        goto error_exit;
+        goto ok_exit;
     }
-    pPCNodeInfo father = PCMANAGER_Get_FatherNode();
+    father = PCMANAGER_Get_FatherNode();
     if(father == PCMANAGER_GET_FATHERNODE_ERROR){
         // get father info error
         goto error_exit;
     }
-    pPCConn conn = &(father->conn);
+    conn = &(father->conn);
     if(conn == PCCONN_COPY_ERROR){
         goto error_exit;
     }

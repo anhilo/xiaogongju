@@ -33,7 +33,7 @@ int JOB_CloseJob(pJobList list,int jobid,
 #define JOB_WAITCLOSEJOB_ERROR  -1
 #define JOB_WAITCLOSEJOB_OK      1
 int JOB_WaitCloseJob(pJobList list,int jobid,
-        int sec);
+        int usec);
 
 
 #define JOB_GETRESULT_ERROR    -1

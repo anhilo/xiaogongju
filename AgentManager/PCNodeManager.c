@@ -340,6 +340,10 @@ pPCNodeInfo PCMANAGER_Get_RootNode(){
 }
 
 int PCMANAGER_Get_RootID(){
+    if(rootnode == NULL){
+        Printf_DEBUG("rootnode is NULL ????");
+        return 0;
+    }
     return rootnode->id;
 }
 

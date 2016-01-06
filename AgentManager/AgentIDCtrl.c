@@ -41,7 +41,7 @@ int Ask_Id_Upper(pJobList list){
         }
         else {
             if(JOB_WAITCLOSEJOB_ERROR == 
-              JOB_WaitCloseJob(list,jobid,10)){
+              JOB_WaitCloseJob(list,jobid,1000)){
                 result = -1;
             }
             else{

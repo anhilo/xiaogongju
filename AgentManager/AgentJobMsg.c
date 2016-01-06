@@ -128,14 +128,14 @@ char *JOB_GetSummary(pJobList list,int jobid,char *buffer,int maxbuflen){
 }
 
 int JOB_WaitCloseJob(pJobList list,int jobid,
-        int sec){
+        int usec){
     int times =0;
-    while((times++)<sec){
+    while((times++)<usec){
         if(((list->joblist)[jobid]).jobState == 
             JOB_STATE_CAN_STOP){
             return JOB_WAITCLOSEJOB_OK;
         }
-        MIC_SLEEP(1);
+        MIC_USLEEP(10);
     }
     return JOB_WAITCLOSEJOB_ERROR;
 }

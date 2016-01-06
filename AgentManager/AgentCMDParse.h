@@ -20,15 +20,15 @@
 #define CMDID_ID_RESET         9 // ID重置
 
 /////  内置ID控制
-#define AGENTID_ADMIN          0 
+#define AGENTID_ADMIN             0 
     // 管理员节点的默认ID
-#define AGENTID_UNKNOWN       -1 
+#define AGENTID_UNKNOWN      0xf7f7f7f
     // 信息和节点ID无关时，使用-1
-#define AGENTID_ALL_AGENT     -2 
+#define AGENTID_ALL_AGENT    0xf7f7f7e 
     // 信息将发给所有节点 
-#define AGENTID_UPPER_AGENT   -3 
+#define AGENTID_UPPER_AGENT  0xf7f7f7d
     // 信息将发给所有上游节点,并递归上传
-#define AGENTID_DOWN_AGENT    -4 
+#define AGENTID_DOWN_AGENT   0xf7f7f7c
     // 信息将广播给所有下游节点,并递归下传
 
 

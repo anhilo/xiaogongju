@@ -27,9 +27,9 @@ int m_SendData_CmdTunnel(pPCConn conn,char *data,int datalen){
     // session lock it
     conn->BusyType = NET_SESSION_BUSY_NOW;
     // send data
-Printf_DEBUG("send data len is %d ",datalen);
+//Printf_DEBUG("send data len is %d ",datalen);
     nsend = API_socket_send(cmdsocket,data,datalen);
-MIC_USLEEP(100);
+MIC_USLEEP(50);
     // unlock it 
     conn->BusyType = NET_SESSION_UNUSED_NOW;
     // check send state

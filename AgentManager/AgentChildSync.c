@@ -73,6 +73,8 @@ int m_Recv_And_Add_Child(pAgent_proto proto){
         -1                    // cmd_socket
     );
     PCMANAGER_ADDRemote(fatherid,info);
+    Printf_OK("Recv a new agent info father(%d),child(%d)..",
+            fatherid,info->id);
     MIC_USLEEP(1);
     PCNODE_Free(info);
     return M_RECV_AND_ADD_CHILD_OK;
@@ -139,7 +141,6 @@ int m_ForEachChildAgent_Trigger(pNodeData minfo){
 //    PCMANAGER_ReplaceID(oldid,newid);
 //Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
 //        oldid,newid,PCMANAGER_Get_RootID());
-Printf_DEBUG("Add OK");
     // send agent info upper
     m_SendChildInfo(PCMANAGER_Get_RootID(),
         newid,
