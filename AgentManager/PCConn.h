@@ -22,6 +22,10 @@ int PCCONN_SendData(pPCConn conn,char *data,int datalen);
 #define PCCONN_RECVDATA_ERROR   -1
 int PCCONN_RecvData(pPCConn conn,char *data,int maxlen);
 
+#define PCCONN_CONN_2_CONN_ERROR   -1
+#define PCCONN_CONN_2_CONN_OK       1
+int PCCONN_Conn_2_Conn(pPCConn conn1,pPCConn conn2,int usec);
+
 #define PCCONN_FREE_ERROR              0
 #define PCCONN_FREE_OK                 1
 int PCCONN_Free(pPCConn conn);

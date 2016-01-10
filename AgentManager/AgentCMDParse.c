@@ -123,7 +123,7 @@ int on_Transmit(pAgent_proto proto,pPCConn conn){
             Printf_DEBUG("Find Error ???? targetid = %d",proto->toID);
             return ON_TRANSMIT_ERROR;
         }
-        tunn_sock_to_sock(conn->cmd_socket,conn2->cmd_socket,10000);
+        PCCONN_Conn_2_Conn(conn,conn2,10000);
         break;
     }
 exit:

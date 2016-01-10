@@ -136,3 +136,16 @@ pPCConn PCCONN_Connect(char *ip,int port){
     return conn;
 }
 
+int PCCONN_Conn_2_Conn(pPCConn conn1,pPCConn conn2,int usec){
+    int sock1,sock2;
+    if(conn1 == NULL || conn2 == NULL){
+        return PCCONN_CONN_2_CONN_ERROR;
+    }
+    sock1 = conn1->cmd_socket;
+    sock2 = conn2->cmd_socket;
+    int res = tunn_sock_to_sock(sock1,sock2,usec);
+    if(TUNNEL_SOCK_TO_SOCK_ERROR == res){
+        return PCCONN_CONN_2_CONN_ERROR;
+    }
+    return PCCONN_CONN_2_CONN_OK;
+}
