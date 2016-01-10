@@ -21,11 +21,11 @@ int on_reverse_Tunnel_Ask(pAgent_proto proto,pPCConn conn);
 // DIRECT Connect callback
 #define ON_NEW_TUNNEL_ASK_OK    1
 #define ON_NEW_TUNNEL_ASK_ERROR 0
-int on_new_tunnel_ask(pPCConn conn);
+int on_new_tunnel_ask(pAgent_proto proto ,pPCConn conn);
 
 // no use
-//#define ON_TUNNEL_REPLY_ERROR  0
-//#define ON_TUNNEL_REPLY_OK     1
-//int on_reverse_Reply(int sock);
+#define ON_TUNNEL_REPLY_ERROR  0
+#define ON_TUNNEL_REPLY_OK     1
+int on_reverse_Reply(pAgent_proto proto,pPCConn conn);
 
 #endif

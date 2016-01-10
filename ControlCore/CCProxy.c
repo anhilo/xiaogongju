@@ -7,6 +7,7 @@
 
 #include "CCProxy.h"
 #include "CC_AgentConn.h"
+#include "../AgentManager/AgentTunnelHandle.h"
 #include "../AgentManager/AgentConversationCTRL.h"
 #include "../AgentManager/PCNodeInfo.h"
 
@@ -190,17 +191,18 @@ int CCProxy_SendMsg(int targetid,char *msg,int msglen){
     if(msglen > MAX_MSG_LEN || strlen(msg)>msglen){
         return 0;
     }
-    int targetsock = m_BuildTargetSock(targetid,AGENT_SERVER_COMMAND_SENDMSG);
-    if( -1 == targetsock ){
+    pPCConn conn = AGENT_TUNN_BuildTunnel(targetid);
+    if( AGENT_TUNN_BUILDTUNNEL_ERROR == conn ){
+        Printf_DEBUG("SendMSG Build target tunnel Error targetid = %d",targetid);
         return 0;
     }
-    API_socket_send(targetsock,msg,msglen);
+    PCCONN_SendData(conn,msg,msglen);
     return 1;
 }
 
-int m_onRecvMsg(int clientsock){
+int m_onRecvMsg(pPCConn conn){
     char buffer[MAX_MSG_LEN];
-    int res = API_socket_recv(clientsock,buffer,MAX_MSG_LEN);
+    int  res = PCCONN_RecvData(conn,buffer,MAX_MSG_LEN);
     if(res > MAX_MSG_LEN){
         Printf_Error( "RECV MSG ERROR");
         return CCPROXY_SENDMSG_ERROR;
@@ -212,22 +214,8 @@ int m_onRecvMsg(int clientsock){
     return CCPROXY_SENDMSG_OK;
 }
 
-int CCProxy_onNewTunnel(int clientsock){
+int CCProxy_onNewTunnel(pAgent_proto proto,pPCConn conn){
     char cmdmsg[MAX_CCPROXY_LEN];
-    API_socket_recv(clientsock,cmdmsg,MAX_CCPROXY_LEN);
-    switch(cmdmsg[CCTRL_TYPE_OFFSET]){
-    case AGENT_CONN_COMMAND_LISTEN:
-        return m_onListenAgent(clientsock);
-        break;
-    case AGENT_CONN_COMMAND_CONNECT:
-        return m_onAgentConnect(clientsock);
-        break;
-    case AGENT_SERVER_COMMAND_SENDMSG:
-        return m_onRecvMsg(clientsock);
-        break;
-    default:
-        return 0;
-        break;
-    }
+Printf_DEBUG("new tunnel here");
     return 1;
 }

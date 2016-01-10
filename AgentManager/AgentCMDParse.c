@@ -12,6 +12,7 @@
 #include "PCNodeManager.h"
 #include "AgentConnHandle.h"
 #include "AgentChildSync.h"
+#include "AgentTunnelHandle.h"
 
 //    int cmdType;
 //    int cmdID;
@@ -41,6 +42,18 @@ int on_MyMsgHere(pAgent_proto proto,pPCConn conn){
     case CMDID_CHILDSYNC_UPPER:
         Printf_DEBUG("sync agent info upper");
         on_SyncInfoUpper(proto);
+        break;
+    case CMDID_NEWTUNNEL_RC_ASK:
+        on_reverse_Tunnel_Ask(proto,conn);
+        break;
+    case CMDID_NEWTUNNEL_RC_RPL:
+        on_reverse_Reply(proto,conn);
+        break;
+    case CMDID_NEWTUNNEL_ASK:
+        on_new_tunnel_ask(proto,conn);
+        break;
+    case CMDID_ID_RESET:
+        Printf_DEBUG("need replace my id");
         break;
     default:
         Printf_DEBUG("Unsupport now %d",proto->cmdID);
@@ -103,7 +116,14 @@ int on_Transmit(pAgent_proto proto,pPCConn conn){
         CMDParse_SendProto_Upper(proto);
         break;
     default:
-        Printf_DEBUG("Need find this agent from tree %d", proto->toID);
+        Printf_DEBUG("Need find this agent from tree iam(%d),target(%d)",
+            PCMANAGER_Get_RootID(), proto->toID);
+        pPCConn conn2= AGENT_TUNN_BuildTunnel(proto->toID);
+        if(conn2 == AGENT_TUNN_BUILDTUNNEL_ERROR){
+            Printf_DEBUG("Find Error ???? targetid = %d",proto->toID);
+            return ON_TRANSMIT_ERROR;
+        }
+        tunn_sock_to_sock(conn->cmd_socket,conn2->cmd_socket,10000);
         break;
     }
 exit:

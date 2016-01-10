@@ -124,23 +124,11 @@ int m_ForEachChildAgent_Trigger(pNodeData minfo){
       || info -> NodeType == UPSTREAM_NODE){
         return 1;
     }
+Printf_DEBUG("m_ForEachChildAgent_Trigger becalled ");
     int newid = AGENT_ID_ASK();
     // set it id
     m_resetTargetNewId(info->id,newid);
     // send set id info
-//    PCMANAGER_ReplaceID(info->id,newid);
-//    int oldid = info -> id;
-//    info->NodeType = MYSELF_NODE_REMOTE;
-//    info->id = newid;
-    /// set that node remote
-//PCMANAGER_Tree_Print();
-//Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
-//        oldid,newid,PCMANAGER_Get_RootID());
-//    PCMANAGER_RemoveNode(oldid);
-//    PCMANAGER_ADDNeighbor(info);
-//    PCMANAGER_ReplaceID(oldid,newid);
-//Printf_DEBUG("oldid = %d,,,,newid = %d,rootid = %d",
-//        oldid,newid,PCMANAGER_Get_RootID());
     // send agent info upper
     m_SendChildInfo(PCMANAGER_Get_RootID(),
         newid,

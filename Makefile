@@ -12,6 +12,7 @@ AgentLib   =  \
 			AgentManager/AgentJobMsg.c \
 			AgentManager/AgentProNet.c \
 			AgentManager/AgentProtocol.c \
+			AgentManager/AgentTunnelHandle.c \
 			AgentManager/GlobalValue.c \
 			AgentManager/PCNodeInfo.c \
 			AgentManager/PCNodeManager.c \
