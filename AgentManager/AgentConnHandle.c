@@ -46,40 +46,6 @@ int m_AddNeighborProxy(pPCNodeInfo info){
     return 0;
 }
 
-
-//int when_IAM_ADMIN(int sock,char *ip,int port){
-//    pPCNodeInfo serverinfo;
-//    int hisid = AGENT_ID_ASK();
-//    if(M_SENDID_ERROR != m_sendID(sock,hisid)){
-//        serverinfo = m_agentInfo_Recv(sock);
-//        if(serverinfo != M_INFO_RECV_ERROR){
-//            serverinfo->conn.ConnType = CONNTYPE_DIRECT_CONNECT;
-//            memcpy(serverinfo->conn.IPaddr,ip,MAX_IP_ADDR_LEN);
-//            serverinfo->conn.port = port;
-//            if(1 == m_AddNeighborProxy(serverinfo)){
-//                return 1;
-//            }
-//        }
-//    }
-//    return 0;
-//}
-//
-//int when_IAM_NORMALNODE(int sock,char *ip,int port){
-//    int myid = m_recvID(sock);
-////    PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
-//    PCMANAGER_Set_RootID(myid);
-//    pPCNodeInfo serverinfo = m_agentInfo_Recv(sock);
-//    if(serverinfo->NodeType == MYSELF_NODE){
-//        serverinfo->conn.ConnType = CONNTYPE_DIRECT_CONNECT;
-//        memcpy(serverinfo->conn.IPaddr,ip,MAX_IP_ADDR_LEN);
-//        serverinfo->conn.port = port;
-//        if(1 == m_AddNeighborProxy(serverinfo)){
-//            return 1;
-//        }
-//    }
-//    return 0;
-//}
-
 // be called By client
 int AgentInfo_Interactive(int sock,char *ip,int port){
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
@@ -91,21 +57,15 @@ int AgentInfo_Interactive(int sock,char *ip,int port){
         PROTO_SendPCNodeInfo(conn,myself)){
         return AGENTCONN_INTERACTIVE_ERROR;
     }
-//    if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
-//        return AGENTCONN_INTERACTIVE_ERROR;
-//    }
     /////// Add code From here
-    Printf_DEBUG("111111111111");
     m_Info_send(conn,myself);
     switch(myself->NodeType ){
     case  MYSELF_NODE:
-        Printf_DEBUG("222222222222");
         When_Iam_Normal_Node(myself,conn);
 //        when_IAM_NORMALNODE(sock,ip,port);
         break;
     case IAM_ADMIN_NODE:
     case BE_MANAGED_NOW:
-        Printf_DEBUG("333333333333");
         When_Iam_WithAdmin_Connect(myself,conn);
         break;
     default:
@@ -115,51 +75,6 @@ int AgentInfo_Interactive(int sock,char *ip,int port){
     return AGENTCONN_INTERACTIVE_OK;
 }
 
-int on_Agent_Connect(int sock){
-//    pPCNodeInfo clientinfo = m_agentInfo_Recv(sock);
-//Printf_DEBUG("the sock is -----> %d",sock);
-//    clientinfo -> conn.ConnType = CONNTYPE_REVERSE_CONNECT;
-//    if(clientinfo == NULL){return 0;}
-//    // add clientnode 
-//    pPCNodeInfo myself = PCMANAGER_Get_RootNode();
-//    switch(clientinfo->NodeType){
-//    case IAM_ADMIN_NODE:
-//        Printf_OK("CLIENT is Admin");
-//        if(0 == m_AddNeighborProxy(clientinfo)){
-//            Printf_Error("Add NeighborProxy Error");
-//            return 0;
-//        }
-//        int myid = m_recvID(sock);
-//        // reset my id
-//        PCMANAGER_Set_RootID(myid);
-//   //     PCMANAGER_ReplaceID(PCMANAGER_Get_RootID(),myid);
-//        // set client is upper
-//        PCMANAGER_SETUpperAdmin(clientinfo->id);
-//        // send myself
-//        m_Info_send(sock,myself);
-//        //ChildNodeInfoSyncTrigger();
-//        break;
-//    case MYSELF_NODE:
-//        Printf_OK("Client is Myself_node");
-//        int hisid = AGENT_ID_ASK();
-//        m_sendID(sock,hisid);
-//        Printf_OK("Client id is %d",hisid);
-//        clientinfo->id = hisid;
-//        if(0 == m_AddNeighborProxy(clientinfo)){
-//            Printf_Error("Add NeighborProxy Error");
-//            return 0;
-//        }
-//        Printf_DEBUG("Send Agent Info Here11111111111");
-////        SendAgentInfo(PCMANAGER_Get_RootID(),clientinfo->id,
-////            clientinfo->OSType,clientinfo->PCName);
-////        m_Info_send(sock,myself);
-//        break;
-//    default:
-//        return 0;
-//    }
-Printf_DEBUG("myid now is %d",PCMANAGER_Get_RootID());
-    return 1;
-}
 
 
 //******************************************************************
@@ -258,6 +173,11 @@ Printf_DEBUG("Get Server Info from here");
     pPCNodeInfo server = m_agentInfo_Recv(conn);
     //  add server to tree
     m_AddNeighborProxy(server);
+    SYNC_SendChildInfoUpper(
+        PCMANAGER_Get_RootID(),
+        server->id,
+        server->OSType,
+        server->PCName);
     PCNODE_Free(server);
     server = NULL;
     return WHEN_IAM_WITHADMIN_CONNECT_OK;
@@ -315,6 +235,16 @@ int When_Client_Normal_Node(pPCNodeInfo client,pPCConn conn){
     }
     // add client to tree
     m_AddNeighborProxy(client);
+
+    if(PCMANAGER_MANAGER_STATE_TRUE == 
+        PCMANAGER_Manager_State()){
+        SYNC_SendChildInfoUpper(
+            PCMANAGER_Get_RootID(),
+            client->id,
+            client->OSType,
+            client->PCName);
+    }
+
     return WHEN_CLIENT_NORMAL_NODE_OK;
 }
 

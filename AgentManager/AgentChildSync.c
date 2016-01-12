@@ -161,3 +161,12 @@ error_exit:
 exit:
     return res;
 }
+
+
+int SYNC_SendChildInfoUpper(int fatherid,int childid, int ostype,char *pcname){
+    int res = m_SendChildInfo(fatherid,childid,ostype,pcname);
+    if(res == M_SENDCHILDINFO_ERROR){
+        return SYNC_SENDCHILDINFOUPPER_ERROR;
+    }
+    return SYNC_SENDCHILDINFOUPPER_OK;
+}

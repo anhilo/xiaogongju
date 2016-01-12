@@ -11,6 +11,9 @@
 #include "../AgentManager/AgentConversationCTRL.h"
 #include "../AgentManager/PCNodeInfo.h"
 
+//==============================================
+int m_CCProxy_CMD_Send(pPCConn conn,int cmd);
+//==============================================
 
 int CCProxy_Init(int ostype,char *pcname,int node_type){
     int agent_type ,os_type;
@@ -78,12 +81,8 @@ pPCConn m_BuildTargetSock(int targetid,int ccproxy_cmd){
     AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR){
         return M_BUILDTARGETSOCK_ERROR;
     }
-    char cmdmsg[MAX_CCPROXY_LEN];
-    cmdmsg[CCTRL_TYPE_OFFSET] = 
-        ccproxy_cmd;
-    if(SOCKET_SEND_ERROR == 
-        PCCONN_SendData(targetsock,cmdmsg,
-            MAX_CCPROXY_LEN)
+    if( 0 == m_CCProxy_CMD_Send(targetsock,
+            ccproxy_cmd)
     ){
         return M_BUILDTARGETSOCK_ERROR;
     }
@@ -101,41 +100,44 @@ int CCProxy_ListenAgent(int targetid,
         return CCPROXY_LISTENAGENT_OK;
     }
     else{
-        int targetsock = m_BuildTargetSock(targetid,
+        pPCConn targetsock = m_BuildTargetSock(targetid,
             AGENT_CONN_COMMAND_LISTEN);
-        if(targetsock == -1){
+        if(targetsock == M_BUILDTARGETSOCK_ERROR){
             return CCPROXY_LISTENAGENT_ERROR;
         }
         char rport_buf[4];
         char maxnum_buf[4];
         API_m_itochar(rport ,rport_buf ,4);
         API_m_itochar(maxnum,maxnum_buf,4);
-        if( SOCKET_SEND_ERROR == 
-                API_socket_send(targetsock, rport_buf,4)
-            || SOCKET_SEND_ERROR == 
-                API_socket_send(targetsock,maxnum_buf,4)
-        ){
+        if( PCCONN_SENDDATA_ERROR == 
+                PCCONN_SendData(targetsock,rport_buf ,4)
+            || PCCONN_SENDDATA_ERROR == 
+                PCCONN_SendData(targetsock,maxnum_buf ,4)){
             return CCPROXY_LISTENAGENT_ERROR;
         }
     }
     return CCPROXY_LISTENAGENT_OK;
 }
 
-int m_onListenAgent(int clientsock){
+int m_onListenAgent(pPCConn clientsock){
     char rport_buf[4];
     char maxnum_buf[4];
-    if(SOCKET_RECV_ERROR == 
-        API_socket_recv(clientsock,rport_buf,4)
-      || SOCKET_RECV_ERROR == 
-        API_socket_recv(clientsock,maxnum_buf,4)
+    if( PCCONN_RECVDATA_ERROR == 
+        PCCONN_RecvData(clientsock,rport_buf,4)
+      || PCCONN_RECVDATA_ERROR == 
+        PCCONN_RecvData(clientsock,maxnum_buf,4)
     ){
         return 0;
     }
     int rport  = API_m_chartoi(rport_buf,4);
     int maxnum = API_m_chartoi(maxnum_buf,4);
     if( CCPROXY_LISTENAGENT_OK == 
-    CCProxy_ListenAgent(AGENT_Conversation_GetID(),
-        rport,maxnum)){
+        CCProxy_ListenAgent(
+                AGENT_Conversation_GetID(),
+                rport,
+                maxnum
+        )
+    ){
         return 0;
     }
     return 1;
@@ -143,45 +145,51 @@ int m_onListenAgent(int clientsock){
 
 int CCProxy_AgentConnect(int targetid,
     char *remoteip,int rport){
-    int targetsock = -1;
+    pPCConn targetsock = NULL;
     if(AGENT_Conversation_GetID() == 
         targetid){
         int res = AGENT_Conversation_Connect(remoteip,rport);
         if(AGENT_CONVERSATION_CONNECT_ERROR == res){
-            return CCPROXY_LISTENAGENT_ERROR;
+            return CCPROXY_CONNECTAGENT_ERROR;
         }
-        return CCPROXY_LISTENAGENT_OK;
+        return CCPROXY_CONNECTAGENT_OK;
     }
     else{
         targetsock = m_BuildTargetSock(targetid,
             AGENT_CONN_COMMAND_CONNECT);
-        if(targetsock == -1){
+        if(targetsock == M_BUILDTARGETSOCK_ERROR){
             return CCPROXY_CONNECTAGENT_ERROR;
         }
         char ipbuf[MAX_IP_ADDR_LEN];
         char portbuf[4];
         strncpy(ipbuf,remoteip,MAX_IP_ADDR_LEN);
         API_m_itochar(rport,portbuf,4);
-        if( SOCKET_SEND_ERROR == 
-            API_socket_send(targetsock,ipbuf,MAX_IP_ADDR_LEN)
-            || SOCKET_SEND_ERROR == 
-            API_socket_send(targetsock,portbuf,4)
+        if( PCCONN_SENDDATA_ERROR == 
+                PCCONN_SendData(targetsock,ipbuf,MAX_IP_ADDR_LEN)
+            || PCCONN_SENDDATA_ERROR == 
+                PCCONN_SendData(targetsock,portbuf,4)
         ){
             return CCPROXY_CONNECTAGENT_ERROR;
         }
     }
-    return targetsock;
+    return CCPROXY_CONNECTAGENT_OK;
 }
 
-int m_onAgentConnect(int clientsock){
+int m_onAgentConnect(pPCConn clientsock){
     char ipbuf[MAX_IP_ADDR_LEN];
     char portbuf[4];
-    API_socket_recv(clientsock,ipbuf  ,MAX_IP_ADDR_LEN);
-    API_socket_recv(clientsock,portbuf,4);
+    if( PCCONN_RECVDATA_ERROR == 
+        PCCONN_RecvData(clientsock,ipbuf,MAX_IP_ADDR_LEN)
+      || PCCONN_RECVDATA_ERROR == 
+        PCCONN_RecvData(clientsock,portbuf,4)
+    ){
+        return 0;
+    }
     int targetid = AGENT_Conversation_GetID();
     int rport = API_m_chartoi(portbuf,4);
     if( CCPROXY_CONNECTAGENT_ERROR == 
-        CCProxy_AgentConnect(targetid,ipbuf,rport)){
+        CCProxy_AgentConnect(targetid,ipbuf,rport)
+    ){
         return 0;
     }
     return 1;
@@ -192,8 +200,9 @@ int CCProxy_SendMsg(int targetid,char *msg,int msglen){
     if(msglen > MAX_MSG_LEN || strlen(msg)>msglen){
         return 0;
     }
-    pPCConn conn = AGENT_TUNN_BuildTunnel(targetid);
-    if( AGENT_TUNN_BUILDTUNNEL_ERROR == conn ){
+    pPCConn conn = m_BuildTargetSock(targetid,
+        AGENT_SERVER_COMMAND_SENDMSG);
+    if( M_BUILDTARGETSOCK_ERROR == conn ){
         Printf_DEBUG("SendMSG Build target tunnel Error targetid = %d",targetid);
         return 0;
     }
@@ -210,14 +219,42 @@ int m_onRecvMsg(pPCConn conn){
     }
     else{
         buffer[res]= '\0';
-        Printf_OK("recv msg: %s",buffer);
+        Printf_OK("CCProxy_onNewTunnel -->%s",buffer);
     }
     return CCPROXY_SENDMSG_OK;
 }
 
+
+#define CCPROXY_CMD_LEN   1
+int m_CCProxy_CMD_Send(pPCConn conn,int cmd){
+    char cmdmsg[CCPROXY_CMD_LEN];
+    cmdmsg[0] = cmd;
+    int res = PCCONN_SendData(conn,cmdmsg,CCPROXY_CMD_LEN);
+    if( PCCONN_SENDDATA_ERROR == res){
+        return 0;
+    }
+    return 1;
+}
+
 int CCProxy_onNewTunnel(pPCConn conn){
-    char cmdmsg[MAX_CCPROXY_LEN];
-    PCCONN_RecvData(conn,cmdmsg,MAX_CCPROXY_LEN);
-    Printf_OK("CCProxy_onNewTunnel -->%s",cmdmsg);
+    char cmdmsg[CCPROXY_CMD_LEN];
+    PCCONN_RecvData(conn,cmdmsg,CCPROXY_CMD_LEN);
+    switch(cmdmsg[0]){
+    case AGENT_SERVER_COMMAND_SENDMSG:
+        m_onRecvMsg(conn);
+        break;
+    case AGENT_CONN_COMMAND_LISTEN:
+        Printf_DEBUG("AGENT_CONN_COMMAND_LISTEN");
+        m_onListenAgent(conn);
+        break;
+    case AGENT_CONN_COMMAND_CONNECT:
+        Printf_DEBUG("AGENT_CONN_COMMAND_CONNECT");
+        m_onAgentConnect(conn);
+        break;
+    default :
+        Printf_Error("CCProxy_onNewTunnel Error CMD(%d)",
+            cmdmsg[0]);
+        break;
+    }
     return 1;
 }
