@@ -67,7 +67,7 @@ exit:
 MIC_THREAD_FUN_DEF(Listener_Thread,info){
     while(1){
         PCMANAGER_Traversal_Neighbor(m_Listener_For_EachAgentNode);
-        MIC_USLEEP(100);
+        MIC_USLEEP(10);
     }
     return 0;
 }
@@ -78,7 +78,7 @@ int StartListenerThread(){
         Printf_Error("Thread id create Error");
         return 0;
     }
-    MIC_USLEEP(10);
+    MIC_USLEEP(1);
     return 1;
 }
 

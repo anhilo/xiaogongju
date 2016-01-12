@@ -67,24 +67,25 @@ int CCProxy_Init(int ostype,char *pcname,int node_type){
 // | LCX? SOCKS?       | args              |
 // +-------------------+-------------------+
 
-#define MAX_CCPROXY_LEN       2
+#define MAX_CCPROXY_LEN       200
 #define CCTRL_TYPE_OFFSET     0
 
-int m_BuildTargetSock(int targetid,int ccproxy_cmd){
-    int targetsock = 
+#define M_BUILDTARGETSOCK_ERROR   NULL
+pPCConn m_BuildTargetSock(int targetid,int ccproxy_cmd){
+    pPCConn targetsock = 
     AGENT_Conversation_Build_SockTunnel(targetid);
     if(targetsock == 
     AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR){
-        return CCPROXY_LISTENAGENT_ERROR;
+        return M_BUILDTARGETSOCK_ERROR;
     }
     char cmdmsg[MAX_CCPROXY_LEN];
     cmdmsg[CCTRL_TYPE_OFFSET] = 
         ccproxy_cmd;
     if(SOCKET_SEND_ERROR == 
-        API_socket_send(targetsock,cmdmsg,
+        PCCONN_SendData(targetsock,cmdmsg,
             MAX_CCPROXY_LEN)
     ){
-        return -1;
+        return M_BUILDTARGETSOCK_ERROR;
     }
     return targetsock;
 }
@@ -214,8 +215,9 @@ int m_onRecvMsg(pPCConn conn){
     return CCPROXY_SENDMSG_OK;
 }
 
-int CCProxy_onNewTunnel(pAgent_proto proto,pPCConn conn){
+int CCProxy_onNewTunnel(pPCConn conn){
     char cmdmsg[MAX_CCPROXY_LEN];
-Printf_DEBUG("new tunnel here");
+    PCCONN_RecvData(conn,cmdmsg,MAX_CCPROXY_LEN);
+    Printf_OK("CCProxy_onNewTunnel -->%s",cmdmsg);
     return 1;
 }

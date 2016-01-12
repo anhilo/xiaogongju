@@ -8,6 +8,7 @@
 #include "AgentConversationProxy.h"
 #include "PCNodeInfo.h"
 #include "PCNodeManager.h"
+#include "AgentTunnelHandle.h"
 int AGENT_Conversation_Init(int ostype,char *pcname,int agent_type){
     pPCNodeInfo m_self;
     int mid = (agent_type == IAM_ADMIN_NODE)?0:1;
@@ -46,15 +47,12 @@ int AGENT_Conversation_Connect(char *ip,int port){
     return AGENT_ConversationProxy_Connect(ip,port);
 }
 
-int AGENT_Conversation_Build_SockTunnel(int targetid){
-    Printf_Error("Build_SockTunnel !!!!");
-//    int target_sock = AGENT_ConversationProxy_Build_Tunnel(targetid);
-//    if(
-//        AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR ==
-//        target_sock){
-//        return AGENT_CONVERSATIONPROXY_BUILD_TUNNEL_ERROR ;
-//    }
-    return -1;
+pPCConn AGENT_Conversation_Build_SockTunnel(int targetid){
+    pPCConn conn = AGENT_TUNN_BuildTunnel(targetid);
+    if(AGENT_TUNN_BUILDTUNNEL_ERROR == conn){
+        return AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR;
+    }
+    return conn;
 }
 
 int AGENT_Conversation_GetID(){

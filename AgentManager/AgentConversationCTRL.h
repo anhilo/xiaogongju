@@ -1,6 +1,7 @@
 #ifndef _AGENT_CONVERSATION_CTRL_H_
 #define _AGENT_CONVERSATION_CTRL_H_
 #include "../generic.h"
+#include "GlobalValue.h"
 
 typedef int (*pfun_For_NewTunnel)(int socket);
 #define AGENT_TYPE_IAM_ADMIN   1
@@ -18,8 +19,8 @@ int AGENT_Conversation_Listen(int port,int maxnum);
 #define AGENT_CONVERSATION_CONNECT_OK       1
 int AGENT_Conversation_Connect(char *ip,int port);
 
-#define AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR -1
-int AGENT_Conversation_Build_SockTunnel(int targetid);
+#define AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR NULL
+pPCConn AGENT_Conversation_Build_SockTunnel(int targetid);
 
 
 #define AGENT_CONVERSATION_GETID_ERROR  -1

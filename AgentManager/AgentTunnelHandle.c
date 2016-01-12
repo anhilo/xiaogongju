@@ -10,6 +10,7 @@
 #include "AgentConversationProxy.h"
 #include "AgentCMDParse.h"
 #include "AgentJobMsg.h"
+#include "../ControlCore/CCProxy.h"
 //=====================================
 pfun_CBF_Tunnel cbf_newtunnel = NULL;
 //=====================================
@@ -156,11 +157,7 @@ int m_on_NewTunnel_Here(pPCConn conn){
     if(conn == NULL){
         return M_ON_NEWTUNNEL_HERE_ERROR;
     }
-    socket = conn->cmd_socket;
-    char cmdmsg[200];
-    int nrecv = API_socket_recv(socket,cmdmsg,200);
-    cmdmsg[nrecv] = '\0';
-    Printf_DEBUG("Recv ----> %s ....",cmdmsg);
+    CCProxy_onNewTunnel(conn);
     return M_ON_NEWTUNNEL_HERE_OK;
 }
 

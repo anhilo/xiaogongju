@@ -21,7 +21,7 @@ int CCProxy_AgentConnect(int targetid, char *remoteip,int rport);
 #define CCPROXY_SENDMSG_OK         1
 #define CCPROXY_SENDMSG_ERROR     -1
 int CCProxy_SendMsg(int targetid,char *msg,int msglen);
-int CCProxy_onNewTunnel(pAgent_proto proto,pPCConn conn);
+int CCProxy_onNewTunnel(pPCConn conn);
 
 //// shell
 //int CCProxy_startShell(int targetid);
