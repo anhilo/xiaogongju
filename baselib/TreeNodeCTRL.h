@@ -67,4 +67,8 @@ int Tree_CleanUp(pTreeManager head);
 int Tree_HaveNode(pTreeManager head,int id);
 
 int Tree_Print(pTreeManager head);
+
+#define TREE_RESETROOTID_ERROR   -1
+#define TREE_RESETROOTID_OK       1
+int Tree_ReSetRootID(pTreeManager head,int newid);
 #endif

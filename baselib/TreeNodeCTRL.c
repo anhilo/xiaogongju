@@ -326,3 +326,11 @@ int Tree_Print(pTreeManager head){
     mNewTravel(head->root,TreeNodePrint);
     return 1;
 }
+
+int Tree_ReSetRootID(pTreeManager head,int newid){
+    if(head == NULL || head->root == NULL){
+        return TREE_RESETROOTID_ERROR;
+    }
+    head->root->id = newid;
+    return TREE_RESETROOTID_OK;
+}

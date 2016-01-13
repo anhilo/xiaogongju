@@ -34,6 +34,7 @@ pPCConn m_buildDirectTunnel(pPCConn nextconn,int targetid){
     pAgent_proto proto = NULL;
     pPCConn       conn = NULL;
     char targetbuf[4];
+Printf_DEBUG("direct-------------------------");
     if(nextconn == PCCONN_CONNECT_ERROR){
         goto error_exit;
     }
@@ -80,6 +81,7 @@ pPCConn m_buildReverseTunnel(pPCConn nextconn,int targetid){
     pAgent_proto proto = NULL;
     char    *resultbuf = NULL;
     int       buflen   = sizeof(pPCConn);
+Printf_DEBUG("reverse-------------------------");
     // check conn
     if(nextconn == M_GETTARGETCONN_ERROR){
         goto error_exit;

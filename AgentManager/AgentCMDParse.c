@@ -159,7 +159,7 @@ int CMDParse_And_Do(pAgent_proto proto,pPCConn conn){
         }
         break;
     case CMDTYPE_TUNNELCTRL:
-        Printf_DEBUG("add Tunnel Ctrl Code here");
+//        Printf_DEBUG("add Tunnel Ctrl Code here");
         on_TunnelCTRL(proto,conn);
         break;
     case CMDTYPE_TRANSMIT:

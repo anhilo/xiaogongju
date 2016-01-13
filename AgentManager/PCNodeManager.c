@@ -351,6 +351,9 @@ int PCMANAGER_Get_RootID(){
 int PCMANAGER_Set_RootID(int newid){
     root_id = newid;
     rootnode->id = newid;
+Printf_DEBUG("PCMANAGER_Set_RootID  my new id is %d",
+        newid);
+    Tree_ReSetRootID(tree,newid);
     maxid = (maxid>newid)?(maxid+1):(newid+1);
     return 1;
 }
