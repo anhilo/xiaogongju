@@ -195,7 +195,15 @@ int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn){
     // recv server agent info 
     pPCNodeInfo server = m_agentInfo_Recv(conn);
     // add server agent 
+    if(server == M_INFO_RECV_ERROR){
+        return WHEN_IAM_NORMAL_NODE_ERROR;
+    }
     m_AddNeighborProxy(server);
+    if(IAM_ADMIN_NODE == server->NodeType
+        || BE_MANAGED_NOW == server->NodeType
+    ){
+        PCMANAGER_SETUpperAdmin(server->id);
+    }
     PCNODE_Free(server);
     server = NULL;
     return WHEN_IAM_NORMAL_NODE_OK;
@@ -204,11 +212,11 @@ int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn){
 #define WHEN_CLIENT_WITH_ADMIN_ERROR   -1
 #define WHEN_CLIENT_WITH_ADMIN_OK       1
 int When_Client_With_Admin(pPCNodeInfo client,pPCConn conn){
-    pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     //  set myself id
     int newid = AGENT_GETID_FROM_PCConn(conn);
     Printf_DEBUG("my new id is %d",newid);
     PCMANAGER_Set_RootID(newid); // set myself id
+    pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     //  send myself info
     if(M_INFO_SEND_ERROR == m_Info_send(conn,myself)){
         return WHEN_CLIENT_WITH_ADMIN_ERROR;
@@ -216,7 +224,9 @@ int When_Client_With_Admin(pPCNodeInfo client,pPCConn conn){
     // add client to tree
     m_AddNeighborProxy(client);
     // set it upper
+Printf_DEBUG("set it upper %d",client->id);
     PCMANAGER_SETUpperAdmin(client->id);
+Printf_DEBUG("start child node trigger");
     ChildNodeInfoSyncTrigger();
     return WHEN_CLIENT_WITH_ADMIN_OK;
 }

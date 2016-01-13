@@ -43,6 +43,20 @@ int on_MyMsgHere(pAgent_proto proto,pPCConn conn){
         Printf_DEBUG("sync agent info upper");
         on_SyncInfoUpper(proto);
         break;
+    case CMDID_ID_RESET:
+        Printf_DEBUG("need replace my id");
+        break;
+    default:
+        Printf_DEBUG("Unsupport now %d",proto->cmdID);
+        break;
+    }
+    return 1;
+}
+
+#define ON_TUNNELCTRL_ERROR    -1
+#define ON_TUNNELCTRL_OK        1
+int on_TunnelCTRL(pAgent_proto proto,pPCConn conn){
+    switch(proto->cmdID){
     case CMDID_NEWTUNNEL_RC_ASK:
         on_reverse_Tunnel_Ask(proto,conn);
         break;
@@ -52,14 +66,8 @@ int on_MyMsgHere(pAgent_proto proto,pPCConn conn){
     case CMDID_NEWTUNNEL_ASK:
         on_new_tunnel_ask(proto,conn);
         break;
-    case CMDID_ID_RESET:
-        Printf_DEBUG("need replace my id");
-        break;
-    default:
-        Printf_DEBUG("Unsupport now %d",proto->cmdID);
-        break;
     }
-    return 1;
+    return ON_TUNNELCTRL_OK;
 }
 
 int CMDParse_SendProto_Upper(pAgent_proto proto){
@@ -106,26 +114,38 @@ int on_Transmit(pAgent_proto proto,pPCConn conn){
     }
 
     switch(proto->toID){
-    case AGENTID_ADMIN: // To Admin, transmit it upper
-        Printf_DEBUG("To Admin, transmit it upper");
-        break;
     case AGENTID_UPPER_AGENT: 
         // analysis it && To All upper Agent
-        Printf_DEBUG("To All upper Agent && analysis it ");
         on_MyMsgHere(proto,conn);
+        Printf_DEBUG("To All upper Agent && analysis it ");
+    case AGENTID_ADMIN: // To Admin, transmit it upper
+        Printf_DEBUG("To Admin, transmit it upper");
         CMDParse_SendProto_Upper(proto);
         break;
     default:
         Printf_DEBUG("Need find this agent from tree iam(%d),target(%d)",
             PCMANAGER_Get_RootID(), proto->toID);
-        pPCConn conn2= AGENT_TUNN_BuildTunnel(proto->toID);
-        if(conn2 == AGENT_TUNN_BUILDTUNNEL_ERROR){
-            Printf_DEBUG("Find Error ???? targetid = %d",proto->toID);
-            return ON_TRANSMIT_ERROR;
+        pPCNodeInfo info2 = 
+            PCMANAGER_GETNextJump(proto->toID);
+        if(info2 == 
+            PCMANAGER_GETNEXTJUMP_ERROR){
+            goto error_exit;
         }
-        PCCONN_Conn_2_Conn(conn,conn2,10000);
+        pPCConn conn2 = &(info2->conn);
+        if(conn2 == NULL){
+            goto error_exit;
+        }
+        PROTO_SendProto(conn2,proto);
+//        pPCConn conn2= AGENT_TUNN_BuildTunnel(proto->toID);
+//        if(conn2 == AGENT_TUNN_BUILDTUNNEL_ERROR){
+//            Printf_DEBUG("Find Error ???? targetid = %d",proto->toID);
+//            return ON_TRANSMIT_ERROR;
+//        }
+//        PCCONN_Conn_2_Conn(conn,conn2,10000);
         break;
     }
+error_exit:
+    return ON_TRANSMIT_ERROR;
 exit:
     return ON_TRANSMIT_OK;
 }
@@ -137,6 +157,10 @@ int CMDParse_And_Do(pAgent_proto proto,pPCConn conn){
         if(ON_NEWCONN_OK == on_NewConn(proto,conn)){
             result = CMDPARSE_AND_DO_OK;
         }
+        break;
+    case CMDTYPE_TUNNELCTRL:
+        Printf_DEBUG("add Tunnel Ctrl Code here");
+        on_TunnelCTRL(proto,conn);
         break;
     case CMDTYPE_TRANSMIT:
         if(ON_TRANSMIT_OK == on_Transmit(proto,conn)){

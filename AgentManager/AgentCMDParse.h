@@ -5,8 +5,9 @@
 #include "AgentProNet.h"
 #include "AgentProtocol.h"
 /////  第一字段 指令类型
-#define CMDTYPE_NEWCONN   1 // 节点连接协议
-#define CMDTYPE_TRANSMIT  2 // 节点间交互协议
+#define CMDTYPE_NEWCONN     1 // 节点连接协议
+#define CMDTYPE_TRANSMIT    2 // 节点间交互协议
+#define CMDTYPE_TUNNELCTRL  3 // 节点间隧道
 
 /////  第二字段 指令编号
 #define CMDID_JOB_RPLY         1 // 工作回馈 

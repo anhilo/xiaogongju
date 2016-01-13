@@ -119,8 +119,9 @@ exit:
 
 int m_ForEachChildAgent_Trigger(pNodeData minfo){
     pPCNodeInfo info = (pPCNodeInfo)minfo;
-    if(info ->NodeType == 
-        MYSELF_NODE_REMOTE
+    if(info ->NodeType == MYSELF_NODE_REMOTE
+      || info -> NodeType == BE_MANAGED_NOW
+      || info -> NodeType == IAM_ADMIN_NODE
       || info -> NodeType == UPSTREAM_NODE){
         return 1;
     }

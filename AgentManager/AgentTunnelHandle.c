@@ -50,7 +50,7 @@ pPCConn m_buildDirectTunnel(pPCConn nextconn,int targetid){
         goto error_exit;
     }
     PROTO_SetCMD(proto,
-        CMDTYPE_TRANSMIT,
+        CMDTYPE_TUNNELCTRL,
         CMDID_NEWTUNNEL_ASK,
         -1);
     PROTO_SetAddress(proto,
@@ -93,7 +93,7 @@ pPCConn m_buildReverseTunnel(pPCConn nextconn,int targetid){
     }
     proto = PROTO_CreateProto();
     PROTO_SetCMD(proto,
-        CMDTYPE_TRANSMIT,
+        CMDTYPE_TUNNELCTRL,
         CMDID_NEWTUNNEL_RC_ASK,
         jobid);
     PROTO_SetAddress(proto,
@@ -212,7 +212,7 @@ int on_reverse_Tunnel_Ask(pAgent_proto upproto,pPCConn upconn){
         goto error_exit;
     }
     PROTO_SetCMD(proto,
-        CMDTYPE_TRANSMIT,
+        CMDTYPE_TUNNELCTRL,
         CMDID_NEWTUNNEL_RC_RPL,
         upproto->jobID);
     PROTO_SetAddress(proto,
@@ -263,6 +263,13 @@ int on_new_tunnel_ask(pAgent_proto proto ,pPCConn conn){
     }
     else{
         Printf_DEBUG("Bind conn and nextconn");
+        pPCConn conn2 = AGENT_TUNN_BuildTunnel(proto->toID);
+        
+        if(conn2 == AGENT_TUNN_BUILDTUNNEL_ERROR){
+            Printf_DEBUG("Find Error ???? targetid = %d",proto->toID);
+            return 0;
+        }
+        PCCONN_Conn_2_Conn(conn,conn2,10000);
     }
     return 1;
 }

@@ -96,17 +96,18 @@ int sendIDBack(pPCConn conn,
 }
 
 int on_AGENT_ID_Ask(pAgent_proto proto,pPCConn conn){
-    int newid = -1;
-    if(proto->toID == PCMANAGER_Get_RootID()){
-        newid = AGENT_ID_ASK();
-        if(newid == -1){
-            return -1;
-        }
+    int newid = AGENT_ID_ASK();
+    if(newid == -1){
+        return -1;
     }
+Printf_DEBUG("on_AGENT_ID_Ask1 targetid(%d),newid(%d)",
+        proto->fromID,newid);
     if(1 == sendIDBack(conn,
         proto->fromID,
         proto->jobID,
         newid)){
+Printf_DEBUG("on_AGENT_ID_Ask2 targetid(%d),newid(%d)",
+        proto->fromID,newid);
         return 1;
     }
     return -1;

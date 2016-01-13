@@ -146,6 +146,7 @@ int PCMANAGER_SETUpperAdmin(int nodeid){
     }
     tree_now = MANAGER_NOW;
     fatherid = nodeid;
+    rootnode->NodeType = BE_MANAGED_NOW;
     PCNODE_Free(node);
     node = NULL;
     return PCMANAGER_SETUPPER_OK;
