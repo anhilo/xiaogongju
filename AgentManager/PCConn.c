@@ -136,6 +136,36 @@ pPCConn PCCONN_Connect(char *ip,int port){
     return conn;
 }
 
+int m_fun_server_cbf(int sock,char *cbfun){
+    if(sock == -1){
+        return 0;
+    }
+    pPCConn conn = PCCONN_CreatePCConnFromSocket(sock);
+    if(conn == PCCONN_CREATEPCCONNFROMSOCKET_ERROR){
+        return 0;
+    }
+    cbf_listen_fun fun = (cbf_listen_fun)cbfun;
+    int res = fun(conn);
+    if(res == 0){
+        return 0;
+    }
+    return 1;
+}
+
+pPCConn PCCONN_Listen(int port,
+            int maxlen,
+            cbf_listen_fun fun
+        ){
+    if(fun == NULL || port == -1 || maxlen <=0 ){
+        return PCCONN_LISTEN_ERROR;
+    }
+    int sockserver = API_socket_init_server
+        (port,maxlen);
+    if( SOCKET_SERVER_INIT_ERROR == sockserver ){
+        return PCCONN_LISTEN_ERROR;
+    }
+}
+
 int PCCONN_Conn_2_Conn(pPCConn conn1,pPCConn conn2,int usec){
     int sock1,sock2;
     if(conn1 == NULL || conn2 == NULL){

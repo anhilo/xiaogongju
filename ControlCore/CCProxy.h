@@ -23,9 +23,8 @@ int CCProxy_AgentConnect(int targetid, char *remoteip,int rport);
 int CCProxy_SendMsg(int targetid,char *msg,int msglen);
 int CCProxy_onNewTunnel(pPCConn conn);
 
-//// shell
-//int CCProxy_startShell(int targetid);
-//int CCProxy_onStartShellHere(int clientsock);
+// shell
+int CCProxy_startShell(int targetid);
 #endif
 
 

@@ -8,6 +8,7 @@
 struct ValueForCallBack{
     Server_CallBack_Fun fun;
     int socket;
+    char *cbfun;
 };
 //**************************************************
 char SHELL_FILE_PATH[MAX_SHELL_PATH];
@@ -254,8 +255,10 @@ MIC_THREAD_FUN_DEF(cbf_for_server_start,pvalue){
         ((struct ValueForCallBack *)pvalue) -> fun;
     int m_sock = 
         ((struct ValueForCallBack *)pvalue) -> socket;
+    char *cbf  = 
+        ((struct ValueForCallBack *)pvalue) -> cbfun;
     MIC_USLEEP(10);
-    int res = m_fun(m_sock);
+    int res = m_fun(m_sock,cbf);
     MIC_THREAD_END();
     return NULL;
 }
