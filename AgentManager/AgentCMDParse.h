@@ -8,17 +8,23 @@
 #define CMDTYPE_NEWCONN     1 // 节点连接协议
 #define CMDTYPE_TRANSMIT    2 // 节点间交互协议
 #define CMDTYPE_TUNNELCTRL  3 // 节点间隧道
+#define CMDTYPE_MANGER_U    4 // 设置上下游节点状态
 
 /////  第二字段 指令编号
+#define CMDID_UNKNOWN          0 // 未知默认值
 #define CMDID_JOB_RPLY         1 // 工作回馈 
+//tunnel
 #define CMDID_NEWTUNNEL_ASK    2 // 新隧道请求(直连)
 #define CMDID_NEWTUNNEL_RC_ASK 3 // 新隧道请求(反向)
 #define CMDID_NEWTUNNEL_RC_RPL 4 // 新隧道响应(反向)
+// id ask
 #define CMDID_NEWID_ASK        5 // 向上级请求新ID
 #define CMDID_NEWID_RPL        6 // 新ID分配响应
-#define CMDID_CHILDSYNC_UPPER  7 // 向上级更新节点信息
-#define CMDID_NEWNODE_HERE     8 // 新节点连接
-#define CMDID_ID_RESET         9 // ID重置
+#define CMDID_ID_RESET         7 // ID重置
+// agent conn sync
+#define CMDID_CHILDSYNC_UPPER  8 // 向上级更新节点信息
+#define CMDID_NEWNODE_HERE     9 // 新节点连接
+
 
 /////  内置ID控制
 #define AGENTID_ADMIN             0 

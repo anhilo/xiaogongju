@@ -102,7 +102,6 @@ int JOB_CloseJob(pJobList list,int jobid,
         }
         return JOB_CLOSEJOB_ERROR;
     }
-Printf_DEBUG("RECV job  somthing ~~~~");
     memcpy(((list->joblist)[jobid]).jobresult,
         jobResult,MAX_RESULT_LEN);
     ((list->joblist)[jobid]).jobState = JOB_STATE_CAN_STOP;

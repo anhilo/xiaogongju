@@ -23,6 +23,7 @@ pPCConn m_getTargetConn(int targetid){
         return M_GETTARGETCONN_ERROR;
     }
     conn = &(info->conn);
+Printf_DEBUG("conn 2 -> socket= %d",conn->cmd_socket);
     if(conn == NULL){
         return M_GETTARGETCONN_ERROR;
     }
@@ -34,7 +35,6 @@ pPCConn m_buildDirectTunnel(pPCConn nextconn,int targetid){
     pAgent_proto proto = NULL;
     pPCConn       conn = NULL;
     char targetbuf[4];
-Printf_DEBUG("direct-------------------------");
     if(nextconn == PCCONN_CONNECT_ERROR){
         goto error_exit;
     }
@@ -81,7 +81,6 @@ pPCConn m_buildReverseTunnel(pPCConn nextconn,int targetid){
     pAgent_proto proto = NULL;
     char    *resultbuf = NULL;
     int       buflen   = sizeof(pPCConn);
-Printf_DEBUG("reverse-------------------------");
     // check conn
     if(nextconn == M_GETTARGETCONN_ERROR){
         goto error_exit;
@@ -194,6 +193,16 @@ Printf_Error("M_BUILDREVERSETUNNEL_ERROR targetid = %d",targetid);
     return conn;
 }
 
+int m_Bindconn_and_nextConn(pPCConn conn,int targetid){
+    pPCConn conn2 = AGENT_TUNN_BuildTunnel(targetid);
+    if(conn2 == AGENT_TUNN_BUILDTUNNEL_ERROR){
+        Printf_DEBUG("Find Error ???? targetid = %d",targetid);
+        return 0;
+    }
+    PCCONN_Conn_2_Conn(conn,conn2,10000);
+    return 1;
+}
+
 int on_reverse_Tunnel_Ask(pAgent_proto upproto,pPCConn upconn){
     pAgent_proto proto = NULL;
     pPCConn       conn = NULL;
@@ -233,6 +242,7 @@ int on_reverse_Tunnel_Ask(pAgent_proto upproto,pPCConn upconn){
     }
     else{
         Printf_DEBUG("Bind conn and nextconn");
+        m_Bindconn_and_nextConn(conn,upproto->toID);
     }
     goto ok_exit;
 error_exit:
@@ -265,13 +275,7 @@ int on_new_tunnel_ask(pAgent_proto proto ,pPCConn conn){
     }
     else{
         Printf_DEBUG("Bind conn and nextconn");
-        pPCConn conn2 = AGENT_TUNN_BuildTunnel(proto->toID);
-        
-        if(conn2 == AGENT_TUNN_BUILDTUNNEL_ERROR){
-            Printf_DEBUG("Find Error ???? targetid = %d",proto->toID);
-            return 0;
-        }
-        PCCONN_Conn_2_Conn(conn,conn2,10000);
+        m_Bindconn_and_nextConn(conn,proto->toID);
     }
     return 1;
 }

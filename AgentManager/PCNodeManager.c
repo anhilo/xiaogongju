@@ -149,6 +149,9 @@ int PCMANAGER_SETUpperAdmin(int nodeid){
     rootnode->NodeType = BE_MANAGED_NOW;
     PCNODE_Free(node);
     node = NULL;
+Printf_OK("MY ID IS %d, Upper ID is %d",
+        PCMANAGER_Get_RootID(),
+        nodeid);
     return PCMANAGER_SETUPPER_OK;
 }
 

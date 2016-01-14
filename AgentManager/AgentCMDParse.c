@@ -105,8 +105,7 @@ exit:
 #define ON_TRANSMIT_ERROR   -1
 #define ON_TRANSMIT_OK       1
 int on_Transmit(pAgent_proto proto,pPCConn conn){
-    Printf_DEBUG("normal cmd info");
-
+    pPCNodeInfo info2 = NULL;
     if(PCMANAGER_Get_RootID() == proto->toID){
         Printf_DEBUG("This is my Msg");
         on_MyMsgHere(proto,conn);
@@ -117,16 +116,11 @@ int on_Transmit(pAgent_proto proto,pPCConn conn){
     case AGENTID_UPPER_AGENT: 
         // analysis it && To All upper Agent
         on_MyMsgHere(proto,conn);
-        Printf_DEBUG("To All upper Agent && analysis it ");
     case AGENTID_ADMIN: // To Admin, transmit it upper
-        Printf_DEBUG("To Admin, transmit it upper");
         CMDParse_SendProto_Upper(proto);
         break;
     default:
-        Printf_DEBUG("Need find this agent from tree iam(%d),target(%d)",
-            PCMANAGER_Get_RootID(), proto->toID);
-        pPCNodeInfo info2 = 
-            PCMANAGER_GETNextJump(proto->toID);
+        info2 = PCMANAGER_GETNextJump(proto->toID);
         if(info2 == 
             PCMANAGER_GETNEXTJUMP_ERROR){
             goto error_exit;
@@ -136,12 +130,6 @@ int on_Transmit(pAgent_proto proto,pPCConn conn){
             goto error_exit;
         }
         PROTO_SendProto(conn2,proto);
-//        pPCConn conn2= AGENT_TUNN_BuildTunnel(proto->toID);
-//        if(conn2 == AGENT_TUNN_BUILDTUNNEL_ERROR){
-//            Printf_DEBUG("Find Error ???? targetid = %d",proto->toID);
-//            return ON_TRANSMIT_ERROR;
-//        }
-//        PCCONN_Conn_2_Conn(conn,conn2,10000);
         break;
     }
 error_exit:
@@ -166,6 +154,9 @@ int CMDParse_And_Do(pAgent_proto proto,pPCConn conn){
         if(ON_TRANSMIT_OK == on_Transmit(proto,conn)){
             result = CMDPARSE_AND_DO_OK;
         }
+        break;
+    case CMDTYPE_MANGER_U:
+        PCMANAGER_SETUpperAdmin(proto->fromID);
         break;
     default:
         Printf_Error("UNKNOWN proto->cmdType %d",proto->cmdType);

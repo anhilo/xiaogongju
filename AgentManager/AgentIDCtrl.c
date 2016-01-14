@@ -41,7 +41,7 @@ int Ask_Id_Upper(pJobList list){
         }
         else {
             if(JOB_WAITCLOSEJOB_ERROR == 
-              JOB_WaitCloseJob(list,jobid,1000)){
+              JOB_WaitCloseJob(list,jobid,100000)){
                 result = -1;
             }
             else{
@@ -100,14 +100,10 @@ int on_AGENT_ID_Ask(pAgent_proto proto,pPCConn conn){
     if(newid == -1){
         return -1;
     }
-Printf_DEBUG("on_AGENT_ID_Ask1 targetid(%d),newid(%d)",
-        proto->fromID,newid);
     if(1 == sendIDBack(conn,
         proto->fromID,
         proto->jobID,
         newid)){
-Printf_DEBUG("on_AGENT_ID_Ask2 targetid(%d),newid(%d)",
-        proto->fromID,newid);
         return 1;
     }
     return -1;
@@ -115,7 +111,6 @@ Printf_DEBUG("on_AGENT_ID_Ask2 targetid(%d),newid(%d)",
 
 int AGENT_SENDID_FROM_PCConn(pPCConn conn,int newid){
     char idbuf[4];
-    Printf_DEBUG("111111111 is = %d",newid);
     API_m_itochar(newid,idbuf,4);
     if( PCCONN_SENDDATA_ERROR == 
         PCCONN_SendData(conn,idbuf,4)){

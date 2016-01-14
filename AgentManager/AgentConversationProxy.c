@@ -30,6 +30,27 @@ int AGENT_ConversationProxy_Init(){
     return AGENT_CONVERSATIONPROXY_INIT_OK;
 }
 
+typedef struct proconn{
+    pAgent_proto proto;
+    pPCConn      conn;
+}PROCONN,*pPROCONN;
+
+
+MIC_THREAD_FUN_DEF(m_parse_do_Thread,protoconn){
+    if(protoconn == NULL) return 0;
+    pAgent_proto proto = 
+        ((struct proconn*)protoconn)->proto;
+    pPCConn conn = 
+        ((struct proconn*)protoconn)->conn;
+    if(CMDPARSE_AND_DO_ERROR == 
+        CMDParse_And_Do(proto,conn)){
+        return 0;
+    }
+    PCCONN_Free(conn);
+    PROTO_FreeProto(proto);
+    return 0;
+}
+
 
 int m_Listener_For_EachAgentNode(pNodeData node){
     int res = 1;
@@ -47,9 +68,15 @@ int m_Listener_For_EachAgentNode(pNodeData node){
         if(proto == PROTO_RECVPROTO_ERROR){
             res = 0;
         }
-        if(CMDPARSE_AND_DO_ERROR == 
-            CMDParse_And_Do(proto,conn)){
-            res = 0;
+        pPROCONN protoconn = 
+            (pPROCONN)malloc(sizeof(PROCONN));
+        protoconn -> proto = proto;
+        protoconn -> conn  = conn;
+        MIC_THREAD_HANDLE_ID thread_id;
+        if(MIC_THREAD_CREATE(thread_id,
+            m_parse_do_Thread,
+            protoconn) < 0){
+            goto error_exit;
         }
     }
 ok_exit:
@@ -59,8 +86,6 @@ error_exit:
     res = 0;
     goto exit;
 exit:
-    PCCONN_Free(conn);
-    PROTO_FreeProto(proto);
     return res;
 }
 

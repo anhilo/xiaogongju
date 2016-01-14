@@ -75,10 +75,7 @@ int AgentInfo_Interactive(int sock,char *ip,int port){
     return AGENTCONN_INTERACTIVE_OK;
 }
 
-
-
 //******************************************************************
-
 int m_Info_send(pPCConn conn,pPCNodeInfo info){
     char buffer[300];
     char idbuf[4],ostype[4],nodetype[4];
@@ -98,7 +95,6 @@ int m_Info_send(pPCConn conn,pPCNodeInfo info){
             API_m_itochar (info->OSType   ,&(buffer[ 4]) ,4);
             API_m_itochar (info->NodeType ,&(buffer[ 8]) ,4);
             API_m_itochar (namelen        ,&(buffer[12]) ,4);
-    Printf_DEBUG("---> sendinfo - %s",info->PCName);
             strncpy(&(buffer[16]), info->PCName,namelen+1);
            // send it  
             if( PCCONN_SENDDATA_ERROR == 
@@ -169,7 +165,6 @@ int When_Iam_WithAdmin_Connect(pPCNodeInfo myself,pPCConn conn){
     int newid = AGENT_ID_ASK();
     AGENT_SENDID_FROM_PCConn(conn,newid);
     //  get server node info
-Printf_DEBUG("Get Server Info from here");
     pPCNodeInfo server = m_agentInfo_Recv(conn);
     //  add server to tree
     m_AddNeighborProxy(server);
@@ -188,7 +183,6 @@ Printf_DEBUG("Get Server Info from here");
 int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn){
     // get my id
     int newid = AGENT_GETID_FROM_PCConn(conn);
-    Printf_DEBUG("my new id is %d",newid);
     // set my id 
     PCMANAGER_Set_RootID(newid);
     
@@ -214,7 +208,6 @@ int When_Iam_Normal_Node(pPCNodeInfo myself,pPCConn conn){
 int When_Client_With_Admin(pPCNodeInfo client,pPCConn conn){
     //  set myself id
     int newid = AGENT_GETID_FROM_PCConn(conn);
-    Printf_DEBUG("my new id is %d",newid);
     PCMANAGER_Set_RootID(newid); // set myself id
     pPCNodeInfo myself = PCMANAGER_Get_RootNode();
     //  send myself info
@@ -224,9 +217,7 @@ int When_Client_With_Admin(pPCNodeInfo client,pPCConn conn){
     // add client to tree
     m_AddNeighborProxy(client);
     // set it upper
-Printf_DEBUG("set it upper %d",client->id);
     PCMANAGER_SETUpperAdmin(client->id);
-Printf_DEBUG("start child node trigger");
     ChildNodeInfoSyncTrigger();
     return WHEN_CLIENT_WITH_ADMIN_OK;
 }

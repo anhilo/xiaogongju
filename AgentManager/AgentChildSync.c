@@ -14,6 +14,12 @@
 
 #define MAX_SENDCHILDINFO_LEN   200
 
+//===============================
+#define M_MANAGERIT_ERROR  -1
+#define M_MANAGERIT_OK      1
+int m_ManagerIt(int targetid);
+//===============================
+
 #define M_SENDCHILDINFO_ERROR   -1
 #define M_SENDCHILDINFO_OK       1
 int m_SendChildInfo(int fatherid,int childid,
@@ -135,7 +141,32 @@ Printf_DEBUG("m_ForEachChildAgent_Trigger becalled ");
         newid,
         info->OSType,
         info->PCName);
+    m_ManagerIt(newid);
     return 1;
+}
+
+int m_ManagerIt(int targetid){
+    pPCNodeInfo info = PCMANAGER_GETNodeInfo(targetid);
+    if(info == PCMANAGER_GETNODEINFO_ERROR){
+        return M_MANAGERIT_ERROR;
+    }
+    pPCConn conn = &(info->conn);
+    pAgent_proto proto = PROTO_CreateProto();
+    PROTO_SetCMD(proto,
+        CMDTYPE_MANGER_U,
+        CMDID_UNKNOWN,
+        -1
+    );
+    PROTO_SetAddress(proto,
+        PCMANAGER_Get_RootID(),
+        targetid
+    );
+    PROTO_SetArgs(proto,
+        0,
+        ""
+    );
+    PROTO_SendProto(conn,proto);
+    return M_MANAGERIT_OK;
 }
 
 int ChildNodeInfoSyncTrigger(){
