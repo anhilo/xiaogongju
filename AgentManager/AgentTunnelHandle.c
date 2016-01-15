@@ -10,7 +10,7 @@
 #include "AgentConversationProxy.h"
 #include "AgentCMDParse.h"
 #include "AgentJobMsg.h"
-#include "../ControlCore/CCProxy.h"
+#include "../ControlCore/Cmd_Ctrl.h"
 //=====================================
 pfun_CBF_Tunnel cbf_newtunnel = NULL;
 //=====================================
@@ -158,7 +158,7 @@ int m_on_NewTunnel_Here(pPCConn conn){
     if(conn == NULL){
         return M_ON_NEWTUNNEL_HERE_ERROR;
     }
-    CCProxy_onNewTunnel(conn);
+    CMDCTRL_onNewTunnel(conn);
     return M_ON_NEWTUNNEL_HERE_OK;
 }
 

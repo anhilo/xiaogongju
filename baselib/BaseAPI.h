@@ -37,7 +37,7 @@ int API_socket_close(int sock);
 int API_socket_read_state(int sock,int sec,int usec);
 int API_socket_write_state(int sock,int sec,int usec);
 
-int API_socket_server_start(int socks_server,Server_CallBack_Fun fun);
+int API_socket_server_start(int socks_server,Server_CallBack_Fun fun,char *funarg);
 
 //struct hostent *API_socket_gethostbyname(char * ser_addr);
 #define API_SOCKET_SERVER_START_OK    1

@@ -6,9 +6,9 @@
 #define SET_SHELL_PATH_OK     1
 
 struct ValueForCallBack{
-    Server_CallBack_Fun fun;
     int socket;
-    char *cbfun;
+    Server_CallBack_Fun fun;
+    char *funarg;
 };
 //**************************************************
 char SHELL_FILE_PATH[MAX_SHELL_PATH];
@@ -256,7 +256,7 @@ MIC_THREAD_FUN_DEF(cbf_for_server_start,pvalue){
     int m_sock = 
         ((struct ValueForCallBack *)pvalue) -> socket;
     char *cbf  = 
-        ((struct ValueForCallBack *)pvalue) -> cbfun;
+        ((struct ValueForCallBack *)pvalue) -> funarg;
     MIC_USLEEP(10);
     int res = m_fun(m_sock,cbf);
     MIC_THREAD_END();
@@ -267,13 +267,15 @@ MIC_THREAD_FUN_DEF(cbf_for_server_start,pvalue){
 struct struct_for_StartServer{
     int socket_server;
     Server_CallBack_Fun function;
+    char *funarg;
 };
 
 MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
     struct struct_for_StartServer *info = 
         (struct struct_for_StartServer *)serverinfo;
-    int socks_server  = info->socket_server;
+    int        socks_server = info->socket_server;
     Server_CallBack_Fun fun = info-> function;
+    char            *funarg = info->funarg;
     struct sockaddr_in client_addr;
     int client_sock;
     int len_sockaddr;
@@ -298,6 +300,7 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
         }
         pvalue -> fun = fun;
         pvalue -> socket = client_sock;
+        pvalue -> funarg = funarg;
         MIC_THREAD_HANDLE_ID thread_id;
         if( MIC_THREAD_CREATE (thread_id, cbf_for_server_start , pvalue ) <0){
             API_socket_close(sockbuf);
@@ -311,13 +314,14 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
     return NULL;
 }
 
-int API_socket_server_start(int socks_server,Server_CallBack_Fun fun){
+int API_socket_server_start(int socks_server,Server_CallBack_Fun fun,char *funarg){
     MIC_THREAD_HANDLE_ID thread_id;
     struct struct_for_StartServer *info = 
         (struct struct_for_StartServer *)
         malloc(sizeof(struct struct_for_StartServer));
     info -> socket_server = socks_server;
     info -> function      = fun;
+    info -> funarg        = funarg;
 Printf_DEBUG("create thread ??? ");
     if(MIC_THREAD_CREATE(thread_id,StartServerFunction,info)< 0){
         Printf_Error("Start Server Error");

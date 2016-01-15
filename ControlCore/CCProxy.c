@@ -7,9 +7,12 @@
 
 #include "CCProxy.h"
 #include "CC_AgentConn.h"
+#include "CC_ShellCtrl.h"
 #include "../AgentManager/AgentTunnelHandle.h"
 #include "../AgentManager/AgentConversationCTRL.h"
 #include "../AgentManager/PCNodeInfo.h"
+#include "Cmd_Ctrl.h"
+#include "CC_Msg_module.h"
 
 //==============================================
 int m_CCProxy_CMD_Send(pPCConn conn,int cmd);
@@ -47,47 +50,6 @@ int CCProxy_Init(int ostype,char *pcname,int node_type){
     return CCPROXY_INIT_OK;
 }
 
-// 指令协议
-// connect agent
-#define AGENT_CONN_COMMAND_LISTEN        1
-#define AGENT_CONN_COMMAND_CONNECT       2
-// lcx
-#define AGENT_SERVER_COMMAND_LCXTRAN     3
-#define AGENT_SERVER_COMMAND_REVLCXTRAN  4
-// file 
-#define AGENT_SERVER_COMMAND_UPFILE      5
-#define AGENT_SERVER_COMMAND_DOWNFILE    6
-// socks
-#define AGENT_SERVER_COMMAND_SOCKS       7
-#define AGENT_SERVER_COMMAND_RVSOCKS     8
-// shell
-#define AGENT_SERVER_COMMAND_CMDSHELL    9
-// send msg
-#define AGENT_SERVER_COMMAND_SENDMSG    10
-// +-------------------+-------------------+
-// | CCTRL_TYPE(1byte) | CCTRL_ARGS(1byte) |
-// +-------------------+-------------------+
-// | LCX? SOCKS?       | args              |
-// +-------------------+-------------------+
-
-#define MAX_CCPROXY_LEN       200
-#define CCTRL_TYPE_OFFSET     0
-
-#define M_BUILDTARGETSOCK_ERROR   NULL
-pPCConn m_BuildTargetSock(int targetid,int ccproxy_cmd){
-    pPCConn targetsock = 
-    AGENT_Conversation_Build_SockTunnel(targetid);
-    if(targetsock == 
-    AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR){
-        return M_BUILDTARGETSOCK_ERROR;
-    }
-    if( 0 == m_CCProxy_CMD_Send(targetsock,
-            ccproxy_cmd)
-    ){
-        return M_BUILDTARGETSOCK_ERROR;
-    }
-    return targetsock;
-}
 
 int CCProxy_ListenAgent(int targetid,
     int rport,int maxnum){
@@ -100,9 +62,9 @@ int CCProxy_ListenAgent(int targetid,
         return CCPROXY_LISTENAGENT_OK;
     }
     else{
-        pPCConn targetsock = m_BuildTargetSock(targetid,
+        pPCConn targetsock = CMDCTRL_BuildTargetSock(targetid,
             AGENT_CONN_COMMAND_LISTEN);
-        if(targetsock == M_BUILDTARGETSOCK_ERROR){
+        if(targetsock == CMDCTRL_BUILDTARGETSOCK_ERROR){
             return CCPROXY_LISTENAGENT_ERROR;
         }
         char rport_buf[4];
@@ -155,9 +117,9 @@ int CCProxy_AgentConnect(int targetid,
         return CCPROXY_CONNECTAGENT_OK;
     }
     else{
-        targetsock = m_BuildTargetSock(targetid,
+        targetsock = CMDCTRL_BuildTargetSock(targetid,
             AGENT_CONN_COMMAND_CONNECT);
-        if(targetsock == M_BUILDTARGETSOCK_ERROR){
+        if(targetsock == CMDCTRL_BUILDTARGETSOCK_ERROR){
             return CCPROXY_CONNECTAGENT_ERROR;
         }
         char ipbuf[MAX_IP_ADDR_LEN];
@@ -195,37 +157,14 @@ int m_onAgentConnect(pPCConn clientsock){
     return 1;
 }
 
-#define MAX_MSG_LEN   300
 int CCProxy_SendMsg(int targetid,char *msg,int msglen){
-    if(msglen > MAX_MSG_LEN || strlen(msg)>msglen){
+    int res = CCMSG_SendMsg(targetid,msg,msglen);
+    if(res == CCMSG_SENDMSG_ERROR ){
         return 0;
     }
-    pPCConn conn = m_BuildTargetSock(targetid,
-        AGENT_SERVER_COMMAND_SENDMSG);
-    if( M_BUILDTARGETSOCK_ERROR == conn ){
-        Printf_DEBUG("SendMSG Build target tunnel Error targetid = %d",targetid);
-        return 0;
-    }
-    PCCONN_SendData(conn,msg,msglen);
     return 1;
 }
 
-int m_onRecvMsg(pPCConn conn){
-    char buffer[MAX_MSG_LEN];
-    int  res = PCCONN_RecvData(conn,buffer,MAX_MSG_LEN);
-    if(res > MAX_MSG_LEN){
-        Printf_Error( "RECV MSG ERROR");
-        return CCPROXY_SENDMSG_ERROR;
-    }
-    else{
-        buffer[res]= '\0';
-        Printf_OK("CCProxy_onNewTunnel -->%s",buffer);
-    }
-    return CCPROXY_SENDMSG_OK;
-}
-
-
-#define CCPROXY_CMD_LEN   1
 int m_CCProxy_CMD_Send(pPCConn conn,int cmd){
     char cmdmsg[CCPROXY_CMD_LEN];
     cmdmsg[0] = cmd;
@@ -236,25 +175,10 @@ int m_CCProxy_CMD_Send(pPCConn conn,int cmd){
     return 1;
 }
 
-int CCProxy_onNewTunnel(pPCConn conn){
-    char cmdmsg[CCPROXY_CMD_LEN];
-    PCCONN_RecvData(conn,cmdmsg,CCPROXY_CMD_LEN);
-    switch(cmdmsg[0]){
-    case AGENT_SERVER_COMMAND_SENDMSG:
-        m_onRecvMsg(conn);
-        break;
-    case AGENT_CONN_COMMAND_LISTEN:
-        Printf_DEBUG("AGENT_CONN_COMMAND_LISTEN");
-        m_onListenAgent(conn);
-        break;
-    case AGENT_CONN_COMMAND_CONNECT:
-        Printf_DEBUG("AGENT_CONN_COMMAND_CONNECT");
-        m_onAgentConnect(conn);
-        break;
-    default :
-        Printf_Error("CCProxy_onNewTunnel Error CMD(%d)",
-            cmdmsg[0]);
-        break;
+int CCProxy_startShell(int targetid,int port,int maxclient){
+    int res = CC_StartShell(targetid,port);
+    if(res == CC_STARTSHELL_ERROR){
+        return CCPROXY_STARTSHELL_ERROR;
     }
-    return 1;
+    return CCPROXY_STARTSHELL_OK;
 }

@@ -5,7 +5,7 @@
 #include "GlobalValue.h"
 #include "AgentProtocol.h"
 
-typedef int (*cbf_listen_fun)(pPCConn conn);
+typedef int (*cbf_listen_fun)(pPCConn conn,char *pValue);
 
 #define PCCONN_CREATEPCCONNFROMSOCKET_ERROR  NULL
 pPCConn PCCONN_CreatePCConnFromSocket(int sock);
@@ -21,9 +21,11 @@ pPCConn PCCONN_Connect(char *ip,int port);
 
 #define PCCONN_LISTEN_ERROR        -1
 #define PCCONN_LISTEN_OK            1
-pPCConn PCCONN_Listen(int port,
+int PCCONN_Listen(
+            int port,
             int maxlen,
-            cbf_listen_fun fun
+            cbf_listen_fun fun,
+            char *pValue
         );
 
 #define PCCONN_SENDDATA_ERROR   -1

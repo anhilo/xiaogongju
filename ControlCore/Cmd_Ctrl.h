@@ -2,59 +2,41 @@
 #define _CMD_CTRL_H_
 
 #include "../generic.h"
+#include "../AgentManager/GlobalValue.h"
+
+// 指令协议
+// connect agent
+#define AGENT_CONN_COMMAND_LISTEN        1
+#define AGENT_CONN_COMMAND_CONNECT       2
+// lcx
+#define AGENT_SERVER_COMMAND_LCXTRAN     3
+#define AGENT_SERVER_COMMAND_REVLCXTRAN  4
+// file 
+#define AGENT_SERVER_COMMAND_UPFILE      5
+#define AGENT_SERVER_COMMAND_DOWNFILE    6
+// socks
+#define AGENT_SERVER_COMMAND_SOCKS       7
+#define AGENT_SERVER_COMMAND_RVSOCKS     8
+// shell
+#define AGENT_SERVER_COMMAND_CMDSHELL    9
+// send msg
+#define AGENT_SERVER_COMMAND_SENDMSG    10
+// +-------------------+-------------------+
+// | CCTRL_TYPE(1byte) | CCTRL_ARGS(1byte) |
+// +-------------------+-------------------+
+// | LCX? SOCKS?       | args              |
+// +-------------------+-------------------+
+
+#define MAX_CCPROXY_LEN               200
+#define CCTRL_TYPE_OFFSET             0
 
 
-//************** AgentCtrl  ******************************
-#define CMD_CTRL_LISTENAGENT_ERROR -1
-#define CMD_CTRL_LISTENAGENT_OK     1
-int CMD_CTRL_ListenAgent(int targetid,
-    int rport);
-
-#define CMD_CTRL_CONNECTAGENT_ERROR  -1
-#define CMD_CTRL_CONNECTAGENT_OK      1
-int CMD_CTRL_ConnectAgent(int targetid,
-    char *remote_ip,int remote_port);
-
-//************** SHELL    ********************************
-// 1.
-// 在目标节点开 SHELL 隧道
-// 返回socket 套接子
-int CMD_CTRL_startShell(int targetid);
-
-//************** Message *********************************
-// 2. 
-// 启动一个指向目标节点的socket 会话
-int CMD_CTRL_sendMsg(int targetid,char *msg,int msglen);
-
-//************** SOCKS   *********************************
-// 3. 
-// 启动一个指向目标服务的socks 会话
-int CMD_CTRL_startSocks(int targetid,int lport);
+#define CMDCTRL_BUILDTARGETSOCK_ERROR NULL
+pPCConn CMDCTRL_BuildTargetSock(int targetid,int ccproxy_cmd);
 
 
-//************** UPFILES *********************************
-// 4.
-// 向目标节点发送新文件
-int CMD_CTRL_UpFile(int targetid,char *from_local_filepath,
-        char *to_remote_filepath);
-
-
-//************** DOWNFILES *******************************
-// 5. 
-// 从目标节点下载文件到本地
-int CMD_CTRL_DownFile(int targetid,char *from_remote_filepath,
-        char *to_local_filepath);
-
-//************** LCX_Tran *******************************
-//========正向
-// 6.
-// 正向lcx tran 请求
-int CMD_CTRL_Lcx_Tran(int targetid,int lport,char *to_ip,int to_port);
-
-//========反向
-// 7.
-// 从目标节点启动反向lcx 请求
-int CMD_CTRL_Lcx_backTran(int targetid,int rport,char *to_ip,int to_port);
-
+#define CMDCTRL_ONNEWTUNNEL_ERROR   -1
+#define CMDCTRL_ONNEWTUNNEL_OK       1
+int CMDCTRL_onNewTunnel(pPCConn conn);
 
 #endif

@@ -3,6 +3,8 @@
 
 #include "../generic.h"
 
+#include "../AgentManager/GlobalValue.h"
+
 #define CC_STARTSHELL_ERROR   -1
 #define CC_STARTSHELL_OK       1
 int CC_StartShell(int targetid,int locolport);

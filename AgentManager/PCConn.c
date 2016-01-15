@@ -136,34 +136,59 @@ pPCConn PCCONN_Connect(char *ip,int port){
     return conn;
 }
 
-int m_fun_server_cbf(int sock,char *cbfun){
-    if(sock == -1){
+typedef struct cbf_data{
+    cbf_listen_fun fun;
+    char *funarg;
+}CBF_DATA,*pCBF_DATA;
+
+int m_fun_server_cbf(int sock,char *data){
+    if(sock == -1 || data == NULL){
+        Printf_Error("m_fun_server_cbf no CBF fun????");
         return 0;
     }
     pPCConn conn = PCCONN_CreatePCConnFromSocket(sock);
     if(conn == PCCONN_CREATEPCCONNFROMSOCKET_ERROR){
         return 0;
     }
-    cbf_listen_fun fun = (cbf_listen_fun)cbfun;
-    int res = fun(conn);
+    pCBF_DATA fun_and_arg = (pCBF_DATA)data;
+    cbf_listen_fun fun = fun_and_arg->fun;
+    char *      funarg = fun_and_arg->funarg;
+    int res = fun(conn,funarg);
     if(res == 0){
+        Printf_DEBUG("fun run error????");
         return 0;
     }
     return 1;
 }
 
-pPCConn PCCONN_Listen(int port,
+int PCCONN_Listen(int port,
             int maxlen,
-            cbf_listen_fun fun
+            cbf_listen_fun fun,
+            char *pValue
         ){
-    if(fun == NULL || port == -1 || maxlen <=0 ){
+    if(fun == NULL || port == -1 || maxlen <=0 )
+    {
         return PCCONN_LISTEN_ERROR;
     }
     int sockserver = API_socket_init_server
         (port,maxlen);
-    if( SOCKET_SERVER_INIT_ERROR == sockserver ){
+    if( SOCKET_SERVER_INIT_ERROR == sockserver )
+    {
         return PCCONN_LISTEN_ERROR;
     }
+
+    pCBF_DATA data = (pCBF_DATA)malloc(sizeof(CBF_DATA));
+    if(data == NULL) return PCCONN_LISTEN_ERROR;
+    data -> fun    = fun;
+    data -> funarg = pValue;
+
+    int res = API_socket_server_start(sockserver,
+        m_fun_server_cbf,
+        (char*)data);
+    if(res == API_SOCKET_SERVER_START_ERROR){
+        return PCCONN_LISTEN_ERROR;
+    }
+    return PCCONN_LISTEN_OK;
 }
 
 int PCCONN_Conn_2_Conn(pPCConn conn1,pPCConn conn2,int usec){

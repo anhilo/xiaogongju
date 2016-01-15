@@ -4,6 +4,9 @@
 #include "../generic.h"
 #include "../AgentManager/AgentProtocol.h"
 #include "../AgentManager/GlobalValue.h"
+
+#define CCPROXY_CMD_LEN   1
+
 #define CCPROXY_INIT_ERROR -1
 #define CCPROXY_INIT_OK     1
 int CCProxy_Init(int ostype,char *pcname,int node_type);
@@ -24,7 +27,9 @@ int CCProxy_SendMsg(int targetid,char *msg,int msglen);
 int CCProxy_onNewTunnel(pPCConn conn);
 
 // shell
-int CCProxy_startShell(int targetid);
+#define CCPROXY_STARTSHELL_ERROR  -1
+#define CCPROXY_STARTSHELL_OK      1
+int CCProxy_startShell(int targetid,int lport,int maxclient);
 #endif
 
 

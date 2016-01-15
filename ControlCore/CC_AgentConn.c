@@ -38,3 +38,12 @@ int CC_Agent_SendMsg(int target,char *msg,int msglen){
     }
     return CC_AGENT_SENDMSG_OK;
 }
+
+int CC_Agent_StartShell(int target,int lport,int maxnum,int usec){
+    int res = 
+        CCProxy_startShell(target,lport,maxnum);
+    if(res == CCPROXY_STARTSHELL_ERROR){
+        return CC_AGENT_STARTSHELL_ERROR;
+    }
+    return CC_AGENT_STARTSHELL_OK;
+}

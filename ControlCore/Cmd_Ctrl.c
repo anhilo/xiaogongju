@@ -7,24 +7,45 @@
 
 #include"Cmd_Ctrl.h"
 #include"CCProxy.h"
+#include"CC_Msg_module.h"
+#include"CCProxy.h"
+#include "../AgentManager/AgentConversationCTRL.h"
 
-int CMD_CTRL_ListenAgent(int targetid,
-    int rport){
-    int res = CCProxy_ListenAgent(targetid,rport,20);
-    if(res == CCPROXY_LISTENAGENT_ERROR){
-        return CMD_CTRL_LISTENAGENT_ERROR;
+
+pPCConn CMDCTRL_BuildTargetSock(int targetid,int ccproxy_cmd){
+    pPCConn targetsock = 
+    AGENT_Conversation_Build_SockTunnel(targetid);
+    if(targetsock == 
+    AGENT_CONVERSATION_BUILD_SOCKTUNNEL_ERROR){
+        return CMDCTRL_BUILDTARGETSOCK_ERROR;
     }
-    return CMD_CTRL_LISTENAGENT_OK;
+    if( 0 == m_CCProxy_CMD_Send(targetsock,
+            ccproxy_cmd)
+    ){
+        return CMDCTRL_BUILDTARGETSOCK_ERROR;
+    }
+    return targetsock;
 }
 
-int CMD_CTRL_ConnectAgent(int targetid,
-    char *remote_ip,int remote_port){
-    int res = CCProxy_AgentConnect(
-                targetid,
-                remote_ip,
-                remote_port);
-    if( CCPROXY_CONNECTAGENT_ERROR == res){
-        return CMD_CTRL_CONNECTAGENT_ERROR;
+int CMDCTRL_onNewTunnel(pPCConn conn){
+    char cmdmsg[CCPROXY_CMD_LEN];
+    PCCONN_RecvData(conn,cmdmsg,CCPROXY_CMD_LEN);
+    switch(cmdmsg[0]){
+    case AGENT_SERVER_COMMAND_SENDMSG:
+        m_onRecvMsg(conn);
+        break;
+    case AGENT_CONN_COMMAND_LISTEN:
+        Printf_DEBUG("AGENT_CONN_COMMAND_LISTEN");
+        m_onListenAgent(conn);
+        break;
+    case AGENT_CONN_COMMAND_CONNECT:
+        Printf_DEBUG("AGENT_CONN_COMMAND_CONNECT");
+        m_onAgentConnect(conn);
+        break;
+    default :
+        Printf_Error("CCProxy_onNewTunnel Error CMD(%d)",
+            cmdmsg[0]);
+        break;
     }
-    return CMD_CTRL_CONNECTAGENT_OK;
+    return 1;
 }

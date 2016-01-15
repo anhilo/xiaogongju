@@ -19,6 +19,8 @@ AgentLib   =  \
 			AgentManager/PCConn.c \
 			ControlCore/CC_AgentConn.c \
 			ControlCore/CCProxy.c \
+			ControlCore/CC_ShellCtrl.c \
+			ControlCore/CC_Msg_module.c \
 			ControlCore/Cmd_Ctrl.c 
 
 
