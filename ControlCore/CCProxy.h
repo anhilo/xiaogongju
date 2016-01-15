@@ -21,6 +21,10 @@ int CCProxy_ListenAgent(int targetid, int rport,int maxnum);
 #define CCPROXY_CONNECTAGENT_OK        1
 int CCProxy_AgentConnect(int targetid, char *remoteip,int rport);
 
+int m_CCProxy_CMD_Send(pPCConn conn,int cmd);
+int m_onListenAgent(pPCConn clientsock);
+int m_onAgentConnect(pPCConn clientsock);
+
 #define CCPROXY_SENDMSG_OK         1
 #define CCPROXY_SENDMSG_ERROR     -1
 int CCProxy_SendMsg(int targetid,char *msg,int msglen);

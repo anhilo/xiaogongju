@@ -15,7 +15,6 @@
 #include "CC_Msg_module.h"
 
 //==============================================
-int m_CCProxy_CMD_Send(pPCConn conn,int cmd);
 //==============================================
 
 int CCProxy_Init(int ostype,char *pcname,int node_type){

