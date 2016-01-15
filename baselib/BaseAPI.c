@@ -138,7 +138,7 @@ int API_socket_init_server(int port,int maxlisten){
     SOCKET  locals;
     struct sockaddr_in   s_sin;        
     memset(&s_sin, 0, sizeof(s_sin));
-    locals = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, NULL, NULL);
+    locals = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, 0);
     s_sin.sin_family = AF_INET;
     s_sin.sin_port = htons(port);
     s_sin.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -260,7 +260,7 @@ MIC_THREAD_FUN_DEF(cbf_for_server_start,pvalue){
     MIC_USLEEP(10);
     int res = m_fun(m_sock,cbf);
     MIC_THREAD_END();
-    return NULL;
+    return MIC_THREAD_RETVALUE;
 }
 
 
@@ -296,7 +296,7 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
             (struct ValueForCallBack *)malloc(sizeof(struct ValueForCallBack));
         if(pvalue == NULL) {
             Printf_Error("server start error pvalue is NULL");
-            return NULL;
+            return MIC_THREAD_RETVALUE;
         }
         pvalue -> fun = fun;
         pvalue -> socket = client_sock;
@@ -305,13 +305,13 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
         if( MIC_THREAD_CREATE (thread_id, cbf_for_server_start , pvalue ) <0){
             API_socket_close(sockbuf);
             Printf_Error("server start error thread error");
-            return NULL;
+            return MIC_THREAD_RETVALUE;
         }
         //MIC_THREAD_JOIN(thread_id);
         MIC_USLEEP(1);
         free(pvalue);
     }
-    return NULL;
+    return MIC_THREAD_RETVALUE;
 }
 
 int API_socket_server_start(int socks_server,Server_CallBack_Fun fun,char *funarg){

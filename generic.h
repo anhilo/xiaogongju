@@ -47,6 +47,7 @@ typedef pNodeData  (*pfunNodeCopy)( pNodeData );
     #define MIC_THREAD_JOIN(handle) \
         Sleep(1)
     #define MIC_THREAD_END() Sleep(1)
+    #define MIC_THREAD_RETVALUE   0 
     #define MIC_SLEEP(x)  Sleep(x*1000)
     #define MIC_USLEEP(x) Sleep(x);
 #else
@@ -58,6 +59,7 @@ typedef pNodeData  (*pfunNodeCopy)( pNodeData );
     #define MIC_THREAD_JOIN(handle) \
         pthread_join(handle ,NULL)
     #define MIC_THREAD_END() pthread_detach(pthread_self())
+    #define MIC_THREAD_RETVALUE   NULL
     #define MIC_SLEEP(x)  sleep(x)
     #define MIC_USLEEP(x) usleep(x*1000);
 #endif

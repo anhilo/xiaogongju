@@ -7,6 +7,7 @@
 #include "CC_Msg_module.h"
 #include "CCProxy.h"
 #include "Cmd_Ctrl.h"
+#include "../AgentManager/PCConn.h"
 
 #define MAX_MSG_LEN   300
 int CCMSG_SendMsg(int targetid,char *msg,int msglen){
