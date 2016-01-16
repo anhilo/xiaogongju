@@ -18,7 +18,7 @@ int fun_callback_for_StartShell(pPCConn conn,char *value){
     pPCConn conn2 = CMDCTRL_BuildTargetSock(targetid,
         AGENT_SERVER_COMMAND_CMDSHELL);
     if( CMDCTRL_BUILDTARGETSOCK_ERROR == conn2 ){
-        Printf_DEBUG("SendMSG Build target tunnel Error targetid = %d",targetid);
+        Printf_DEBUG("Build Shell Tunnel Error targetid = %d",targetid);
         return 0;
     }
     PCCONN_Conn_2_Conn(conn,conn2,100000);

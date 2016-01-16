@@ -13,6 +13,7 @@
 #include "../AgentManager/PCNodeInfo.h"
 #include "Cmd_Ctrl.h"
 #include "CC_Msg_module.h"
+#include "CC_LcxCtrl.h"
 
 //==============================================
 //==============================================
@@ -180,4 +181,12 @@ int CCProxy_startShell(int targetid,int port,int maxclient){
         return CCPROXY_STARTSHELL_ERROR;
     }
     return CCPROXY_STARTSHELL_OK;
+}
+
+int CCProxy_LcxTran(int targetid,int lport,char *rip,int rport,int usec){
+    int res = CC_Lcx_Tran(targetid,lport,rip,rport,usec);
+    if(res == CC_LCX_TRAN_ERROR){
+        return CCPROXY_LCXTRAN_ERROR;
+    }
+    return CCPROXY_LCXTRAN_OK;
 }

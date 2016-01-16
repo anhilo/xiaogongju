@@ -21,6 +21,7 @@ AgentLib   =  \
 			ControlCore/CCProxy.c \
 			ControlCore/CC_ShellCtrl.c \
 			ControlCore/CC_Msg_module.c \
+			ControlCore/CC_LcxCtrl.c  \
 			ControlCore/Cmd_Ctrl.c 
 
 

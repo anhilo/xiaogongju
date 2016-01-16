@@ -46,6 +46,18 @@ int whileMain(){
             
             CC_Agent_StartShell(agentnow,shellport,200,10000);
         }
+        else if(startWith(line,"lcxtran")){
+            int lcxport;
+            char rip[MAX_IP_ADDR_LEN];
+            int rport;
+            sprintf(inputformat,"lcxtran %s %s%ds %s","%d","%",MAX_IP_ADDR_LEN,"%d");
+//            Printf_OK(inputformat,"HelloWorld");
+            sscanf(line,inputformat,&lcxport,rip,&rport);
+            Printf_OK("locolport   :%d\n",lcxport);
+            Printf_OK("remote ip   :%s\n",rip);
+            Printf_OK("remote port :%d\n",rport);
+            CC_Agent_LcxTran(agentnow,lcxport,rip,rport,10000);
+        }
         else if(startWith(line,"connect")){
             Printf_OK("target agent connect new agent");
 //            Printf_OK(line);

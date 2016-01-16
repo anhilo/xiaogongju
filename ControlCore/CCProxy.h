@@ -34,6 +34,12 @@ int CCProxy_onNewTunnel(pPCConn conn);
 #define CCPROXY_STARTSHELL_ERROR  -1
 #define CCPROXY_STARTSHELL_OK      1
 int CCProxy_startShell(int targetid,int lport,int maxclient);
+
+// lcx_tran
+#define CCPROXY_LCXTRAN_ERROR     -1
+#define CCPROXY_LCXTRAN_OK         1
+int CCProxy_LcxTran(int targetid,int lport,char *rip,int rport,int usec);
+
 #endif
 
 
