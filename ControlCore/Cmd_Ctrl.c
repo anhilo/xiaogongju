@@ -13,6 +13,7 @@
 #include "../AgentManager/PCConn.h"
 #include "CC_ShellCtrl.h"
 #include "CC_LcxCtrl.h"
+#include "CC_Agent_Socks_module.h"
 
 
 pPCConn CMDCTRL_BuildTargetSock(int targetid,int ccproxy_cmd){
@@ -44,6 +45,10 @@ int CMDCTRL_onNewTunnel(pPCConn conn){
     case AGENT_CONN_COMMAND_CONNECT:
         Printf_DEBUG("AGENT_CONN_COMMAND_CONNECT");
         m_onAgentConnect(conn);
+        break;
+    case AGENT_SERVER_COMMAND_SOCKS:
+        Printf_DEBUG("AGENT_SERVER_COMMAND_SOCKS");
+        on_CC_startSocks(conn);
         break;
     case AGENT_SERVER_COMMAND_CMDSHELL:
         CC_onStartShellhere(conn);

@@ -55,3 +55,11 @@ int CC_Agent_LcxTran(int target,int lport,char *rip,int rport,int usec){
     }
     return CC_AGENT_LCXTRAN_OK;
 }
+
+int CC_Agent_StartSocks(int target,int lport,int usec){
+    int res = CCProxy_StartSocks(target,lport,usec);
+    if(CCPROXY_STARTSOCKS_ERROR == res){
+        return CC_AGENT_STARTSOCKS_ERROR;
+    }
+    return CC_AGENT_STARTSOCKS_OK;
+}

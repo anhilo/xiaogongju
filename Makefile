@@ -1,5 +1,8 @@
-object_lib = baselib/BaseAPI.c baselib/GlobalFunctions.c \
-			baselib/ListNodeCTRL.c baselib/TreeNodeCTRL.c \
+object_lib = baselib/BaseAPI.c \
+			baselib/GlobalFunctions.c \
+			baselib/ListNodeCTRL.c \
+			baselib/TreeNodeCTRL.c \
+			sockslib/SocksBase.c \
 			sockslib/Sock_Tunnel.c
 
 AgentLib   =  \
@@ -20,6 +23,7 @@ AgentLib   =  \
 			ControlCore/CC_AgentConn.c \
 			ControlCore/CCProxy.c \
 			ControlCore/CC_ShellCtrl.c \
+			ControlCore/CC_Agent_Socks_module.c \
 			ControlCore/CC_Msg_module.c \
 			ControlCore/CC_LcxCtrl.c  \
 			ControlCore/Cmd_Ctrl.c 

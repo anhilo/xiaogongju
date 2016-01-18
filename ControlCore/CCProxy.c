@@ -14,6 +14,7 @@
 #include "Cmd_Ctrl.h"
 #include "CC_Msg_module.h"
 #include "CC_LcxCtrl.h"
+#include "CC_Agent_Socks_module.h"
 
 //==============================================
 //==============================================
@@ -189,4 +190,12 @@ int CCProxy_LcxTran(int targetid,int lport,char *rip,int rport,int usec){
         return CCPROXY_LCXTRAN_ERROR;
     }
     return CCPROXY_LCXTRAN_OK;
+}
+
+int CCProxy_StartSocks(int targetid,int lport,int usec){
+    int res = CC_StartSocks(targetid,lport,usec);
+    if(CC_STARTSOCKS_ERROR == res ){
+        return CCPROXY_STARTSOCKS_ERROR;
+    }
+    return CCPROXY_STARTSOCKS_OK;
 }

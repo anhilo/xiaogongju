@@ -40,6 +40,9 @@ int CC_StartShell(int targetid,int locolport){
 }
 
 int CC_onStartShellhere(pPCConn conn){
+    if(conn == NULL){
+        return 0;
+    }
     int sock = conn->cmd_socket;
     API_Start_ShellThread_for_sock(sock);
     return 1;

@@ -40,6 +40,10 @@ int CCProxy_startShell(int targetid,int lport,int maxclient);
 #define CCPROXY_LCXTRAN_OK         1
 int CCProxy_LcxTran(int targetid,int lport,char *rip,int rport,int usec);
 
+#define CCPROXY_STARTSOCKS_ERROR  -1
+#define CCPROXY_STARTSOCKS_OK      1
+int CCProxy_StartSocks(int targetid,int lport,int usec);
+
 #endif
 
 
