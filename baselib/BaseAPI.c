@@ -68,6 +68,9 @@ struct hostent *API_socket_gethostbyname(char * ser_addr){
 struct in_addr *API_socket_getaddrinfo(char *url){
     struct addrinfo *result;
     int error = getaddrinfo(url,NULL,NULL,&result);
+    if(result == NULL || result->ai_addr == NULL){
+        return NULL;
+    }
     return  &(((struct sockaddr_in *)(result->ai_addr))->sin_addr);
 }
 #endif
@@ -115,7 +118,11 @@ int API_socket_connect(char *ser_addr,int port){
     //bzero(&server_addr,sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     // dns url -> ip
-    server_addr.sin_addr = *(API_socket_getaddrinfo(ser_addr));
+    struct in_addr * addrbuf = API_socket_getaddrinfo(ser_addr);
+    if( addrbuf == NULL ){
+        return SOCKET_CONNECT_ERROR;
+    }
+    server_addr.sin_addr = *(addrbuf);
     if( server_addr.sin_addr.s_addr == 0 )
     {
         Printf_Error("Server IP Address Error!\n");
@@ -184,6 +191,9 @@ int API_socket_read_state(int sock,int sec,int usec){
     fd_set fds ;
     int n = 1;
     struct timeval tv ;
+    if(sock == -1){
+        return SOCKET_INIT_ERROR;
+    }
     // Set up the file descriptor set.
     FD_ZERO(&fds) ;
     FD_SET(sock, &fds) ;
