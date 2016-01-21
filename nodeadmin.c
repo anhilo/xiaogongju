@@ -46,6 +46,9 @@ int whileMain(){
             
             CC_Agent_StartShell(agentnow,shellport,200,10000);
         }
+        else if(startWith(line,"show")){
+            PCMANAGER_Tree_Print();
+        }
         else if(startWith(line,"lcxtran")){
             int lcxport;
             char rip[MAX_IP_ADDR_LEN];

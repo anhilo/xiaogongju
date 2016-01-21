@@ -286,9 +286,9 @@ int Tree_HaveNode(pTreeManager head,int id){
     return 1;
 }
 
-typedef int (*pfunCallBackForNode)(pNodeData node,int fatherid);
+typedef int (*pfunCallBackForNode)(pNodeData node,int fatherid,int deep);
 
-int mNewTravel(pTreeNode root,pfunCallBackForNode callback){
+int mNewTravel(pTreeNode root,pfunCallBackForNode callback,int deep){
     int k;
     TreeNode *p = NULL;
     if(root ==NULL){
@@ -296,19 +296,19 @@ int mNewTravel(pTreeNode root,pfunCallBackForNode callback){
     }
 //    printf("this id is %d , child_num = %d\n",root->id, root->child_num);
     if(root->father != NULL ){
-        if( 0== callback(root->node,root->father->id)){
+        if( 0 == callback(root->node,root->father->id,deep-1)){
             return 0;
         }
     }
     else{
-        if( 0== callback(root->node,-1)){
+        if( 0== callback(root->node,-1,deep-1)){
             return 0;
         }
     }
     p = root->child;
     for(k=0;k<root->child_num;k++){
 //printf(">>>>start print child this id = %d \n",root->id);
-        if(0 == mNewTravel(p,callback)){
+        if(0 == mNewTravel(p,callback,deep+1)){
             return 0;
         }
         p = p->next_Sibling;
@@ -316,14 +316,16 @@ int mNewTravel(pTreeNode root,pfunCallBackForNode callback){
     return 1;
 }
 
-int TreeNodePrint(pNodeData node,int faterid){
+int TreeNodePrint(pNodeData node,int faterid,int deep){
     pPCNodeInfo info = (pPCNodeInfo)node;
-    Printf_OK("====Father id is %d,id = %d,pcname = %s",faterid,info->id,info->PCName);
+    Printf_OK("====Father(%d) node[%d:%s] deep(%d)",faterid,
+            info->id,info->PCName,
+            deep);
     return 1;
 }
 
 int Tree_Print(pTreeManager head){
-    mNewTravel(head->root,TreeNodePrint);
+    mNewTravel(head->root,TreeNodePrint,1);
     return 1;
 }
 
