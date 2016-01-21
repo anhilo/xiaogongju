@@ -14,7 +14,7 @@ int startWith(char *str1,char *);
 int readline(char *desbuf,char stopchar,int maxlen);
 
 int main(){
-    CC_Agent_Init(1,"This node is Admin",IAM_ADMIN_NODE);
+    CC_Agent_Init(PCTYPE_GetMyType(),"This node is Admin",IAM_ADMIN_NODE);
     CC_Agent_Connect(0,remoteip,remoteport);
     whileMain();
     return 0;
@@ -47,7 +47,7 @@ int whileMain(){
             CC_Agent_StartShell(agentnow,shellport,200,10000);
         }
         else if(startWith(line,"show")){
-            PCMANAGER_Tree_Print();
+            CC_Agent_ShowMap();
         }
         else if(startWith(line,"lcxtran")){
             int lcxport;

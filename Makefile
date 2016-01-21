@@ -2,6 +2,7 @@ object_lib = baselib/BaseAPI.c \
 			baselib/GlobalFunctions.c \
 			baselib/ListNodeCTRL.c \
 			baselib/TreeNodeCTRL.c \
+			baselib/PCType.c \
 			sockslib/SocksBase.c \
 			sockslib/Sock_Tunnel.c
 

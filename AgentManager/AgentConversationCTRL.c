@@ -58,3 +58,8 @@ pPCConn AGENT_Conversation_Build_SockTunnel(int targetid){
 int AGENT_Conversation_GetID(){
     return PCMANAGER_Get_RootID();
 }
+
+int AGENT_Conversation_ShowMap(){
+    PCMANAGER_Tree_Print();
+    return AGENT_CONVERSATION_SHOWMAP_OK;
+}

@@ -6,12 +6,6 @@
 #define NODETYPE_ADMIN_NODE  1
 #define NODETYPE_NORMAL_NODE 2
 
-#define OSTYPE_LINUX_OS       1
-#define OSTYPE_ARMLINUX_OS    2
-#define OSTYPE_WINDOW_OS      3
-#define OSTYPE_MACOSX_OS      4
-#define OSTYPE_UNKNOW_OS      5
-
 
 #define CC_AGENT_INIT_ERROR   -1
 #define CC_AGENT_INIT_OK       1
@@ -40,5 +34,9 @@ int CC_Agent_LcxTran(int target,int lport,char *rip,int rport,int usec);
 #define CC_AGENT_STARTSOCKS_ERROR  -1
 #define CC_AGENT_STARTSOCKS_OK      1
 int CC_Agent_StartSocks(int target,int lport,int usec);
+
+#define CC_AGENT_SHOWMAP_ERROR     -1
+#define CC_AGENT_SHOWMAP_OK         1
+int CC_Agent_ShowMap();
 
 #endif

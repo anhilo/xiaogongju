@@ -26,4 +26,8 @@ pPCConn AGENT_Conversation_Build_SockTunnel(int targetid);
 #define AGENT_CONVERSATION_GETID_ERROR  -1
 int AGENT_Conversation_GetID();
 
+#define AGENT_CONVERSATION_SHOWMAP_ERROR -1
+#define AGENT_CONVERSATION_SHOWMAP_OK     1
+int AGENT_Conversation_ShowMap();
+
 #endif

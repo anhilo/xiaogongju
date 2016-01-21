@@ -6,6 +6,7 @@
 */
 #include "CC_AgentConn.h"
 #include "CCProxy.h"
+#include "../AgentManager/AgentConversationCTRL.h"
 
 int CC_Agent_Init(int ostype,char *pcname,int node_type){
     int res = CCProxy_Init(ostype,pcname,node_type);
@@ -62,4 +63,12 @@ int CC_Agent_StartSocks(int target,int lport,int usec){
         return CC_AGENT_STARTSOCKS_ERROR;
     }
     return CC_AGENT_STARTSOCKS_OK;
+}
+
+int CC_Agent_ShowMap(){
+    int res = AGENT_Conversation_ShowMap();
+    if(AGENT_CONVERSATION_SHOWMAP_ERROR == res ){
+        return CC_AGENT_SHOWMAP_ERROR;
+    }
+    return CC_AGENT_SHOWMAP_OK;
 }

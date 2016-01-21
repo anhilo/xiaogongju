@@ -318,10 +318,25 @@ int mNewTravel(pTreeNode root,pfunCallBackForNode callback,int deep){
 
 int TreeNodePrint(pNodeData node,int faterid,int deep){
     pPCNodeInfo info = (pPCNodeInfo)node;
-    Printf_OK("====Father(%d) node[%d:%s] deep(%d)",faterid,
-            info->id,info->PCName,
-            deep);
+    int i=0;
+    for(i=0;i<deep-1;i++){
+        Printf(" |  ");
+    }
+    if(deep>0){
+        Printf(" +--");
+    }
+    MyPrintf("%2d%c",info->id,PCTYPE_GetNodeFirstByte(info->OSType));
     return 1;
+    
+//    else if(deep == 1){
+//
+//        MyPrintf(" +--%2d"
+//    }
+//
+//    Printf_OK("====Father(%d) node[%d:%s] deep(%d)",faterid,
+//            info->id,info->PCName,
+//            deep);
+//    return 1;
 }
 
 int Tree_Print(pTreeManager head){

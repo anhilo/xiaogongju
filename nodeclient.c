@@ -66,7 +66,7 @@ int main(int argc,char *argv[]){
     char c;
     int index;
     API_env_init();
-    AGENT_Conversation_Init(10,"This Client Node",MYSELF_NODE);
+    AGENT_Conversation_Init(PCTYPE_GetMyType(),"This Client Node",MYSELF_NODE);
 //    AGENT_Conversation_Connect("127.0.0.1",8888);
 
     if(argc == 1){ 

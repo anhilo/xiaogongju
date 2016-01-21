@@ -34,6 +34,7 @@ typedef pNodeData  (*pfunNodeCopy)( pNodeData );
 #include "baselib/GlobalFunctions.h"
 #include "baselib/ListNodeCTRL.h"
 #include "baselib/TreeNodeCTRL.h"
+#include "baselib/PCType.h"
 // end my headers
 #include "sockslib/Sock_Tunnel.h"
 
@@ -74,6 +75,8 @@ typedef pNodeData  (*pfunNodeCopy)( pNodeData );
 
 #define MyPrintf(...) \
         (printf(__VA_ARGS__),printf("\n"))
+#define Printf(...) \
+        (printf(__VA_ARGS__))
 
 
 #define MAX_POOL       1000
