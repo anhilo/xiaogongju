@@ -12,6 +12,7 @@ int  remoteport = 8888;
 int whileMain();
 int startWith(char *str1,char *);
 int readline(char *desbuf,char stopchar,int maxlen);
+int help();
 
 int main(){
     CC_Agent_Init(PCTYPE_GetMyType(),"This node is Admin",IAM_ADMIN_NODE);
@@ -35,19 +36,37 @@ int whileMain(){
             sscanf(line,"sendmsg %s",msgbesend);
             CC_Agent_SendMsg(agentnow,msgbesend,strlen(msgbesend));
         }
+        else if(startWith(line,"help")){
+            help();
+        }
+        else if(startWith(line,"show")){
+            CC_Agent_ShowMap();
+        }
         else if(startWith(line,"goto")){
             sscanf(line,"goto %d",&agentnow);
             Printf_OK("Current be contral ID is %d",agentnow);
         }
-        else if(startWith(line,"shell")){
-            int shellport;
-            sscanf(line,"shell %d",&shellport);
-            Printf_OK("band %d's shell on %d locol port.",agentnow,shellport);
-            
-            CC_Agent_StartShell(agentnow,shellport,200,10000);
+        else if(startWith(line,"listen")){
+            Printf_OK("target agent listen new port here");
+            Printf_OK("%s",line);
+            sscanf(line,"listen %d",&remoteport);
+            CC_Agent_Listen(agentnow,remoteport,30);
         }
-        else if(startWith(line,"show")){
-            CC_Agent_ShowMap();
+        else if(startWith(line,"connect")){
+            Printf_OK("target agent connect new agent");
+            sprintf(inputformat,"connect %s%ds %s","%",MAX_IP_ADDR_LEN,"%d");
+            sscanf(line,inputformat,remoteip,&remoteport);
+            Printf_OK("remote ip   :%s\n",remoteip);
+            Printf_OK("remote port :%d\n",remoteport);
+            CC_Agent_Connect(agentnow,remoteip,remoteport);
+        }
+        else if(startWith(line,"socks")){
+            Printf_OK("Start socks server from target agent");
+            int socksport;
+            sscanf(line,"socks %d",&socksport);
+            Printf_OK("Start Socks from %d port,Server Agent is %d",
+                socksport,agentnow);
+            CC_Agent_StartSocks(agentnow,socksport,10000);
         }
         else if(startWith(line,"lcxtran")){
             int lcxport;
@@ -61,29 +80,12 @@ int whileMain(){
             Printf_OK("remote port :%d\n",rport);
             CC_Agent_LcxTran(agentnow,lcxport,rip,rport,10000);
         }
-        else if(startWith(line,"connect")){
-            Printf_OK("target agent connect new agent");
-//            Printf_OK(line);
-            sprintf(inputformat,"connect %s%ds %s","%",MAX_IP_ADDR_LEN,"%d");
-//            Printf_OK(inputformat,"HelloWorld");
-            sscanf(line,inputformat,remoteip,&remoteport);
-            Printf_OK("remote ip   :%s\n",remoteip);
-            Printf_OK("remote port :%d\n",remoteport);
-            CC_Agent_Connect(agentnow,remoteip,remoteport);
-        }
-        else if(startWith(line,"listen")){
-            Printf_OK("target agent listen new port here");
-            Printf_OK("%s",line);
-            sscanf(line,"listen %d",&remoteport);
-            CC_Agent_Listen(agentnow,remoteport,30);
-        }
-        else if(startWith(line,"socks")){
-            Printf_OK("Start socks server from target agent");
-            int socksport;
-            sscanf(line,"socks %d",&socksport);
-            Printf_OK("Start Socks from %d port,Server Agent is %d",
-                socksport,agentnow);
-            CC_Agent_StartSocks(agentnow,socksport,10000);
+        else if(startWith(line,"shell")){
+            int shellport;
+            sscanf(line,"shell %d",&shellport);
+            Printf_OK("band %d's shell on %d locol port.",agentnow,shellport);
+            
+            CC_Agent_StartShell(agentnow,shellport,200,10000);
         }
         else{
             Printf_OK("unknow cmd");
@@ -93,6 +95,30 @@ int whileMain(){
         readline(line,'\n',MAX_READLINE_LEN);
     }
     return 1;
+}
+
+int help(){
+    MyPrintf("**************************************************************************");
+    MyPrintf("                          BASE COMMAND");
+    MyPrintf(" ------------------------------------------------------------------------     ");
+    MyPrintf(" %-35s %s","0. help","This help text.");
+    MyPrintf(" %-35s %s","1. show","Display agent map.");
+    MyPrintf("==========================================================================");
+    MyPrintf("                          AGENT CONTROL");
+    MyPrintf(" ------------------------------------------------------------------------     ");
+    MyPrintf(" %-35s %s","2. goto     [id]",       "Select id as target agent.");
+    MyPrintf(" %-35s %s","3. listen   [port]",     "Start server port on target agent.");
+    MyPrintf(" %-35s %s","4. connect  [ip] [port]","Connect new agent from target agent.");
+    MyPrintf("==========================================================================");
+    MyPrintf(" START A SERVER ON TARGET AGENT,THEN BIND IT WITH LOCAL PORT");
+    MyPrintf(" ------------------------------------------------------------------------     ");
+    MyPrintf(" %-35s %s","5. socks    [lport]",    "Start a socks server.");
+    MyPrintf(" %-35s %s","6. lcxtran  [lport] [rhost] [rport]","Build a tunnel with remote host.");
+    MyPrintf(" %-35s %s","7. shell    [lport]","Start a shell server.");
+//    MyPrintf(" %-35s %s","8. upfile   [from_file] [to_file]","Upload file from local host.");
+//    MyPrintf(" %-35s %s","9. downfile [from_file] [to_file]","Download file from target agent.");
+    MyPrintf("**************************************************************************");
+    return 0;
 }
 
 int readline(char *desbuf,char stopchar,int maxlen){
