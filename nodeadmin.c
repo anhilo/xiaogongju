@@ -1,6 +1,7 @@
 #include "generic.h"
 #include "ControlCore/CC_AgentConn.h"
 #include "AgentManager/PCNodeInfo.h"
+#include "global_lib.h"
 
 ///////////////////////////////////////////////////////////
 #define MAX_READLINE_LEN  300
@@ -8,15 +9,64 @@ int agentnow = 0;
 char remoteip[MAX_IP_ADDR_LEN] = "127.0.0.1";
 int  remoteport = 8888;
 ///////////////////////////////////////////////////////////
+const char *optstring="c:p:hvaq";
+struct option opts[]={
+    {"tohost" , required_argument, NULL,'c'},
+    {"toport" , required_argument, NULL,'p'},
+    {"help"   , required_argument, NULL,'h'},
+    {"version", required_argument, NULL,'v'},
+    {"about"  , required_argument, NULL,'a'},
+    {"qu"     , required_argument, NULL,'q'},
+    {0,0,0,0}
+};
 
 int whileMain();
 int startWith(char *str1,char *);
 int readline(char *desbuf,char stopchar,int maxlen);
 int help();
+int arghelp();
 
-int main(){
+int main(int argc,char *argv[]){
+    char c;
+    int index; 
     CC_Agent_Init(PCTYPE_GetMyType(),"This node is Admin",IAM_ADMIN_NODE);
-    CC_Agent_Connect(0,remoteip,remoteport);
+    if(argc == 1){
+        arghelp();
+        return 0;
+    } 
+    while((c=getopt_long(argc,argv,optstring,opts,&index))!=-1){
+        switch (c){
+            case 'c':
+                strncpy(remoteip,optarg,MAX_IP_ADDR_LEN);
+                break;
+            case 'p':
+                remoteport = atoi(optarg);
+                break;
+            case 'h':
+                arghelp();
+                exit(1);
+            case 'a':
+                about_fun();
+                break;
+            case 'v':
+                version_fun();
+                break;
+            case 'q':
+                qu_fun();
+                break;
+            case '?':
+                Printf_Error(" arg is unknown");
+                arghelp();
+                break;
+            default:
+                Printf_OK("c is %c",c);
+                break;
+        }
+    }
+    if ( CC_AGENT_CONNECT_ERROR == 
+        CC_Agent_Connect(0,remoteip,remoteport)){
+        return 1;
+    }
     whileMain();
     return 0;
 }
@@ -154,5 +204,21 @@ int startWith(char *string,char *startString){
             return 0;
         }
     }
+    return 1;
+}
+
+int arghelp(){
+    MyPrintf("");
+    MyPrintf("VERSION : %s",CURRENT_VERSION);
+    MyPrintf("Eg: ");
+    MyPrintf("\t$ ./xxx -h");
+    MyPrintf("\t$ ./xxx -c [rhost] -p [rport]");
+    MyPrintf("---------");
+    MyPrintf("options :");
+    MyPrintf("%4s %-8s %s","-c","tohost","Remote host address.");
+    MyPrintf("%4s %-8s %s","-p","toport","The port on remote host.");
+    MyPrintf("%4s %-8s %s","-h","help","This help page.");
+    MyPrintf("%4s %-8s %s","-v","version","Show the version.");
+    MyPrintf("%4s %-8s %s","-a","about","Show the about text.");
     return 1;
 }

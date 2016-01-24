@@ -16,7 +16,6 @@ int AGENT_Conversation_Init(int ostype,char *pcname,int agent_type){
     if(m_self == NULL){
         return AGENT_CONVERSATION_INIT_ERROR;
     }
-Printf_DEBUG("agent_type = %d",agent_type);
     int res = PCNODE_SETAllData(
         m_self,     // node
         mid,        // id

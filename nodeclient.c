@@ -3,8 +3,8 @@
 #include "AgentManager/AgentConversationCTRL.h"
 #include "AgentManager/PCNodeManager.h"
 #include "ControlCore/CC_AgentConn.h"
+#include "global_lib.h"
 
-#define VERSION_STR   "Alpha 2.0"
 /////////////////////////////////////////////////////
 #define MODE_UNKNOWN   0
 #define MODE_SERVER    1 << 1
@@ -12,7 +12,7 @@
 #define NEEDHELP       1 << 3
 #define ABOUT_NOW      1 << 4
 #define VERSION        1 << 5
-#define FUNNY_FLAG     1 << 4
+#define FUNNY_FLAG     1 << 6
 
 #define NOVALUESET     0
 #define IP_BESETED     1 << 1
@@ -32,7 +32,7 @@ struct option opts[]={
     {"toport" , required_argument, NULL,'p'},
     {"help"   , required_argument, NULL,'h'},
     {"version", required_argument, NULL,'v'},
-    {"aboutme", required_argument, NULL,'a'},
+    {"about"  , required_argument, NULL,'a'},
     {"qu"     , required_argument, NULL,'q'},
     {0,0,0,0}
 };
@@ -43,24 +43,28 @@ int realDo();
 int about_fun();
 
 int mainDo(){
+    int flag = 0;
     if(HAS_STATE(nodestate,ABOUT_NOW)){
         about_fun();
+        flag = 1;
     }
     if(HAS_STATE(nodestate,VERSION)){
-        MyPrintf("\nVERSION : %s \n",VERSION_STR);
+        version_fun();
+        flag = 1;
     }
     if(HAS_STATE(nodestate,FUNNY_FLAG) ){
         qu_fun();
+        flag = 1;
     }
     if( HAS_STATE(nodestate,NEEDHELP) ){
         help();
+        flag = 1;
     }
-    else{
+    if(flag != 1){
         realDo();
     }
     return 0;
 }
-
 
 int main(int argc,char *argv[]){
     char c;
@@ -112,8 +116,6 @@ int main(int argc,char *argv[]){
     return 0;
 }
 
-
-
 int realDo(){
     Printf_OK(" ip is %s",host);
     Printf_OK(" port is %d",port);
@@ -140,18 +142,21 @@ int realDo(){
     return 1;
 }
 
-int qu_fun(){
-    MyPrintf("This is qu function");
-    return 1;
-}
-
-int about_fun(){
-    MyPrintf("This is about page");
-    return 1;
-}
-
 int help(){
-    MyPrintf("This is help page");
+    MyPrintf("");
+    MyPrintf("VERSION : %s",CURRENT_VERSION);
+    MyPrintf("Eg: ");
+    MyPrintf("\t$ ./xxx -h");
+    MyPrintf("\t$ ./xxx -l [lport]");
+    MyPrintf("\t$ ./xxx -c [rhost] -p [rport]");
+    MyPrintf("---------");
+    MyPrintf("options :");
+    MyPrintf("%4s %-8s %s","-l","listen","Listen a local port.");
+    MyPrintf("%4s %-8s %s","-c","tohost","Remote host address.");
+    MyPrintf("%4s %-8s %s","-p","toport","The port on remote host.");
+    MyPrintf("%4s %-8s %s","-h","help","This help page.");
+    MyPrintf("%4s %-8s %s","-v","version","Show the version.");
+    MyPrintf("%4s %-8s %s","-a","about","Show the about text.");
     return 1;
 }
 

@@ -4,7 +4,7 @@ object_lib = baselib/BaseAPI.c \
 			baselib/TreeNodeCTRL.c \
 			baselib/PCType.c \
 			sockslib/SocksBase.c \
-			sockslib/Sock_Tunnel.c
+			sockslib/Sock_Tunnel.c 
 
 AgentLib   =  \
 			AgentManager/AgentChildSync.c \
@@ -32,8 +32,8 @@ AgentLib   =  \
 
           
 
-node_admin  = nodeadmin.c
-node_client = nodeclient.c
+node_admin  = nodeadmin.c global_lib.c
+node_client = nodeclient.c global_lib.c
 node_server = nodeserver.c
 node_test   = nodetest.c
 

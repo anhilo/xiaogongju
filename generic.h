@@ -84,5 +84,6 @@ typedef pNodeData  (*pfunNodeCopy)( pNodeData );
 #define False             0
 #define TUNMAX_BUF    10000
 
+#define CURRENT_VERSION  "Alpha 2.0"
 
 #endif // _GENERIC_H_

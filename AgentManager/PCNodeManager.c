@@ -38,8 +38,6 @@ int PCMANAGER_INIT(pPCNodeInfo nodeself){
     root_id = rootnode -> id;
     tree_now = NO_MANAGER;
     maxid = rootnode->id;
-Printf_DEBUG("rootid = %d ",
-        root_id);
 /// start build Tree and list
     tree = Tree_Init_Manager(NULL,
         fun_pcInfo_free,
