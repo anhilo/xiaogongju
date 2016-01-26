@@ -3,6 +3,7 @@ object_lib = baselib/BaseAPI.c \
 			baselib/ListNodeCTRL.c \
 			baselib/TreeNodeCTRL.c \
 			baselib/PCType.c \
+			baselib/File_Base_API.c \
 			sockslib/SocksBase.c \
 			sockslib/Sock_Tunnel.c 
 
@@ -27,6 +28,7 @@ AgentLib   =  \
 			ControlCore/CC_Agent_Socks_module.c \
 			ControlCore/CC_Msg_module.c \
 			ControlCore/CC_LcxCtrl.c  \
+			ControlCore/CC_File_Ctrl.c  \
 			ControlCore/Cmd_Ctrl.c 
 
 

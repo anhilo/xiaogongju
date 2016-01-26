@@ -13,6 +13,7 @@ int CC_Agent_Init(int ostype,char *pcname,int node_type){
     if(CCPROXY_INIT_ERROR == res){
         return CC_AGENT_INIT_ERROR;
     }
+    API_Init_File_ENV();
     return CC_AGENT_INIT_OK;
 }
 
@@ -71,4 +72,12 @@ int CC_Agent_ShowMap(){
         return CC_AGENT_SHOWMAP_ERROR;
     }
     return CC_AGENT_SHOWMAP_OK;
+}
+
+int CC_Agent_Upfile(int target,char *from_lfile,char *to_rfile){
+    int res = CCPROXY_Upfile(target,from_lfile,to_rfile);
+    if(CCPROXY_UPFILE_ERROR == res){
+        return  CC_AGENT_UPFILE_ERROR;
+    }
+    return CC_AGENT_UPFILE_OK;
 }

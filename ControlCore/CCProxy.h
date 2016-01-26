@@ -44,6 +44,12 @@ int CCProxy_LcxTran(int targetid,int lport,char *rip,int rport,int usec);
 #define CCPROXY_STARTSOCKS_OK      1
 int CCProxy_StartSocks(int targetid,int lport,int usec);
 
+
+#define CCPROXY_UPFILE_ERROR      -1
+#define CCPROXY_UPFILE_OK          1
+int CCPROXY_Upfile(int target,char *from_lfile,char *to_rfile);
+
+
 #endif
 
 

@@ -35,6 +35,7 @@ typedef pNodeData  (*pfunNodeCopy)( pNodeData );
 #include "baselib/ListNodeCTRL.h"
 #include "baselib/TreeNodeCTRL.h"
 #include "baselib/PCType.h"
+#include "baselib/File_Base_API.h"
 // end my headers
 #include "sockslib/Sock_Tunnel.h"
 

@@ -35,6 +35,10 @@ int CC_Agent_LcxTran(int target,int lport,char *rip,int rport,int usec);
 #define CC_AGENT_STARTSOCKS_OK      1
 int CC_Agent_StartSocks(int target,int lport,int usec);
 
+#define CC_AGENT_UPFILE_ERROR      -1
+#define CC_AGENT_UPFILE_OK          1
+int CC_Agent_Upfile(int target,char *from_lfile,char *to_rfile);
+
 #define CC_AGENT_SHOWMAP_ERROR     -1
 #define CC_AGENT_SHOWMAP_OK         1
 int CC_Agent_ShowMap();

