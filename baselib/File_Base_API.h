@@ -5,7 +5,7 @@
 
 #define MAX_FILE_POOL_NUM          100
 #define MAX_FILE_NAME_LEN          512
-#define MAX_READ_LEN               1
+#define MAX_READ_LEN               1000
 
 #define FILE_BUSY_STATE              1
 #define FILE_NOT_BUSY_STATE          0

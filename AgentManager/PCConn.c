@@ -102,19 +102,19 @@ int PCCONN_SendData(pPCConn conn,char *data,int datalen){
 
 int PCCONN_RecvData(pPCConn conn,char *data,int maxlen){
     int nrecv;
-    char cmdbuff[MAX_PROTO_BUFLEN];
+//    char cmdbuff[MAX_PROTO_BUFLEN];
     if( conn == NULL ){
         return PCCONN_RECVDATA_ERROR;
     }
 MIC_USLEEP(10);
-    nrecv = API_socket_recv(conn->cmd_socket,cmdbuff,maxlen);
+    nrecv = API_socket_recv(conn->cmd_socket,data,maxlen);
     if(nrecv == 0){ return PCCONN_RECVDATA_ERROR; }
     if(nrecv > maxlen){
         Printf_Error("nrecv (%d) > maxlen (%d)",
             nrecv,maxlen);
         return PCCONN_RECVDATA_ERROR;
     }
-    memcpy(data,cmdbuff,maxlen);
+//    memcpy(data,cmdbuff,nrecv);
     return nrecv;
 }
 
