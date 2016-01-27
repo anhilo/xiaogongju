@@ -15,6 +15,7 @@ int CC_onFile_upload(pPCConn conn);
 #define CC_FILE_DOWNFILE_OK     1
 int CC_FILE_Downfile(int targetid,char *from_rfile,char *to_lfile);
 
+#define CC_ONFILE_DOWNFILE_ERROR 0
 int CC_onFile_Downfile(pPCConn conn);
 
 #endif

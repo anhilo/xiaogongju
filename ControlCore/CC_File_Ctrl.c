@@ -91,3 +91,56 @@ int CC_onFile_upload(pPCConn conn){
     API_File_Close(filenum);
     return 1;
 }
+
+int CC_FILE_Downfile(int targetid,char *from_rfile,char *to_lfile){ 
+    char data[MAX_FILE_READ_LEN];
+    int recvcmd;
+    if(MAX_FILE_NAME_LEN < strlen(from_rfile)
+        || MAX_FILE_NAME_LEN < strlen(to_lfile)){
+        return CC_FILE_DOWNFILE_ERROR;
+    }
+    int wfile = API_File_Write_Open(to_lfile);
+    if( FILE_OPEN_ERROR == wfile){
+        return CC_FILE_DOWNFILE_ERROR;
+    }
+    pPCConn conn = CMDCTRL_BuildTargetSock(targetid,
+        AGENT_SERVER_COMMAND_DOWNFILE);
+    // send file name
+    PCCONN_SendData(conn,from_rfile,MAX_FILE_NAME_LEN);
+    // recv file data
+    recvcmd = m_pconn_recvInt(conn);
+    while( FILE_CONTINUE == recvcmd ){
+        int datalen=m_pconn_recvInt(conn);
+        PCCONN_RecvData(conn,data,datalen);
+        API_File_Write(wfile,data,datalen);
+        recvcmd = m_pconn_recvInt(conn);
+    }
+    API_File_Close(wfile);
+    return CC_FILE_DOWNFILE_OK;
+}
+
+
+int CC_onFile_Downfile(pPCConn conn){
+    char data[MAX_FILE_READ_LEN];
+    char from_rfile[MAX_FILE_NAME_LEN];
+    if( conn == NULL){
+        return CC_ONFILE_DOWNFILE_ERROR;
+    }
+    PCCONN_RecvData(conn,from_rfile,MAX_FILE_NAME_LEN);
+    int rfile = API_File_Read_Open(from_rfile);
+    if ( FILE_OPEN_ERROR == rfile ){
+        return CC_ONFILE_DOWNFILE_ERROR;
+    }
+    
+    int read_size = API_File_Read(rfile,data,MAX_FILE_READ_LEN);
+    while(FILE_READ_END != read_size){
+        m_pconn_sendInt(conn,FILE_CONTINUE);
+        m_pconn_sendInt(conn,read_size);
+        PCCONN_SendData(conn,data,read_size);
+        read_size = API_File_Read(rfile,data,MAX_FILE_READ_LEN);
+    }
+    //  send file end
+    m_pconn_sendInt(conn,FILE_TRANS_END);
+    API_File_Close(rfile);
+    return CC_FILE_UPLOAD_OK;
+}

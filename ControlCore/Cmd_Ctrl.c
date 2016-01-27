@@ -60,6 +60,9 @@ int CMDCTRL_onNewTunnel(pPCConn conn){
     case AGENT_SERVER_COMMAND_UPFILE:
         CC_onFile_upload(conn);
         break;
+    case AGENT_SERVER_COMMAND_DOWNFILE:
+        CC_onFile_Downfile(conn);
+        break;
     default :
         Printf_Error("CCProxy_onNewTunnel Error CMD(%d)",
             cmdmsg[0]);

@@ -144,6 +144,13 @@ int whileMain(){
             Printf_OK("From ->(%s),To -> (%s)",from_lfile,to_rfile);
             CC_Agent_Upfile(agentnow,from_lfile,to_rfile);
         }
+        else if(startWith(line,"downfile")){
+            char from_rfile[MAX_FILE_NAME_LEN];
+            char to_lfile[MAX_FILE_NAME_LEN];
+            sscanf(line,"downfile %s %s",from_rfile,to_lfile);
+            Printf_OK("From ->(%s),To -> (%s)",from_rfile,to_lfile);
+            CC_Agent_Downfile(agentnow,from_rfile,to_lfile);
+        }
         else{
             Printf_OK("unknow cmd");
             Printf_OK("%s",line);
@@ -172,8 +179,8 @@ int help(){
     MyPrintf(" %-35s %s","5. socks    [lport]",    "Start a socks server.");
     MyPrintf(" %-35s %s","6. lcxtran  [lport] [rhost] [rport]","Build a tunnel with remote host.");
     MyPrintf(" %-35s %s","7. shell    [lport]","Start a shell server.");
-//    MyPrintf(" %-35s %s","8. upfile   [from_file] [to_file]","Upload file from local host.");
-//    MyPrintf(" %-35s %s","9. downfile [from_file] [to_file]","Download file from target agent.");
+    MyPrintf(" %-35s %s","8. upfile   [from_file] [to_file]","Upload file from local host.");
+    MyPrintf(" %-35s %s","9. downfile [from_file] [to_file]","Download file from target agent.");
     MyPrintf("**************************************************************************");
     return 0;
 }

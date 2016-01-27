@@ -39,6 +39,10 @@ int CC_Agent_StartSocks(int target,int lport,int usec);
 #define CC_AGENT_UPFILE_OK          1
 int CC_Agent_Upfile(int target,char *from_lfile,char *to_rfile);
 
+#define CC_AGENT_DOWNFILE_ERROR    -1
+#define CC_AGENT_DOWNFILE_OK        1
+int CC_Agent_Downfile(int target,char *from_rfile,char *to_lfile);
+
 #define CC_AGENT_SHOWMAP_ERROR     -1
 #define CC_AGENT_SHOWMAP_OK         1
 int CC_Agent_ShowMap();

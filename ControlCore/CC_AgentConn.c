@@ -81,3 +81,11 @@ int CC_Agent_Upfile(int target,char *from_lfile,char *to_rfile){
     }
     return CC_AGENT_UPFILE_OK;
 }
+
+int CC_Agent_Downfile(int target,char *from_rfile,char *to_lfile){
+    int res = CCPROXY_Downfile(target,from_rfile,to_lfile);
+    if ( CCPROXY_DOWNFILE_ERROR == res ){
+        return CC_AGENT_DOWNFILE_ERROR;
+    }
+    return CC_AGENT_DOWNFILE_OK;
+}

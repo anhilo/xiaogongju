@@ -49,6 +49,9 @@ int CCProxy_StartSocks(int targetid,int lport,int usec);
 #define CCPROXY_UPFILE_OK          1
 int CCPROXY_Upfile(int target,char *from_lfile,char *to_rfile);
 
+#define CCPROXY_DOWNFILE_ERROR    -1
+#define CCPROXY_DOWNFILE_OK        1
+int CCPROXY_Downfile(int target,char *from_rfile,char *to_lfile);
 
 #endif
 

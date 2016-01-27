@@ -208,3 +208,11 @@ int CCPROXY_Upfile(int target,char *from_lfile,char *to_rfile){
     }
     return CCPROXY_UPFILE_OK;
 }
+
+int CCPROXY_Downfile(int target,char *from_rfile,char *to_lfile){
+    int res = CC_FILE_Downfile(target,from_rfile,to_lfile);
+    if ( CC_FILE_DOWNFILE_ERROR == res ){
+        return CCPROXY_DOWNFILE_ERROR;
+    }
+    return CCPROXY_DOWNFILE_OK;
+}
