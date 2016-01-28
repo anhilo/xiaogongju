@@ -143,8 +143,7 @@ int realDo(){
 }
 
 int help(){
-    MyPrintf("");
-    MyPrintf("VERSION : %s",CURRENT_VERSION);
+    MyPrintf("\nVERSION : %s",CURRENT_VERSION);
     MyPrintf("Eg: ");
     MyPrintf("\t$ ./xxx -h");
     MyPrintf("\t$ ./xxx -l [lport]");

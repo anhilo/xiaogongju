@@ -17,7 +17,6 @@ int about_fun(){
 }
 
 int version_fun(){
-    MyPrintf("");
-    MyPrintf("VERSION : %s",CURRENT_VERSION);
+    MyPrintf("\nVERSION : %s",CURRENT_VERSION);
     return 1;
 }

@@ -222,8 +222,7 @@ int startWith(char *string,char *startString){
 }
 
 int arghelp(){
-    MyPrintf("");
-    MyPrintf("VERSION : %s",CURRENT_VERSION);
+    MyPrintf("\nVERSION : %s",CURRENT_VERSION);
     MyPrintf("Eg: ");
     MyPrintf("\t$ ./xxx -h");
     MyPrintf("\t$ ./xxx -c [rhost] -p [rport]");
