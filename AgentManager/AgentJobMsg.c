@@ -91,15 +91,6 @@ int JOB_SetJOBState(pJobList list,int jobid,
 int JOB_CloseJob(pJobList list,int jobid,
         char *jobResult){
     if(list == NULL || list->joblist == NULL){
-        if(list == NULL){
-            Printf_DEBUG("list is NULL ~~~~");
-        }
-        else if(list->joblist == NULL){
-            Printf_DEBUG("joblist is NULL ~~~~");
-        }
-        else{
-            Printf_DEBUG("sth is NULL ~~~~");
-        }
         return JOB_CLOSEJOB_ERROR;
     }
     memcpy(((list->joblist)[jobid]).jobresult,

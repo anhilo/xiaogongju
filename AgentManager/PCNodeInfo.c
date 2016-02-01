@@ -54,7 +54,6 @@ int PCNODE_SETAllData(
 
 void PCNODE_Free(pPCNodeInfo node){
     if( node == NULL ){
-        Printf_DEBUG("PCNODE_FREE node is null");
         return ;
     }
     free(node);

@@ -332,7 +332,6 @@ int API_socket_server_start(int socks_server,Server_CallBack_Fun fun,char *funar
     info -> socket_server = socks_server;
     info -> function      = fun;
     info -> funarg        = funarg;
-Printf_DEBUG("create thread ??? ");
     if(MIC_THREAD_CREATE(thread_id,StartServerFunction,info)< 0){
         Printf_Error("Start Server Error");
         return API_SOCKET_SERVER_START_ERROR;

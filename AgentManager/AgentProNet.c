@@ -96,9 +96,7 @@ int PROTO_SendPCNodeInfo(pPCConn conn,pPCNodeInfo info){
         -1,-1);              // 无须设置消息来回
     PROTO_SetArgs(proto,
         0,"");
-Printf_DEBUG("111111111111111");
     PROTO_SendProto(conn,proto);
-Printf_DEBUG("222222222222222");
     return 1;
 }
 
@@ -111,15 +109,13 @@ pPCNodeInfo PROTO_AnalysisPCNodeInfo(pPCConn conn,pAgent_proto proto){
     char pcname [MAX_PCNAME_LEN];
     int id,ostype,nodetype,namelen;
     
-Printf_DEBUG("PROTO_AnalysisPCNodeInfo()");
     if( proto == PROTO_CREATEPROTO_ERROR 
         || info == NULL){
         return PROTO_ANALYSISPCNODEINFO_ERROR;
     }
-if(proto->cmdargs == NULL){
-    Printf_DEBUG("NULLL?      arglen = %d ",proto->argLen);
-    Printf_DEBUG("NULLL????????");
-}
+    if(proto->cmdargs == NULL){
+        return PROTO_ANALYSISPCNODEINFO_ERROR;
+    }
     cmdbuff = proto->cmdargs;
 //    memcpy(cmdbuff,proto->cmdargs,MAX_ARG_LEN);
     memcpy(idbuf      , &(cmdbuff[ 0]),4);

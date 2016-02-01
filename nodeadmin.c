@@ -90,6 +90,7 @@ int whileMain(){
             help();
         }
         else if(startWith(line,"show")){
+            MyPrintf(" >>>>>>>>>>>>> Current ID is %d <<<<<<<<<<<<< ",agentnow);
             CC_Agent_ShowMap();
         }
         else if(startWith(line,"goto")){

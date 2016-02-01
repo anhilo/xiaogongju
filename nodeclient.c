@@ -117,16 +117,11 @@ int main(int argc,char *argv[]){
 }
 
 int realDo(){
-    Printf_OK(" ip is %s",host);
-    Printf_OK(" port is %d",port);
-
     if(HAS_STATE(nodestate,MODE_SERVER)){
-        Printf_OK("Server State ...");
         Printf_OK("Listening --> 0.0.0.0:%d",port);
         CC_Agent_Listen(PCMANAGER_Get_RootID(),port,20);
     }
     else if(HAS_STATE(nodestate,MODE_CLIENT)){
-        Printf_OK("Client State");
         Printf_OK("Connect to --> %s:%d",host,port);
         CC_Agent_Connect(PCMANAGER_Get_RootID(),host,port);
     }
@@ -134,7 +129,6 @@ int realDo(){
         help();
         return 1;
     }
-    Printf_OK("******MY ID is %d",PCMANAGER_Get_RootID());
     MIC_SLEEP(10);
     while(1){
         MIC_SLEEP(10000);

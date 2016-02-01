@@ -12,8 +12,15 @@ typedef struct file_trans{
     int datalen;
 }FILE_CMD,*pFILE_CMD;
 
-#define FILE_CONTINUE   1
-#define FILE_TRANS_END  2
+#define FILE_MSG_OPEN_OK        1   // 远程开文件成功
+#define FILE_MSG_OPEN_ERROR     2   // 开文件失败
+#define FILE_MSG_ADD_DATA       3   // 向文件追加数据
+#define FILE_MSG_ADD_DATA_OK    4   // 向文件追加数据成功
+#define FILE_MSG_ADD_DATA_ERROR 5   // 向文件追加数据失败
+#define FILE_MSG_END_FILE       6   // 文件传输结束
+#define FILE_MSG_EXCPTION       7   // 异常消息
+
+
 
 int m_pconn_sendInt(pPCConn conn,int num){
     char intbuf[4];
@@ -52,16 +59,22 @@ int CC_FILE_Upload(int targetid,
         AGENT_SERVER_COMMAND_UPFILE);
     //  send file name 
     PCCONN_SendData(conn,to_rfile,MAX_FILE_NAME_LEN);
+    //  readOpenState
+    int remoteOpenState = m_pconn_recvInt(conn);
+    if(remoteOpenState == FILE_MSG_OPEN_ERROR){
+        Printf_Error("Open %s File Error",to_rfile);
+        return CC_FILE_UPLOAD_ERROR;
+    }
     //  send file data
     int read_size = API_File_Read(rfile,data,MAX_FILE_READ_LEN);
     while(FILE_READ_END != read_size){
-        m_pconn_sendInt(conn,FILE_CONTINUE);
+        m_pconn_sendInt(conn,FILE_MSG_ADD_DATA);
         m_pconn_sendInt(conn,read_size);
         PCCONN_SendData(conn,data,read_size);
         read_size = API_File_Read(rfile,data,MAX_FILE_READ_LEN);
     }
     //  send file end
-    m_pconn_sendInt(conn,FILE_TRANS_END);
+    m_pconn_sendInt(conn,FILE_MSG_END_FILE);
     API_File_Close(rfile);
     return CC_FILE_UPLOAD_OK;
 }
@@ -77,11 +90,12 @@ int CC_onFile_upload(pPCConn conn){
     PCCONN_RecvData(conn,tofile,MAX_FILE_NAME_LEN);
     filenum = API_File_Write_Open(tofile);
     if(filenum == FILE_OPEN_ERROR){
+        m_pconn_sendInt(conn,FILE_MSG_OPEN_ERROR);
         return 0;
     }
+    m_pconn_sendInt(conn,FILE_MSG_OPEN_OK);
     recvcmd = m_pconn_recvInt(conn);
-    while(recvcmd != FILE_TRANS_END){
-        Printf(".");
+    while(recvcmd != FILE_MSG_END_FILE){
         datalen=m_pconn_recvInt(conn);
         PCCONN_RecvData(conn,data,datalen);
         API_File_Write(filenum,data,datalen);
@@ -107,9 +121,14 @@ int CC_FILE_Downfile(int targetid,char *from_rfile,char *to_lfile){
         AGENT_SERVER_COMMAND_DOWNFILE);
     // send file name
     PCCONN_SendData(conn,from_rfile,MAX_FILE_NAME_LEN);
+    int remotestate=m_pconn_recvInt(conn);
+    if ( FILE_MSG_OPEN_ERROR == remotestate){
+        Printf_Error("Open %s File error",from_rfile);
+        return CC_FILE_DOWNFILE_ERROR;
+    }
     // recv file data
     recvcmd = m_pconn_recvInt(conn);
-    while( FILE_CONTINUE == recvcmd ){
+    while( FILE_MSG_ADD_DATA == recvcmd ){
         int datalen=m_pconn_recvInt(conn);
         PCCONN_RecvData(conn,data,datalen);
         API_File_Write(wfile,data,datalen);
@@ -129,18 +148,19 @@ int CC_onFile_Downfile(pPCConn conn){
     PCCONN_RecvData(conn,from_rfile,MAX_FILE_NAME_LEN);
     int rfile = API_File_Read_Open(from_rfile);
     if ( FILE_OPEN_ERROR == rfile ){
+        m_pconn_sendInt(conn,FILE_MSG_OPEN_ERROR);
         return CC_ONFILE_DOWNFILE_ERROR;
     }
-    
+    m_pconn_sendInt(conn,FILE_MSG_OPEN_OK);
     int read_size = API_File_Read(rfile,data,MAX_FILE_READ_LEN);
     while(FILE_READ_END != read_size){
-        m_pconn_sendInt(conn,FILE_CONTINUE);
+        m_pconn_sendInt(conn,FILE_MSG_ADD_DATA);
         m_pconn_sendInt(conn,read_size);
         PCCONN_SendData(conn,data,read_size);
         read_size = API_File_Read(rfile,data,MAX_FILE_READ_LEN);
     }
     //  send file end
-    m_pconn_sendInt(conn,FILE_TRANS_END);
+    m_pconn_sendInt(conn,FILE_MSG_END_FILE);
     API_File_Close(rfile);
     return CC_FILE_UPLOAD_OK;
 }

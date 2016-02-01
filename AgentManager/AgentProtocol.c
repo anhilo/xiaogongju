@@ -66,7 +66,6 @@ int PROTO_SetArgs (pAgent_proto proto,int arglen,char *cmdargs){
 
 int PROTO_FreeProto(pAgent_proto proto){
     if(proto == NULL){
-//        Printf_DEBUG("PROTO FREE proto is NULL");
         return PROTO_FREEPROTO_ERROR;
     }
     free(proto->cmdargs);

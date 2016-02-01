@@ -23,7 +23,6 @@ pPCConn m_getTargetConn(int targetid){
         return M_GETTARGETCONN_ERROR;
     }
     conn = &(info->conn);
-Printf_DEBUG("conn 2 -> socket= %d",conn->cmd_socket);
     if(conn == NULL){
         return M_GETTARGETCONN_ERROR;
     }
@@ -124,7 +123,6 @@ pPCConn m_buildReverseTunnel(pPCConn nextconn,int targetid){
         &buflen);
     conbuf = &conn;
     memcpy(conbuf,resultbuf,sizeof(pPCConn));
-//Printf_DEBUG(" -> 2 <-   The get conn addr is 0x%x",(unsigned int)conn);
     JOB_ReleaseJob(
         GLOBAL_GetJobList(),
         jobid);

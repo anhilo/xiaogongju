@@ -62,6 +62,9 @@ int m_Recv_And_Add_Child(pAgent_proto proto){
     int fatherid,childid,ostype;
     int namelen;
     char pcname[MAX_PCNAME_LEN];
+    if ( proto == NULL ){
+        return M_RECV_AND_ADD_CHILD_ERROR;
+    }
     fatherid = API_m_chartoi(&((proto->cmdargs)[ 0]),4);
     childid  = API_m_chartoi(&((proto->cmdargs)[ 4]),4);
     ostype   = API_m_chartoi(&((proto->cmdargs)[ 8]),4);
@@ -79,8 +82,8 @@ int m_Recv_And_Add_Child(pAgent_proto proto){
         -1                    // cmd_socket
     );
     PCMANAGER_ADDRemote(fatherid,info);
-    Printf_OK("Recv a new agent info father(%d),child(%d)..",
-            fatherid,info->id);
+    Printf_OK("New Agent(%d) Online. Its father(%d)..",
+            info->id,fatherid);
     MIC_USLEEP(1);
     PCNODE_Free(info);
     return M_RECV_AND_ADD_CHILD_OK;
@@ -131,7 +134,6 @@ int m_ForEachChildAgent_Trigger(pNodeData minfo){
       || info -> NodeType == UPSTREAM_NODE){
         return 1;
     }
-Printf_DEBUG("m_ForEachChildAgent_Trigger becalled ");
     int newid = AGENT_ID_ASK();
     // set it id
     m_resetTargetNewId(info->id,newid);

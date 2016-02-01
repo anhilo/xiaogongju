@@ -261,15 +261,13 @@ int on_NewAgent_Connect(pAgent_proto proto,pPCConn conn){
         switch(client->NodeType){
         case IAM_ADMIN_NODE:
         case BE_MANAGED_NOW:
-            Printf_DEBUG("client is admin or with admin");
             When_Client_With_Admin(client,conn);
             break;
         case MYSELF_NODE:
-            Printf_DEBUG("client is normal node");
             When_Client_Normal_Node(client,conn);
             break;
         default:
-            Printf_DEBUG("UNKNOWN client node type %d\n",client->NodeType);
+            Printf_Error("UNKNOWN client node type %d\n",client->NodeType);
             break;
         }
         result = ON_NEWAGENT_CONNECT_OK;

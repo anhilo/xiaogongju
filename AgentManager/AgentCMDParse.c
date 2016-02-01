@@ -20,7 +20,6 @@
 #define ON_NEWCONN_ERROR    -1
 #define ON_NEWCONN_OK        1
 int on_NewConn(pAgent_proto proto,pPCConn conn){
-    Printf_DEBUG("new agent connected here");
     if( ON_NEWAGENT_CONNECT_ERROR == 
         on_NewAgent_Connect(proto,conn)){
         return ON_NEWCONN_ERROR;
@@ -31,23 +30,20 @@ int on_NewConn(pAgent_proto proto,pPCConn conn){
 int on_MyMsgHere(pAgent_proto proto,pPCConn conn){
     switch(proto->cmdID){
     case CMDID_NEWID_ASK:
-        Printf_DEBUG("fresh new id and give it back");
         on_AGENT_ID_Ask(proto,conn);
         break;
     case CMDID_NEWID_RPL:
-        Printf_DEBUG("get a new id replay how to use it ?");
         JOB_CloseJob(GLOBAL_GetJobList(),
             proto->jobID,
             proto->cmdargs);
     case CMDID_CHILDSYNC_UPPER:
-        Printf_DEBUG("sync agent info upper");
         on_SyncInfoUpper(proto);
         break;
     case CMDID_ID_RESET:
         Printf_DEBUG("need replace my id");
         break;
     default:
-        Printf_DEBUG("Unsupport now %d",proto->cmdID);
+        Printf_Error("Unsupport now %d",proto->cmdID);
         break;
     }
     return 1;
@@ -107,7 +103,6 @@ exit:
 int on_Transmit(pAgent_proto proto,pPCConn conn){
     pPCNodeInfo info2 = NULL;
     if(PCMANAGER_Get_RootID() == proto->toID){
-        Printf_DEBUG("This is my Msg");
         on_MyMsgHere(proto,conn);
         goto exit;
     }
@@ -147,7 +142,6 @@ int CMDParse_And_Do(pAgent_proto proto,pPCConn conn){
         }
         break;
     case CMDTYPE_TUNNELCTRL:
-//        Printf_DEBUG("add Tunnel Ctrl Code here");
         on_TunnelCTRL(proto,conn);
         break;
     case CMDTYPE_TRANSMIT:

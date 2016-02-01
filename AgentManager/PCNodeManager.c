@@ -330,8 +330,6 @@ int PCMANAGER_Get_Fresh_ID(){
         maxid ++;
     }
     if(maxid >=0 ){
-//Printf_DEBUG("maxid is %d.",maxid);
-Printf_DEBUG("Fresh new id %d ",maxid);
         return maxid;
     }
     return PCMANAGER_GET_FRESH_ID_ERROR;
@@ -352,7 +350,7 @@ int PCMANAGER_Get_RootID(){
 int PCMANAGER_Set_RootID(int newid){
     root_id = newid;
     rootnode->id = newid;
-Printf_DEBUG("PCMANAGER_Set_RootID  my new id is %d",
+    Printf_OK("my id is %d now.",
         newid);
     Tree_ReSetRootID(tree,newid);
     maxid = (maxid>newid)?(maxid+1):(newid+1);
