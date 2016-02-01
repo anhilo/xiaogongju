@@ -7,7 +7,17 @@
 #include "global_lib.h"
 
 int qu_fun(){
-    MyPrintf("This is qu function");
+    MyPrintf("\n");
+    MyPrintf("          .\"'\".");
+    MyPrintf("      .-./ _=_ \\.-.");
+    MyPrintf("     {  (,(oYo),) }}");
+    MyPrintf("     {{ |   \"   |} }");
+    MyPrintf("     { { \\(---)/  }}");
+    MyPrintf("     {{  }'-=-'{ } }");
+    MyPrintf("     { { }._:_.{  }}");
+    MyPrintf("     {{  } -:- { } }");
+    MyPrintf("     {_{ }'==='{  _}");
+    MyPrintf("    ((((\\)     (/))))");
     return 1;
 }
 

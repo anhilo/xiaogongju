@@ -292,9 +292,8 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
     int fun_result;
     int sockbuf;
     struct ValueForCallBack * pvalue ;
-    MyPrintf("start socket server here");
     len_sockaddr = sizeof(struct sockaddr_in);
-    MyPrintf("start accept socket client here");
+    MyPrintf("Socket Server Starting now !");
     while( (client_sock = accept(
                 socks_server,
                 (struct sockaddr *)&client_addr,
