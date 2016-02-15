@@ -9,4 +9,6 @@ int about_fun();
 
 int version_fun();
 
+int detailed_fun();
+
 #endif

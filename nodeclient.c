@@ -11,8 +11,9 @@
 #define MODE_CLIENT    1 << 2
 #define NEEDHELP       1 << 3
 #define ABOUT_NOW      1 << 4
-#define VERSION        1 << 5
-#define FUNNY_FLAG     1 << 6
+#define DETAILED       1 << 5
+#define VERSION        1 << 6
+#define FUNNY_FLAG     1 << 7
 
 #define NOVALUESET     0
 #define IP_BESETED     1 << 1
@@ -25,15 +26,16 @@ int valuestate = NOVALUESET;
 char host[MAX_IP_ADDR_LEN_1] = "127.0.0.1";
 int  port = 8888;
 /////////////////////////////////////////////////////
-const char *optstring="l:c:p:hvaq";
+const char *optstring="l:c:p:hvadq";
 struct option opts[]={
-    {"listen" , required_argument, NULL,'l'},
-    {"tohost" , required_argument, NULL,'c'},
-    {"toport" , required_argument, NULL,'p'},
-    {"help"   , required_argument, NULL,'h'},
-    {"version", required_argument, NULL,'v'},
-    {"about"  , required_argument, NULL,'a'},
-    {"qu"     , required_argument, NULL,'q'},
+    {"listen"  , required_argument, NULL,'l'},
+    {"tohost"  , required_argument, NULL,'c'},
+    {"toport"  , required_argument, NULL,'p'},
+    {"help"    , required_argument, NULL,'h'},
+    {"version" , required_argument, NULL,'v'},
+    {"about"   , required_argument, NULL,'a'},
+    {"detailed", required_argument, NULL,'d'},
+    {"qu"      , required_argument, NULL,'q'},
     {0,0,0,0}
 };
 
@@ -46,6 +48,10 @@ int mainDo(){
     int flag = 0;
     if(HAS_STATE(nodestate,ABOUT_NOW)){
         about_fun();
+        flag = 1;
+    }
+    if(HAS_STATE(nodestate, DETAILED)){
+        detailed_fun();
         flag = 1;
     }
     if(HAS_STATE(nodestate,VERSION)){
@@ -97,6 +103,9 @@ int main(int argc,char *argv[]){
             break;
         case 'a':
             nodestate = nodestate | ABOUT_NOW;
+            break;
+        case 'd':
+            nodestate = nodestate | DETAILED;
             break;
         case 'v':
             nodestate = nodestate | VERSION;
@@ -150,6 +159,7 @@ int help(){
     MyPrintf("%4s %-8s %s","-h","help","This help page.");
     MyPrintf("%4s %-8s %s","-v","version","Show the version.");
     MyPrintf("%4s %-8s %s","-a","about","Show the about text.");
+    MyPrintf("%4s %-8s %s","-d","detailed","Show the detailed text.");
     return 1;
 }
 

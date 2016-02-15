@@ -9,14 +9,15 @@ int agentnow = 0;
 char remoteip[MAX_IP_ADDR_LEN] = "127.0.0.1";
 int  remoteport = 8888;
 ///////////////////////////////////////////////////////////
-const char *optstring="c:p:hvaq";
+const char *optstring="c:p:hvadq";
 struct option opts[]={
-    {"tohost" , required_argument, NULL,'c'},
-    {"toport" , required_argument, NULL,'p'},
-    {"help"   , required_argument, NULL,'h'},
-    {"version", required_argument, NULL,'v'},
-    {"about"  , required_argument, NULL,'a'},
-    {"qu"     , required_argument, NULL,'q'},
+    {"tohost"  , required_argument, NULL,'c'},
+    {"toport"  , required_argument, NULL,'p'},
+    {"help"    , required_argument, NULL,'h'},
+    {"version" , required_argument, NULL,'v'},
+    {"about"   , required_argument, NULL,'a'},
+    {"detailed", required_argument, NULL,'d'},
+    {"qu"      , required_argument, NULL,'q'},
     {0,0,0,0}
 };
 
@@ -47,13 +48,16 @@ int main(int argc,char *argv[]){
                 exit(1);
             case 'a':
                 about_fun();
-                break;
+                exit(1);
             case 'v':
                 version_fun();
                 break;
             case 'q':
                 qu_fun();
                 break;
+            case 'd':
+                detailed_fun();
+                exit(1);
             case '?':
                 Printf_Error(" arg is unknown");
                 arghelp();
@@ -234,5 +238,6 @@ int arghelp(){
     MyPrintf("%4s %-8s %s","-h","help","This help page.");
     MyPrintf("%4s %-8s %s","-v","version","Show the version.");
     MyPrintf("%4s %-8s %s","-a","about","Show the about text.");
+    MyPrintf("%4s %-8s %s","-d","detailed","Show the detailed text.");
     return 1;
 }

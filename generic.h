@@ -86,6 +86,6 @@ typedef pNodeData  (*pfunNodeCopy)( pNodeData );
 #define TUNMAX_BUF    10000
 
 #define CURRENT_VERSION  "Alpha 2.0"
-#define CURRENT_TOOLNAME "KindJia"
+#define CURRENT_TOOLNAME "EarthWorm2.0"
 
 #endif // _GENERIC_H_

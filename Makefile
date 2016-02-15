@@ -43,10 +43,10 @@ LINUX_LINK = -g -lpthread
 WIN32_LINK = -lwsock32 -lws2_32
 
 out1 = nserver
-out2 = nclient
+out2 = agent_exe
 testout = nodetest
-out3 = nadmin
-winout = nserver.exe nclient.exe nodetest.exe
+out3 = admin_exe
+winout = nserver.exe admin_exe.exe agent_exe.exe
 nuxout = $(out1) $(out2) $(testout) $(out3)
 
 clientobj = $(object_lib) $(AgentLib) $(node_client)
