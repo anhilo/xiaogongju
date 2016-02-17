@@ -39,7 +39,7 @@ node_client = nodeclient.c global_lib.c
 node_server = nodeserver.c
 node_test   = nodetest.c
 
-LINUX_LINK = -g -lpthread 
+LINUX_LINK = -s -lpthread 
 WIN32_LINK = -lwsock32 -lws2_32
 
 out1 = nserver
