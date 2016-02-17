@@ -62,7 +62,7 @@ int m_Listener_For_EachAgentNode(pNodeData node){
     }
     // socket can read
     if( PROTO_RECVSTATE_CANRECV == 
-        PROTO_RecvState(conn)
+        PROTO_RecvState(conn,0,5)
     ){
         proto = PROTO_RecvProto(conn);
         if(proto == PROTO_RECVPROTO_ERROR){
@@ -115,7 +115,7 @@ int m_callBackForEachAccept(int socket,char *arg){
         return 0;
     }
     if( PROTO_RECVSTATE_CANRECV == 
-        PROTO_RecvState(conn)
+        PROTO_RecvState(conn,10,0)
     ){
         proto = PROTO_RecvProto(conn);
         if(proto == PROTO_RECVPROTO_ERROR){

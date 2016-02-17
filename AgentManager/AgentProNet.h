@@ -14,7 +14,7 @@ int PROTO_SendProto(pPCConn conn,pAgent_proto proto);
 #define PROTO_RECVSTATE_CANRECV        1
 #define PROTO_RECVSTATE_SOCKET_ERROR   2
 #define PROTO_RECVSTATE_OVERTIME       3
-int PROTO_RecvState(pPCConn conn);
+int PROTO_RecvState(pPCConn conn,int sec,int usec);
 
 #define PROTO_RECVPROTO_ERROR       NULL
 pAgent_proto PROTO_RecvProto(pPCConn conn);

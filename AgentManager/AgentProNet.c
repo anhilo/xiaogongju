@@ -64,11 +64,11 @@ pAgent_proto PROTO_RecvProto(pPCConn conn){
 }
 
 
-int PROTO_RecvState(pPCConn conn){
+int PROTO_RecvState(pPCConn conn,int sec,int usec){
     if( conn == NULL){
         return PROTO_RECVSTATE_SOCKET_ERROR;
     }
-    int res = API_socket_read_state(conn->cmd_socket,0,5);
+    int res = API_socket_read_state(conn->cmd_socket,sec,usec);
     if(res == SOCKET_CAN_READ_STATE ){
         return PROTO_RECVSTATE_CANRECV;
     }
