@@ -66,13 +66,11 @@ struct hostent *API_socket_gethostbyname(char * ser_addr){
 }
 #else //__linux__ 
 struct in_addr *API_socket_getaddrinfo(char *url){
-Printf_DEBUG("1111111111111111111111111111111111111");
     struct addrinfo *result;
     int error = getaddrinfo(url,NULL,NULL,&result);
     if(result == NULL || result->ai_addr == NULL){
         return NULL;
     }
-Printf_DEBUG("2222222222222222222222222222222222222");
     return  &(((struct sockaddr_in *)(result->ai_addr))->sin_addr);
 }
 #endif
