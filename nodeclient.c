@@ -118,9 +118,10 @@ int main(int argc,char *argv[]){
             break;
         default:
             printf("c is %d\n",c);
-            break;
+            goto out;
         }
     }
+out:
     mainDo();
     return 0;
 }

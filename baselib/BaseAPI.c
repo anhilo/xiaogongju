@@ -66,11 +66,13 @@ struct hostent *API_socket_gethostbyname(char * ser_addr){
 }
 #else //__linux__ 
 struct in_addr *API_socket_getaddrinfo(char *url){
+Printf_DEBUG("1111111111111111111111111111111111111");
     struct addrinfo *result;
     int error = getaddrinfo(url,NULL,NULL,&result);
     if(result == NULL || result->ai_addr == NULL){
         return NULL;
     }
+Printf_DEBUG("2222222222222222222222222222222222222");
     return  &(((struct sockaddr_in *)(result->ai_addr))->sin_addr);
 }
 #endif
@@ -237,7 +239,11 @@ int API_socket_write_state(int sock,int sec,int usec){
 
 
 int API_socket_send(int sock,char *buf,int buflen){
-    return send(sock,buf,buflen,0);
+    int res = send(sock,buf,buflen,0);
+    if ( res == -1 ){
+        return -1;
+    }
+    return res;
 }
 
 int API_socket_recv(int sock,char *buf,int buflen){
