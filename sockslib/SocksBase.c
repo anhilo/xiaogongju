@@ -109,7 +109,7 @@ MIC_THREAD_FUN_DEF(socks_check_and_tunnel,sock){
 //    }
 //    MIC_THREAD_END();
 //    pthread_detach(pthread_self());
-    return NULL;
+    MIC_THREAD_RETVALUE;
 }
 
 

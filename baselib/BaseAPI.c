@@ -318,7 +318,7 @@ MIC_THREAD_FUN_DEF(StartServerFunction,serverinfo){
         }
         //MIC_THREAD_JOIN(thread_id);
         MIC_USLEEP(1);
-        free(pvalue);
+  //      free(pvalue);
     }
     return MIC_THREAD_RETVALUE;
 }
@@ -328,6 +328,10 @@ int API_socket_server_start(int socks_server,Server_CallBack_Fun fun,char *funar
     struct struct_for_StartServer *info = 
         (struct struct_for_StartServer *)
         malloc(sizeof(struct struct_for_StartServer));
+if(info == NULL){
+    Printf_DEBUG("info == NULL????");
+    return API_SOCKET_SERVER_START_ERROR;
+}
     info -> socket_server = socks_server;
     info -> function      = fun;
     info -> funarg        = funarg;

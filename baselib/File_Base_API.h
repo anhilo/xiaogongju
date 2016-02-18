@@ -12,7 +12,7 @@
 #define GET_FILE_POOL_NUM_ERROR     -1
 
 #define FILE_OPEN_WRITE_MODE      "wb+"
-#define FILE_OPEN_READ_MODE       "rb+"
+#define FILE_OPEN_READ_MODE       "rb"
 
 #define FILE_OPEN_ERROR             -1
 #define FILE_WRITE_OK                1

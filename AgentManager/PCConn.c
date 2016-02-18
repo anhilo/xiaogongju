@@ -47,6 +47,7 @@ pPCConn PCCONN_CreatePCConnFromSocket(int sock){
     if(conn == NULL){
         return PCCONN_CREATEPCCONNFROMSOCKET_ERROR;
     }
+    (conn->IPaddr[0])='\0'; 
     conn->ConnType   = CONNTYPE_REVERSE_CONNECT;
     conn->cmd_socket = sock;
     conn->BusyType   = NET_SESSION_UNUSED_NOW;

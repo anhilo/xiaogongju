@@ -33,7 +33,7 @@ int m_onRecvMsg(pPCConn conn){
     }
     else{
         buffer[res]= '\0';
-        Printf_OK("CCProxy_onNewTunnel -->%s",buffer);
+        Printf_OK("New_Message_Here -->%s",buffer);
     }
     return CCPROXY_SENDMSG_OK;
 }

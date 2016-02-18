@@ -48,7 +48,14 @@ int tunn_close(int num){
         flag = 1;
     }
     if(flag) tunn_clean(num);
-    printf("--> %3d <-- (close)used/unused  %d/%d\n",num,live_num,MAX_POOL - live_num);
+
+    if( live_num > ((MAX_POOL/10)*9) ){
+        Printf_WARNING("--> %3d <-- (close)used/unused  %d/%d\n",
+            num,
+            live_num,
+            MAX_POOL - live_num);
+        Printf_WARNING("Please wait a moment... I will try my best to release more resources.");
+    }
     return 1; 
 }
 
@@ -130,7 +137,16 @@ int tunn_get_pool_id_and_lock_it(){
         if(socks_Pool[i].flag == False){
             live_num ++;
             socks_Pool[i].flag = True;
-    printf("<-- %3d --> (open)used/unused  %d/%d\n",i,live_num,MAX_POOL - live_num);
+    //printf("<-- %3d --> (open)used/unused  %d/%d\n",i,live_num,MAX_POOL - live_num);
+
+            if( live_num > ((MAX_POOL/10)*9) ){
+                Printf_WARNING("--> %3d <-- (open)used/unused  %d/%d\n",
+                    i,
+                    live_num,
+                    MAX_POOL - live_num);
+                Printf_WARNING("Please wait a moment... I will try my best to release more resources.");
+            }
+
             can_write_pool = True;
             return i;
         }

@@ -267,7 +267,7 @@ int on_reverse_Reply(pAgent_proto proto,pPCConn conn){
 
 int on_new_tunnel_ask(pAgent_proto proto ,pPCConn conn){
     Printf_DEBUG("New Tunnel asked here !!!!!");
-    Printf_OK("Recv msg here ???");
+//    Printf_OK("Recv msg here ???");
     if(proto -> toID == PCMANAGER_Get_RootID()){
         m_on_NewTunnel_Here(conn);
     }
