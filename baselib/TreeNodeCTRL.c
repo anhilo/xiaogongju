@@ -249,7 +249,7 @@ int Tree_GetNextJump(pTreeManager head,int id){
     else if(root->child_num > 0){
         p = root->child;
         for(k=0;k< root->child_num ; k++){
-            result =  GetNode(head,id);
+            result =  mGetNode(p,id);
             if (result != NULL){
                 return p->id;
             }
